@@ -24,8 +24,8 @@ async function seed() {
 
   // 1. Institute Config
   console.log('1. Populating institute_config...');
-  await db.collection('institute_configs').deleteMany({});
-  await db.collection('institute_configs').insertOne({
+  await db.collection('institute_config').deleteMany({});
+  await db.collection('institute_config').insertOne({
     _id: data.dataset_id,
     dataset_id: data.dataset_id,
     institute: data.institute,
@@ -50,8 +50,8 @@ async function seed() {
 
   // 3. Faculty (40)
   console.log('3. Populating faculty (40)...');
-  await db.collection('faculties').deleteMany({});
-  await db.collection('faculties').insertMany(data.faculty.map(f => ({
+  await db.collection('faculty').deleteMany({});
+  await db.collection('faculty').insertMany(data.faculty.map(f => ({
     _id: f.id,
     name: f.name,
     department: f.department,
@@ -105,8 +105,8 @@ async function seed() {
 
   // 7. Room Unavailability (2)
   console.log('7. Populating room_unavailability (2)...');
-  await db.collection('room_unavailabilities').deleteMany({});
-  await db.collection('room_unavailabilities').insertMany((data.room_unavailability || []).map((u, idx) => ({
+  await db.collection('room_unavailability').deleteMany({});
+  await db.collection('room_unavailability').insertMany((data.room_unavailability || []).map((u, idx) => ({
     _id: `RU-${idx + 1}-${u.room_id}-${u.day}`,
     room_id: u.room_id,
     day: u.day,

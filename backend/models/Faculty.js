@@ -26,4 +26,4 @@ const FacultySchema = new mongoose.Schema({
   _id: false,
 });
 
-export default mongoose.models.Faculty || mongoose.model('Faculty', FacultySchema);
+export default mongoose.models.Faculty || mongoose.model('Faculty', FacultySchema, 'faculty');

@@ -49,4 +49,4 @@ const BookingRequestSchema = new mongoose.Schema({
   _id: false,
 });
 
-export default mongoose.models.BookingRequest || mongoose.model('BookingRequest', BookingRequestSchema);
+export default mongoose.models.BookingRequest || mongoose.model('BookingRequest', BookingRequestSchema, 'booking_requests');

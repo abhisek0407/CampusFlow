@@ -12,4 +12,4 @@ const InstituteConfigSchema = new mongoose.Schema({
   _id: false,
 });
 
-export default mongoose.models.InstituteConfig || mongoose.model('InstituteConfig', InstituteConfigSchema);
+export default mongoose.models.InstituteConfig || mongoose.model('InstituteConfig', InstituteConfigSchema, 'institute_config');

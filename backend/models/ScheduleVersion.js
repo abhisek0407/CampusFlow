@@ -27,4 +27,4 @@ const ScheduleVersionSchema = new mongoose.Schema({
   _id: false,
 });
 
-export default mongoose.models.ScheduleVersion || mongoose.model('ScheduleVersion', ScheduleVersionSchema);
+export default mongoose.models.ScheduleVersion || mongoose.model('ScheduleVersion', ScheduleVersionSchema, 'schedule_versions');

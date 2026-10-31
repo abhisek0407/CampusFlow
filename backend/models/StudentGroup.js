@@ -12,4 +12,4 @@ const StudentGroupSchema = new mongoose.Schema({
   _id: false,
 });
 
-export default mongoose.models.StudentGroup || mongoose.model('StudentGroup', StudentGroupSchema);
+export default mongoose.models.StudentGroup || mongoose.model('StudentGroup', StudentGroupSchema, 'student_groups');

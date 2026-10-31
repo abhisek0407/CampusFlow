@@ -11,4 +11,4 @@ const RoomUnavailabilitySchema = new mongoose.Schema({
   _id: false,
 });
 
-export default mongoose.models.RoomUnavailability || mongoose.model('RoomUnavailability', RoomUnavailabilitySchema);
+export default mongoose.models.RoomUnavailability || mongoose.model('RoomUnavailability', RoomUnavailabilitySchema, 'room_unavailability');

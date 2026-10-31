@@ -24,4 +24,4 @@ const DisruptionSchema = new mongoose.Schema({
   _id: false,
 });
 
-export default mongoose.models.Disruption || mongoose.model('Disruption', DisruptionSchema);
+export default mongoose.models.Disruption || mongoose.model('Disruption', DisruptionSchema, 'disruptions');
