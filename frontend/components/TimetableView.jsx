@@ -216,9 +216,25 @@ export default function TimetableView() {
             ))}
           </select>
 
-          <span className="text-xs text-slate-400 ml-auto">
-            Total Sessions Scheduled: <strong className="text-slate-800 dark:text-slate-200">{timetableData?.total_sessions || 0}</strong>
-          </span>
+          <div className="text-xs text-slate-400 ml-auto flex items-center flex-wrap gap-2">
+            <span>
+              Total Sessions Scheduled: <strong className="text-slate-800 dark:text-slate-200">{timetableData?.total_sessions || 0}</strong>
+            </span>
+            {timetableData?.sessions && timetableData.sessions.length > 0 && (
+              <span className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[11px] font-semibold text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                <span className="text-indigo-600 dark:text-indigo-400">Daily Load:</span>
+                <span>MON: {timetableData.sessions.filter(s => s.day === 'MON').length}</span>
+                <span>•</span>
+                <span>TUE: {timetableData.sessions.filter(s => s.day === 'TUE').length}</span>
+                <span>•</span>
+                <span>WED: {timetableData.sessions.filter(s => s.day === 'WED').length}</span>
+                <span>•</span>
+                <span>THU: {timetableData.sessions.filter(s => s.day === 'THU').length}</span>
+                <span>•</span>
+                <span className="text-emerald-600 dark:text-emerald-400 font-bold">FRI: {timetableData.sessions.filter(s => s.day === 'FRI').length} (Afternoon P6–P8)</span>
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
@@ -280,8 +296,8 @@ export default function TimetableView() {
                       <td className="py-2 px-3 text-center font-bold text-amber-800 dark:text-amber-400 text-[11px] whitespace-nowrap">
                         13:00 - 14:00
                       </td>
-                      <td colSpan={5} className="py-2 px-4 text-center text-amber-700 dark:text-amber-300 font-semibold tracking-wider uppercase text-[11px]">
-                        🍽️ Official Institute Lunch Break (Protected by Institute Timing Rule H9)
+                      <td colSpan={5} className="py-2.5 px-4 text-center text-amber-700 dark:text-amber-300 font-semibold tracking-wider uppercase text-[11px]">
+                        🍽️ Official Institute Lunch Break (Protected by Institute Timing Rule H9) • Afternoon Sessions Continue Below (Periods P6 to P9) ↓
                       </td>
                     </tr>
                   );
@@ -306,6 +322,12 @@ export default function TimetableView() {
                             </div>
                           ) : (
                             <div className="space-y-1.5">
+                              {sessions.length > 1 && (
+                                <div className="text-[10px] font-bold text-purple-700 dark:text-purple-300 bg-purple-100/80 dark:bg-purple-950/70 px-2 py-0.5 rounded border border-purple-200 dark:border-purple-800 flex items-center justify-between mb-1">
+                                  <span>📚 Elective Basket (Rule H6)</span>
+                                  <span className="text-[9px] font-semibold uppercase">Choose 1 of {sessions.length}</span>
+                                </div>
+                              )}
                               {sessions.map((s, idx) => {
                                 const isContinuation = s.duration > 1 && period > s.start_period;
                                 if (isContinuation) {
@@ -339,9 +361,16 @@ export default function TimetableView() {
                                   >
                                     <div className="flex items-center justify-between mb-1">
                                       <span className="font-bold text-xs">{s.course_id}</span>
-                                      <span className={`text-[9px] uppercase font-bold px-1.5 py-0.5 rounded ${badgeClass}`}>
-                                        {s.kind} {s.duration > 1 && `(${s.duration}h Block • P${s.start_period}–P${s.end_period})`}
-                                      </span>
+                                      <div className="flex items-center gap-1">
+                                        {s.basket_slot && (
+                                          <span className="text-[8px] uppercase font-bold px-1.5 py-0.5 rounded bg-purple-100 text-purple-700 dark:bg-purple-900/60 dark:text-purple-300">
+                                            Elective Option
+                                          </span>
+                                        )}
+                                        <span className={`text-[9px] uppercase font-bold px-1.5 py-0.5 rounded ${badgeClass}`}>
+                                          {s.kind} {s.duration > 1 && `(${s.duration}h Block • P${s.start_period}–P${s.end_period})`}
+                                        </span>
+                                      </div>
                                     </div>
                                     <div className="text-[11px] font-medium leading-tight truncate" title={s.course_title}>
                                       {s.course_title}
@@ -407,6 +436,18 @@ export default function TimetableView() {
                 <span className="font-semibold text-slate-900 dark:text-white">{activeModalSession.size} Students</span>
               </div>
             </div>
+
+            {/* Elective Basket Information if applicable */}
+            {activeModalSession.basket_slot && (
+              <div className="p-3 rounded-xl bg-purple-50/70 dark:bg-purple-950/40 border border-purple-200/60 dark:border-purple-800/60 text-xs space-y-1">
+                <div className="font-bold text-purple-900 dark:text-purple-300 flex items-center gap-1.5">
+                  <span>📚 Elective Basket Synchronization (Constraint H6)</span>
+                </div>
+                <p className="text-purple-800 dark:text-purple-200 leading-relaxed text-[11px]">
+                  This session belongs to Open Elective Basket slot <strong>{activeModalSession.basket_slot}</strong>. Under Rule H6, OE301, OE302, and OE303 are scheduled at the identical day and period across distinct venues (LH-6, LH-5, CR-201). Students elect exactly one course; they do not take all three concurrently.
+                </p>
+              </div>
+            )}
 
             {/* AI Constraint Explanation */}
             <div className="p-3 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200/60 dark:border-indigo-800/60 text-xs space-y-1">
