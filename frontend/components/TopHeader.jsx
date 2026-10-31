@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import {
   Menu,
-  RotateCcw,
   ShieldCheck,
   ChevronDown,
   User,
@@ -13,6 +12,7 @@ import {
   Layers
 } from 'lucide-react';
 import { ROLE_NAV_CONFIG } from './Sidebar';
+import ThemeToggle from './ThemeToggle';
 
 export const DEMO_USERS = [
   {
@@ -21,7 +21,7 @@ export const DEMO_USERS = [
     email: 'admin@cit.edu',
     role: 'admin',
     department: 'ADMIN',
-    badge: 'bg-rose-100 text-rose-800 border-rose-200'
+    badge: 'bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800'
   },
   {
     id: 'USER_COORD_CSE',
@@ -29,7 +29,7 @@ export const DEMO_USERS = [
     email: 'dept.cse@cit.edu',
     role: 'department_coordinator',
     department: 'CSE',
-    badge: 'bg-amber-100 text-amber-800 border-amber-200'
+    badge: 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800'
   },
   {
     id: 'USER_FACULTY_F01',
@@ -38,7 +38,7 @@ export const DEMO_USERS = [
     role: 'faculty',
     department: 'CSE',
     linked_faculty_id: 'F01',
-    badge: 'bg-blue-100 text-blue-800 border-blue-200'
+    badge: 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-800'
   },
   {
     id: 'USER_CLUB_DRAMATICS',
@@ -46,7 +46,7 @@ export const DEMO_USERS = [
     email: 'club.dramatics@cit.edu',
     role: 'club',
     department: 'CLUBS',
-    badge: 'bg-emerald-100 text-emerald-800 border-emerald-200'
+    badge: 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800'
   },
 ];
 
@@ -65,70 +65,56 @@ export default function TopHeader({
   const currentTabObj = roleConfig.tabs.find(t => t.id === activeTab) || roleConfig.tabs[0];
 
   return (
-    <header className="sticky top-0 z-30 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm">
-      <div className="px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+    <header className="sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-xs transition-colors duration-200">
+      <div className="px-3 sm:px-6 h-13 sm:h-14 flex items-center justify-between">
         
         {/* Left: Sidebar Toggle + Breadcrumb */}
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2 sm:space-x-3 overflow-hidden">
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+            className="p-1.5 sm:p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
             title="Toggle Sidebar"
+            aria-label="Toggle Navigation Sidebar"
           >
             <Menu className="w-5 h-5" />
           </button>
 
-          <div className="flex items-center space-x-2 text-sm">
-            <span className="font-semibold text-slate-800 dark:text-slate-100">
+          <div className="flex items-center space-x-1.5 sm:space-x-2 text-xs overflow-hidden">
+            <span className="font-medium text-slate-500 dark:text-slate-400 hidden sm:inline truncate">
               {roleConfig.label}
             </span>
-            <span className="text-slate-400">/</span>
-            <span className="font-medium text-indigo-600 dark:text-indigo-400">
+            <span className="text-slate-300 dark:text-slate-700 hidden sm:inline">/</span>
+            <span className="font-semibold text-slate-900 dark:text-white truncate">
               {currentTabObj?.label || 'Overview'}
             </span>
-          </div>
-
-          {/* Academic Semester Badge */}
-          <div className="hidden md:flex items-center space-x-1.5 px-2.5 py-1 rounded-md bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-amber-800 dark:text-amber-300 text-xs font-medium">
-            <Calendar className="w-3.5 h-3.5" />
-            <span>Week 7: Spectra Fest & Midsems Prep</span>
           </div>
         </div>
 
         {/* Right Actions */}
         <div className="flex items-center space-x-3">
           
-          {/* Official Benchmark Status Badge */}
-          <div className="hidden lg:flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-semibold">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>0 Hard Violations</span>
-            <span className="text-emerald-400">•</span>
-            <span>67.0 Booking Score (Ceiling)</span>
-            <span className="text-emerald-400">•</span>
-            <span>3 Soft Penalty</span>
+          {/* Official Benchmark Status (Transparent background, sleek light styling) */}
+          <div className="hidden lg:flex items-center space-x-2 text-xs font-medium text-slate-500 dark:text-slate-400 pr-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            <span className="text-emerald-600 dark:text-emerald-400 font-semibold">0 Violations</span>
+            <span className="text-slate-300 dark:text-slate-700">•</span>
+            <span className="text-slate-600 dark:text-slate-300">67.0 Score</span>
+            <span className="text-slate-300 dark:text-slate-700">•</span>
+            <span className="text-slate-500 dark:text-slate-400">3 Soft Penalty</span>
           </div>
 
-          {/* Admin Reset Demo Data Button */}
-          {currentUser?.role === 'admin' && (
-            <button
-              onClick={onResetData}
-              disabled={isResetting}
-              title="Reset database to clean starter dataset state"
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 text-xs font-semibold transition disabled:opacity-50"
-            >
-              <RotateCcw className={`w-3.5 h-3.5 ${isResetting ? 'animate-spin text-rose-500' : ''}`} />
-              <span>{isResetting ? 'Resetting...' : 'Reset Demo Data'}</span>
-            </button>
-          )}
+          {/* Light / Dark Mode Toggle */}
+          <ThemeToggle />
 
-          {/* Role Switcher for Hackathon Judges */}
+          {/* Role Switcher */}
           <div className="relative">
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-800 dark:text-slate-200 transition"
+              className="flex items-center space-x-2 px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-800 dark:text-slate-200 transition"
+              aria-expanded={dropdownOpen}
             >
               <div className="w-2 h-2 rounded-full bg-indigo-500"></div>
-              <span>{currentUser?.name?.split(' ')[0]}</span>
+              <span className="hidden sm:inline">{currentUser?.name?.split(' ')[0]}</span>
               <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 uppercase tracking-wider font-bold">
                 {currentUser?.role?.replace('_', ' ')}
               </span>
@@ -136,7 +122,7 @@ export default function TopHeader({
             </button>
 
             {dropdownOpen && (
-              <div className="absolute right-0 mt-2 w-72 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xl py-2 z-50">
+              <div className="absolute right-0 mt-2 w-72 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xl py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
                 <div className="px-3 py-1.5 border-b border-slate-100 dark:border-slate-700">
                   <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                     Switch Active Demo Role (RBAC)
@@ -158,31 +144,26 @@ export default function TopHeader({
                             : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/60'
                         }`}
                       >
-                        <div>
-                          <div className="font-semibold">{user.name}</div>
-                          <div className="text-[10px] text-slate-400 font-normal">{user.email}</div>
+                        <div className="flex flex-col">
+                          <span className="font-semibold">{user.name}</span>
+                          <span className="text-[10px] text-slate-400">{user.email}</span>
                         </div>
-                        <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold uppercase ${
-                          user.role === 'admin' ? 'bg-rose-100 text-rose-800' :
-                          user.role === 'department_coordinator' ? 'bg-amber-100 text-amber-800' :
-                          user.role === 'faculty' ? 'bg-blue-100 text-blue-800' :
-                          'bg-emerald-100 text-emerald-800'
-                        }`}>
+                        <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded border ${user.badge}`}>
                           {user.role.replace('_', ' ')}
                         </span>
                       </button>
                     );
                   })}
                 </div>
-                <div className="px-3 pt-2 mt-1 border-t border-slate-100 dark:border-slate-700 text-center">
+                <div className="pt-1.5 border-t border-slate-100 dark:border-slate-700 px-3">
                   <button
                     onClick={() => {
                       setDropdownOpen(false);
                       onOpenLoginModal();
                     }}
-                    className="text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline font-semibold"
+                    className="w-full text-center py-1 text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-semibold"
                   >
-                    Open Full Auth Credentials Modal →
+                    Custom Email / JWT Sign In
                   </button>
                 </div>
               </div>
@@ -190,6 +171,7 @@ export default function TopHeader({
           </div>
 
         </div>
+
       </div>
     </header>
   );

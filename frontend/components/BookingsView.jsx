@@ -168,68 +168,69 @@ export default function BookingsView({ currentUser }) {
   return (
     <div className="space-y-6">
       
-      {/* Header Bar */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <Building2 className="w-5 h-5 text-indigo-600" />
-            Spectra '27 Fest Week Venue Management
-          </h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            25 Event Venue Requests • Priority Order: Admin &gt; Faculty &gt; Coordinator &gt; Club • 0 Priority Inversions
-          </p>
+      {/* Unified Professional Header & Action Bar */}
+      <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-xs space-y-3.5 transition-colors">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <Building2 className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+              <span>Spectra Fest Venue Management</span>
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              25 Fest Venue Requests • 67.0 Benchmark Score (Ceiling) • Priority Compliant (Admin &gt; Faculty &gt; Coord &gt; Club)
+            </p>
+          </div>
+
+          <button
+            onClick={() => setShowManualModal(true)}
+            className="flex items-center space-x-2 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm shadow-indigo-500/20 transition self-start sm:self-auto"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Submit Venue Request</span>
+          </button>
         </div>
 
-        {/* Action Button: Manual Booking */}
-        <button
-          onClick={() => setShowManualModal(true)}
-          className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-md shadow-indigo-500/20 transition self-start md:self-auto"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Submit Venue Request</span>
-        </button>
-      </div>
+        {/* Filter and Search Row */}
+        <div className="flex flex-wrap items-center gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
+          <div className="relative flex-1 min-w-[200px]">
+            <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search by title, ID (BR-01), or requester..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full text-xs pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
 
-      {/* Filter and Search Bar */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Search by title, ID (BR-01), or requester..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full text-xs pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="text-xs font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-slate-700 dark:text-slate-300 focus:outline-none"
+          >
+            <option value="ALL">All Categories</option>
+            <option value="institute_event">Institute Events (5 pts)</option>
+            <option value="guest_lecture">Guest Lectures (4 pts)</option>
+            <option value="department_event">Department Events (3 pts)</option>
+            <option value="club_event">Club Events (2 pts)</option>
+          </select>
+
+          <select
+            value={selectedStatus}
+            onChange={(e) => setSelectedStatus(e.target.value)}
+            className="text-xs font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-slate-700 dark:text-slate-300 focus:outline-none"
+          >
+            <option value="ALL">All Statuses</option>
+            <option value="approved">Approved</option>
+            <option value="alternative_offered">Alternative Offered</option>
+            <option value="rejected">Rejected</option>
+            <option value="cancelled">Cancelled (B3)</option>
+          </select>
+
+          <span className="text-xs text-slate-400 ml-auto font-medium">
+            Showing <strong className="text-slate-800 dark:text-slate-200">{filteredBookings.length}</strong> of {bookings.length} requests
+          </span>
         </div>
-
-        <select
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-          className="text-xs font-medium bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-slate-700 dark:text-slate-300 focus:outline-none"
-        >
-          <option value="ALL">All Event Categories</option>
-          <option value="institute_event">Institute Events (5 pts)</option>
-          <option value="guest_lecture">Guest Lectures (4 pts)</option>
-          <option value="department_event">Department Events (3 pts)</option>
-          <option value="club_event">Club Events (2 pts)</option>
-        </select>
-
-        <select
-          value={selectedStatus}
-          onChange={(e) => setSelectedStatus(e.target.value)}
-          className="text-xs font-medium bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-slate-700 dark:text-slate-300 focus:outline-none"
-        >
-          <option value="ALL">All Statuses</option>
-          <option value="approved">Approved</option>
-          <option value="alternative_offered">Alternative Offered</option>
-          <option value="rejected">Rejected</option>
-          <option value="cancelled">Cancelled</option>
-        </select>
-
-        <span className="text-xs text-slate-400 ml-auto font-medium">
-          Showing <strong className="text-slate-800 dark:text-slate-200">{filteredBookings.length}</strong> of {bookings.length} requests
-        </span>
       </div>
 
       {/* Bookings Card List */}

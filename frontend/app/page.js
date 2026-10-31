@@ -42,6 +42,11 @@ export default function Home() {
   const [toastMessage, setToastMessage] = useState(null);
 
   useEffect(() => {
+    // If on mobile screen, default sidebar to collapsed
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      setSidebarCollapsed(true);
+    }
+
     // Restore session from localStorage if present
     const saved = localStorage.getItem('cit_user');
     if (saved) {
@@ -51,6 +56,13 @@ export default function Home() {
       } catch (e) {}
     }
   }, []);
+
+  function handleTabChange(tab) {
+    setActiveTab(tab);
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      setSidebarCollapsed(true);
+    }
+  }
 
   function handleSwitchUser(user) {
     setCurrentUser(user);
@@ -190,20 +202,29 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans flex">
+    <div className="h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans flex overflow-hidden">
       
       {/* Role-Based Sidebar */}
       <Sidebar
         currentUser={currentUser}
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={handleTabChange}
         onOpenLoginModal={() => setIsLoginModalOpen(true)}
         sidebarCollapsed={sidebarCollapsed}
         setSidebarCollapsed={setSidebarCollapsed}
       />
 
+      {/* Mobile Backdrop Overlay when sidebar is open */}
+      {!sidebarCollapsed && (
+        <div
+          onClick={() => setSidebarCollapsed(true)}
+          className="fixed inset-0 bg-slate-950/50 backdrop-blur-xs z-30 md:hidden transition-opacity"
+          aria-hidden="true"
+        />
+      )}
+
       {/* Main Content Area */}
-      <div className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${sidebarCollapsed ? 'ml-20' : 'ml-72'}`}>
+      <div className={`flex-1 flex flex-col h-screen overflow-hidden transition-all duration-300 ${sidebarCollapsed ? 'md:ml-20 ml-0' : 'md:ml-72 ml-0'}`}>
         
         {/* Top Header */}
         <TopHeader
@@ -217,13 +238,13 @@ export default function Home() {
           onOpenLoginModal={() => setIsLoginModalOpen(true)}
         />
 
-        {/* View Content */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
+        {/* View Content - Single Page Viewport */}
+        <main className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-3.5 sm:py-4 w-full max-w-7xl mx-auto flex flex-col justify-start">
           {renderActiveView()}
         </main>
 
-        {/* Footer */}
-        <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-4 px-6 text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2">
+        {/* Compact Footer */}
+        <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-2 px-4 sm:px-6 text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-1 shrink-0">
           <div>
             <strong>CampusFlow / OrchestrAI</strong> • Chilika Institute of Technology (CIT) Autonomous Scheduling System
           </div>

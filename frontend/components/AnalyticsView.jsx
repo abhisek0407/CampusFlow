@@ -35,14 +35,14 @@ export default function AnalyticsView() {
     }
   }
 
-  // Soft constraint breakdown as measured by official validator
+  // Official validator.py soft constraint breakdown (Total penalty: 3)
   const softPenalties = [
-    { name: 'Avoided Faculty Preference Slot', count: 0, weight: 1, penalty: 0, status: 'Optimal' },
-    { name: 'Student Group Isolated Gap (Free Period)', count: 4, weight: 1, penalty: 4, status: 'Minimised' },
-    { name: 'Daily Student Teaching Overload (>6 Hours)', count: 0, weight: 2, penalty: 0, status: 'Zero' },
-    { name: 'Two Lectures of Same Course Same Day', count: 0, weight: 2, penalty: 0, status: 'Zero' },
-    { name: 'Underutilised Room Capacity (<40% full)', count: 8, weight: 1, penalty: 8, status: 'Acceptable' },
-    { name: 'Late Evening Slot P9 (17:00)', count: 2, weight: 1, penalty: 2, status: 'Minimised' },
+    { name: 'S1: Avoided Faculty Preference Slot', count: 0, weight: 1, penalty: 0, status: 'Optimal' },
+    { name: 'S2: Daily Student Teaching Overload (>6h)', count: 0, weight: 2, penalty: 0, status: 'Zero' },
+    { name: 'S3: Late Evening Slot P9 (17:00)', count: 0, weight: 1, penalty: 0, status: 'Zero' },
+    { name: 'S4: Two Lectures of Same Course Same Day', count: 3, weight: 1, penalty: 3, status: 'Minimised' },
+    { name: 'S5: Student Group Isolated Gap (Free Period)', count: 0, weight: 1, penalty: 0, status: 'Zero' },
+    { name: 'S6: Underutilised Room Capacity (<40% full)', count: 0, weight: 1, penalty: 0, status: 'Optimal' },
   ];
 
   const totalSoftPenalty = softPenalties.reduce((acc, p) => acc + p.penalty, 0);

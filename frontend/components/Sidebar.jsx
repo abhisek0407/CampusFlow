@@ -94,29 +94,28 @@ export default function Sidebar({
 }) {
   const role = currentUser?.role || 'admin';
   const config = ROLE_NAV_CONFIG[role] || ROLE_NAV_CONFIG.admin;
-  const RoleIcon = config.icon;
 
   return (
     <aside
-      className={`fixed inset-y-0 left-0 z-40 bg-slate-900 border-r border-slate-800 flex flex-col transition-all duration-300 ${
-        sidebarCollapsed ? 'w-20' : 'w-72'
+      className={`fixed inset-y-0 left-0 z-40 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col transition-all duration-300 shadow-xs ${
+        sidebarCollapsed ? '-translate-x-full md:translate-x-0 md:w-20' : 'translate-x-0 w-72'
       }`}
     >
       {/* Brand Header */}
-      <div className="h-16 px-4 flex items-center justify-between border-b border-slate-800 bg-slate-950/40">
+      <div className="h-15 px-4 flex items-center justify-between border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/30">
         <div className="flex items-center space-x-3 overflow-hidden">
-          <div className="w-10 h-10 min-w-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-            <GraduationCap className="w-6 h-6 text-white" />
+          <div className="w-9 h-9 min-w-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center shadow-md shadow-indigo-500/20">
+            <GraduationCap className="w-5 h-5 text-white" />
           </div>
           {!sidebarCollapsed && (
             <div className="flex flex-col">
               <div className="flex items-center space-x-1.5">
-                <span className="font-bold text-base text-white tracking-tight">CampusFlow</span>
-                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                <span className="font-bold text-base text-slate-900 dark:text-white tracking-tight">CampusFlow</span>
+                <span className="text-[10px] font-semibold px-1.5 py-0.2 rounded bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
                   CIT
                 </span>
               </div>
-              <span className="text-[11px] text-slate-400 font-medium truncate">
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate">
                 Chilika Institute of Tech
               </span>
             </div>
@@ -124,47 +123,13 @@ export default function Sidebar({
         </div>
       </div>
 
-      {/* Role Banner */}
-      <div className="p-3 border-b border-slate-800/80 bg-slate-900/60">
-        {!sidebarCollapsed ? (
-          <div className="p-2.5 rounded-xl bg-slate-800/60 border border-slate-700/60 flex items-center justify-between">
-            <div className="flex items-center space-x-2.5 overflow-hidden">
-              <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
-                <RoleIcon className="w-4 h-4" />
-              </div>
-              <div className="overflow-hidden">
-                <p className="text-[10px] uppercase font-semibold tracking-wider text-slate-400">
-                  Active Portal
-                </p>
-                <p className="text-xs font-bold text-white truncate">
-                  {config.label}
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={onOpenLoginModal}
-              title="Switch demo role"
-              className="text-[11px] text-indigo-400 hover:text-indigo-300 underline font-medium ml-2 shrink-0"
-            >
-              Switch
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={onOpenLoginModal}
-            title={config.label}
-            className="w-full flex justify-center py-2 text-indigo-400 hover:text-indigo-300"
-          >
-            <RoleIcon className="w-5 h-5" />
-          </button>
-        )}
-      </div>
-
       {/* Navigation List */}
-      <nav className="flex-1 overflow-y-auto p-3 space-y-1.5">
-        <div className={`px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400 ${sidebarCollapsed ? 'hidden' : 'block'}`}>
-          Navigation Menu
-        </div>
+      <nav className="flex-1 overflow-y-auto p-3 space-y-1">
+        {!sidebarCollapsed && (
+          <div className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+            Navigation Menu
+          </div>
+        )}
         {config.tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -174,24 +139,16 @@ export default function Sidebar({
               onClick={() => setActiveTab(tab.id)}
               title={tab.label}
               className={`w-full flex items-center rounded-xl transition-all ${
-                sidebarCollapsed ? 'justify-center p-3' : 'px-3 py-2.5 space-x-3 text-left'
+                sidebarCollapsed ? 'justify-center p-3' : 'px-3 py-2 space-x-3 text-left'
               } ${
                 isActive
-                  ? 'bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-medium shadow-md shadow-indigo-600/20'
-                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                  ? 'bg-indigo-600 text-white font-medium shadow-sm shadow-indigo-600/30'
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
-              <Icon className={`w-5 h-5 shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+              <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-500 dark:text-slate-400'}`} />
               {!sidebarCollapsed && (
-                <div className="flex-1 overflow-hidden">
-                  <div className="text-sm font-medium leading-tight truncate">{tab.label}</div>
-                  <div className={`text-[11px] truncate ${isActive ? 'text-indigo-200' : 'text-slate-400'}`}>
-                    {tab.desc}
-                  </div>
-                </div>
-              )}
-              {!sidebarCollapsed && isActive && (
-                <ChevronRight className="w-4 h-4 text-white/70 shrink-0" />
+                <span className="flex-1 text-xs font-semibold truncate tracking-tight">{tab.label}</span>
               )}
             </button>
           );
@@ -199,22 +156,23 @@ export default function Sidebar({
       </nav>
 
       {/* User Profile & Quick Switch Footer */}
-      <div className="p-3 border-t border-slate-800 bg-slate-950/60">
+      <div className="p-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/40">
         {!sidebarCollapsed ? (
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2.5 overflow-hidden">
-              <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center font-bold text-xs text-indigo-300 border border-slate-600">
+              <div className="w-8 h-8 rounded-full bg-indigo-50 dark:bg-slate-800 flex items-center justify-center font-bold text-xs text-indigo-600 dark:text-indigo-300 border border-indigo-200 dark:border-slate-700">
                 {currentUser?.name?.charAt(0) || 'U'}
               </div>
               <div className="overflow-hidden">
-                <div className="text-xs font-semibold text-slate-200 truncate">{currentUser?.name}</div>
+                <div className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">{currentUser?.name}</div>
                 <div className="text-[10px] text-slate-400 truncate">{currentUser?.email}</div>
               </div>
             </div>
             <button
               onClick={onOpenLoginModal}
-              title="Logout / Change Role"
-              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition"
+              title="Change Active Role"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+              aria-label="Switch User Role"
             >
               <LogOut className="w-4 h-4" />
             </button>
@@ -222,10 +180,11 @@ export default function Sidebar({
         ) : (
           <button
             onClick={onOpenLoginModal}
-            title="Logout / Change Role"
-            className="w-full flex justify-center py-2 text-slate-400 hover:text-rose-400"
+            title="Change Active Role"
+            className="w-full flex justify-center py-2 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400"
+            aria-label="Switch User Role"
           >
-            <LogOut className="w-5 h-5" />
+            <LogOut className="w-4 h-4" />
           </button>
         )}
       </div>

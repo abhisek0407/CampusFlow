@@ -46,38 +46,39 @@ export default function ClubOverviewView({ setActiveTab }) {
   return (
     <div className="space-y-6">
       
-      {/* Banner */}
-      <div className="bg-gradient-to-r from-emerald-950/70 via-slate-900 to-teal-950/70 border border-emerald-800/40 rounded-2xl p-6 text-white shadow-xl">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center space-x-2 mb-2">
-              <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-semibold border border-emerald-500/30">
-                Spectra Tech Fest Portal
-              </span>
-              <span className="text-xs text-slate-300 font-medium">Week 7 Campus Festival</span>
-            </div>
-            <h1 className="text-2xl font-bold tracking-tight">{clubName} Representative</h1>
-            <p className="text-slate-300 text-xs mt-1 max-w-2xl leading-relaxed">
-              Submit venue requests in plain English or Hinglish, monitor live Dean approval status, and manage reservations according to CIT festival priority rules.
-            </p>
+      {/* Clean Unboxed Page Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-1 pb-1">
+        <div>
+          <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-medium">
+            <span>Chilika Institute of Technology</span>
+            <span>•</span>
+            <span className="text-emerald-600 dark:text-emerald-400 font-semibold">Spectra Tech Fest</span>
+            <span>•</span>
+            <span className="text-slate-400">Club Representative Portal</span>
           </div>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white mt-1">
+            {clubName}
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-2xl">
+            Submit venue requests in natural English or Hinglish, track Dean review status, and manage Spectra fest slots.
+          </p>
+        </div>
 
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setActiveTab('new-venue-booking')}
-              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition flex items-center space-x-2 shadow-lg shadow-emerald-600/30"
-            >
-              <PlusCircle className="w-4 h-4" />
-              <span>New Venue Request</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('my-bookings')}
-              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold text-xs transition flex items-center space-x-2"
-            >
-              <Calendar className="w-4 h-4" />
-              <span>Track Bookings</span>
-            </button>
-          </div>
+        <div className="flex items-center gap-2.5 shrink-0">
+          <button
+            onClick={() => setActiveTab('new-venue-booking')}
+            className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs transition flex items-center space-x-2 shadow-xs cursor-pointer"
+          >
+            <PlusCircle className="w-3.5 h-3.5" />
+            <span>New Request</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('my-bookings')}
+            className="px-3.5 py-2 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750 font-medium text-xs transition flex items-center space-x-2 cursor-pointer shadow-2xs"
+          >
+            <Calendar className="w-3.5 h-3.5 text-slate-400" />
+            <span>Track Bookings</span>
+          </button>
         </div>
       </div>
 
