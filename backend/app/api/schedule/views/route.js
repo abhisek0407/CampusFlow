@@ -13,15 +13,20 @@ export async function GET(request) {
 
     await connectToDatabase();
 
-    // 1. Fetch current schedule
-    let schedule = await Schedule.findOne({ _id: 'SCHEDULE_CURRENT' }).lean();
-    if (!schedule) {
-      const schedulePath = path.resolve(process.cwd(), '../exports/schedule.json');
-      const altSchedulePath = path.resolve(process.cwd(), 'exports/schedule.json');
-      const finalPath = fs.existsSync(schedulePath) ? schedulePath : fs.existsSync(altSchedulePath) ? altSchedulePath : null;
-      if (finalPath) {
+    // 1. Fetch current schedule (Ground truth benchmark exports/schedule.json, with DB fallback)
+    let schedule = null;
+    const schedulePath = path.resolve(process.cwd(), '../exports/schedule.json');
+    const altSchedulePath = path.resolve(process.cwd(), 'exports/schedule.json');
+    const finalPath = fs.existsSync(schedulePath) ? schedulePath : fs.existsSync(altSchedulePath) ? altSchedulePath : null;
+    if (finalPath) {
+      try {
         schedule = JSON.parse(fs.readFileSync(finalPath, 'utf8'));
+      } catch (e) {
+        console.error('Error reading exports/schedule.json:', e);
       }
+    }
+    if (!schedule) {
+      schedule = await Schedule.findOne({ _id: 'SCHEDULE_CURRENT' }).lean();
     }
 
     if (!schedule || !schedule.sessions) {

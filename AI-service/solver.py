@@ -150,11 +150,15 @@ class CampusScheduleSolver:
         fac_time = defaultdict(list)
         fac_day_hours = defaultdict(list)
         grp_time = defaultdict(list)
+        grp_course_day = defaultdict(list)
+        fac_course_day = defaultdict(list)
 
         for s in session_list:
             sid = s["id"]
             dur = s["duration"]
             fid = s["faculty_id"]
+            cid = s["course_id"]
+            kind = s["kind"]
             is_basket = bool(s.get("basket_slot"))
             for (d, st, rid) in candidates[sid]:
                 var = x[(sid, d, st, rid)]
@@ -165,6 +169,10 @@ class CampusScheduleSolver:
                     if not is_basket:
                         for g in s["groups"]:
                             grp_time[(g, d, p)].append(var)
+                if kind == "lecture" and not is_basket:
+                    for g in s["groups"]:
+                        grp_course_day[(g, cid, d)].append(var)
+                    fac_course_day[(fid, cid, d)].append(var)
 
         for (rid, d, p), vars_list in room_time.items():
             if len(vars_list) > 1:
@@ -200,6 +208,20 @@ class CampusScheduleSolver:
                         elif rid != b_rid:
                             obj.append(var * 1)
         else:
+            # S4: Heavily penalize multiple lectures of same course on same day for a group
+            for (g, cid, d), vlist in grp_course_day.items():
+                if len(vlist) > 1:
+                    excess = model.NewIntVar(0, len(vlist), f"s4_{g}_{cid}_{d}")
+                    model.Add(excess >= sum(vlist) - 1)
+                    obj.append(excess * 30)
+
+            # Discourage faculty from teaching multiple lectures of same course in 1 day
+            for (fid, cid, d), vlist in fac_course_day.items():
+                if len(vlist) > 1:
+                    f_excess = model.NewIntVar(0, len(vlist), f"fac_s4_{fid}_{cid}_{d}")
+                    model.Add(f_excess >= sum(vlist) - 1)
+                    obj.append(f_excess * 15)
+
             for s in session_list:
                 sid = s["id"]
                 dur = s["duration"]

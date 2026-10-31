@@ -12,7 +12,8 @@ import {
   ArrowRight,
   ShieldCheck,
   Send,
-  Edit3
+  Edit3,
+  PlusCircle
 } from 'lucide-react';
 
 const SAMPLE_HINGLISH_PROMPTS = [
