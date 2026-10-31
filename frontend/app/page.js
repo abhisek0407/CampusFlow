@@ -52,14 +52,25 @@ export default function Home() {
     }
 
     // Restore session from localStorage if present
-    const saved = localStorage.getItem('cit_user');
-    if (saved) {
-      try {
+    try {
+      const saved = localStorage.getItem('cit_user');
+      if (saved) {
         const u = JSON.parse(saved);
         setCurrentUser(u);
-      } catch (e) {}
+      }
+    } catch (e) {
+      console.warn('Could not restore user session from localStorage', e);
+    } finally {
+      setIsMounted(true);
     }
   }, []);
+
+  function handleTabChange(tab) {
+    setActiveTab(tab);
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      setSidebarCollapsed(true);
+    }
+  }
 
   function handleLoginSuccess(user) {
     setCurrentUser(user);
