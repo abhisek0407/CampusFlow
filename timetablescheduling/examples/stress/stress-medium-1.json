@@ -1,0 +1,134 @@
+{
+ "id": "stress-medium-1",
+ "dataset": "cit-public-v1",
+ "description": "generated: level=medium seed=1",
+ "changes": [
+  {
+   "type": "add_faculty",
+   "faculty": {
+    "id": "FX11",
+    "name": "Visiting Faculty FX11",
+    "department": "CSE",
+    "max_hours_per_day": 4,
+    "needs_accessible": false,
+    "unavailable": [],
+    "preferences": []
+   }
+  },
+  {
+   "type": "add_session",
+   "session": {
+    "id": "ME203-L3-N10",
+    "course_id": "ME203",
+    "kind": "lecture",
+    "groups": [
+     "ME-2"
+    ],
+    "faculty_id": "F38",
+    "size": 60,
+    "duration": 1,
+    "room_types": [
+     "classroom",
+     "lecture_hall",
+     "auditorium"
+    ],
+    "needs_accessible": true,
+    "basket_slot": null,
+    "fixed_slot": null
+   }
+  },
+  {
+   "type": "room_unavailable",
+   "room_id": "LH-5",
+   "days": [
+    "THU"
+   ],
+   "periods": [
+    6,
+    7,
+    8,
+    9
+   ],
+   "reason": "stress: LH-5 closed (afternoon)"
+  },
+  {
+   "type": "faculty_unavailable",
+   "faculty_id": "F17",
+   "days": [
+    "FRI"
+   ],
+   "periods": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "reason": "stress: F17 out (morning)"
+  },
+  {
+   "type": "remove_session",
+   "session_id": "CS204-L3"
+  },
+  {
+   "type": "room_unavailable",
+   "room_id": "LH-1",
+   "days": [
+    "THU"
+   ],
+   "periods": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "reason": "stress: LH-1 closed (full day)"
+  },
+  {
+   "type": "faculty_unavailable",
+   "faculty_id": "F15",
+   "days": [
+    "WED"
+   ],
+   "periods": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "reason": "stress: F15 out (full day)"
+  },
+  {
+   "type": "add_session",
+   "session": {
+    "id": "PH101-B-L3-N11",
+    "course_id": "PH101",
+    "kind": "lecture",
+    "groups": [
+     "Y1-B"
+    ],
+    "faculty_id": "F21",
+    "size": 90,
+    "duration": 1,
+    "room_types": [
+     "classroom",
+     "lecture_hall",
+     "auditorium"
+    ],
+    "needs_accessible": false,
+    "basket_slot": null,
+    "fixed_slot": null
+   }
+  }
+ ]
+}
