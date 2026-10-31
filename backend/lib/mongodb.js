@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const DEFAULT_LOCAL_URI = 'mongodb://127.0.0.1:27017/orchestrai_db';
-const PRIMARY_URI = process.env.MONGODB_URI || DEFAULT_LOCAL_URI;
+const PRIMARY_URI = process.env.MONGODB_ATLAS_URI || DEFAULT_LOCAL_URI;
 
 let cached = global.mongoose;
 

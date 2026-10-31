@@ -10,7 +10,9 @@ import {
   GraduationCap,
   Sparkles,
   Calendar,
-  Layers
+  Layers,
+  LogOut,
+  UserCog
 } from 'lucide-react';
 import { ROLE_NAV_CONFIG } from './Sidebar';
 
@@ -58,7 +60,9 @@ export default function TopHeader({
   isResetting,
   sidebarCollapsed,
   setSidebarCollapsed,
-  onOpenLoginModal
+  onOpenLoginModal,
+  onLogout,
+  onOpenEditProfile
 }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const roleConfig = ROLE_NAV_CONFIG[currentUser?.role] || ROLE_NAV_CONFIG.admin;
@@ -174,20 +178,68 @@ export default function TopHeader({
                     );
                   })}
                 </div>
-                <div className="px-3 pt-2 mt-1 border-t border-slate-100 dark:border-slate-700 text-center">
+                <div className="px-3 pt-2 mt-1 border-t border-slate-100 dark:border-slate-700 space-y-1 text-center">
                   <button
                     onClick={() => {
                       setDropdownOpen(false);
                       onOpenLoginModal();
                     }}
-                    className="text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline font-semibold"
+                    className="block w-full text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline font-semibold"
                   >
                     Open Full Auth Credentials Modal →
                   </button>
+                  {onOpenEditProfile && (
+                    <button
+                      onClick={() => {
+                        setDropdownOpen(false);
+                        onOpenEditProfile();
+                      }}
+                      className="w-full py-1.5 px-3 rounded-lg text-xs font-bold text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/40 flex items-center justify-center space-x-1.5 transition cursor-pointer"
+                    >
+                      <UserCog className="w-3.5 h-3.5" />
+                      <span>Edit My Profile</span>
+                    </button>
+                  )}
+                  {onLogout && (
+                    <button
+                      onClick={() => {
+                        setDropdownOpen(false);
+                        onLogout();
+                      }}
+                      className="w-full py-1.5 px-3 rounded-lg text-xs font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center justify-center space-x-1.5 transition cursor-pointer"
+                    >
+                      <LogOut className="w-3.5 h-3.5" />
+                      <span>Sign Out</span>
+                    </button>
+                  )}
                 </div>
               </div>
             )}
           </div>
+
+          {/* Edit Profile Button at Top Right */}
+          {onOpenEditProfile && (
+            <button
+              onClick={onOpenEditProfile}
+              title="Edit Profile Details"
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-semibold transition cursor-pointer shadow-2xs"
+            >
+              <UserCog className="w-3.5 h-3.5 text-blue-600" />
+              <span className="hidden sm:inline font-bold">Edit Profile</span>
+            </button>
+          )}
+
+          {/* Dedicated Sign Out Button */}
+          {onLogout && (
+            <button
+              onClick={onLogout}
+              title="Sign Out of CIT Account"
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-200 text-xs font-semibold transition cursor-pointer"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Sign Out</span>
+            </button>
+          )}
 
         </div>
       </div>

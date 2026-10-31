@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import Sidebar, { ROLE_NAV_CONFIG } from '../components/Sidebar';
 import TopHeader, { DEMO_USERS } from '../components/TopHeader';
 import LoginModal from '../components/LoginModal';
+import AuthPortal from '../components/AuthPortal';
+import EditProfileModal from '../components/EditProfileModal';
 
 // Shared & Admin Views
 import AdminOverviewView from '../components/AdminOverviewView';
@@ -34,14 +36,17 @@ import ClubMyBookingsView from '../components/ClubMyBookingsView';
 import ClubBookingHistoryView from '../components/ClubBookingHistoryView';
 
 export default function Home() {
-  const [currentUser, setCurrentUser] = useState(DEMO_USERS[0]);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [isMounted, setIsMounted] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
 
   useEffect(() => {
+    setIsMounted(true);
     // Restore session from localStorage if present
     const saved = localStorage.getItem('cit_user');
     if (saved) {
@@ -51,6 +56,12 @@ export default function Home() {
       } catch (e) {}
     }
   }, []);
+
+  function handleLoginSuccess(user) {
+    setCurrentUser(user);
+    setActiveTab('overview');
+    showToast(`Welcome back, ${user.name}! (${user.role.toUpperCase()})`);
+  }
 
   function handleSwitchUser(user) {
     setCurrentUser(user);
@@ -69,8 +80,8 @@ export default function Home() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: user.email, password: passwords[user.email] || 'Admin@123' }),
     })
-      .then(r => r.json())
-      .then(d => {
+      .then((r) => r.json())
+      .then((d) => {
         if (d.success && d.token) {
           localStorage.setItem('cit_token', d.token);
         }
@@ -78,6 +89,17 @@ export default function Home() {
       .catch(() => {});
 
     showToast(`Switched active portal: ${user.name} (${user.role.toUpperCase()})`);
+  }
+
+  async function handleLogout() {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch (e) {}
+    localStorage.removeItem('cit_user');
+    localStorage.removeItem('cit_token');
+    setCurrentUser(null);
+    setActiveTab('overview');
+    showToast("Logged out successfully");
   }
 
   async function handleResetData() {
@@ -106,7 +128,30 @@ export default function Home() {
     setTimeout(() => setToastMessage(null), 4000);
   }
 
+  // Prevent hydration flicker before localStorage is checked
+  if (!isMounted) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center font-sans">
+        <div className="flex items-center space-x-2 text-slate-500 text-xs font-semibold">
+          <span className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-ping"></span>
+          <span>Loading CampusFlow...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // VIEW 1: AUTHENTICATION HOME PORTAL (SIGN-IN, REGISTER, FORGOT, RESET)
+  // Renders when user is not logged in. Uses /logo.png as background picture.
+  // =========================================================================
+  if (!currentUser) {
+    return <AuthPortal onLoginSuccess={handleLoginSuccess} />;
+  }
+
+  // =========================================================================
+  // VIEW 2: ROLE-BASED DASHBOARD
   // Render the active view based on the current user's role and selected sidebar tab
+  // =========================================================================
   function renderActiveView() {
     const role = currentUser?.role || 'admin';
 
@@ -190,7 +235,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans flex">
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans flex">
       
       {/* Role-Based Sidebar */}
       <Sidebar
@@ -215,6 +260,8 @@ export default function Home() {
           sidebarCollapsed={sidebarCollapsed}
           setSidebarCollapsed={setSidebarCollapsed}
           onOpenLoginModal={() => setIsLoginModalOpen(true)}
+          onLogout={handleLogout}
+          onOpenEditProfile={() => setIsEditProfileOpen(true)}
         />
 
         {/* View Content */}
@@ -223,9 +270,9 @@ export default function Home() {
         </main>
 
         {/* Footer */}
-        <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-4 px-6 text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2">
+        <footer className="border-t border-slate-200 bg-white py-4 px-6 text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2">
           <div>
-            <strong>CampusFlow / OrchestrAI</strong> • Chilika Institute of Technology (CIT) Autonomous Scheduling System
+            <strong>CampusFlow</strong> • Chilika Institute of Technology (CIT) Autonomous Scheduling System
           </div>
           <div className="flex items-center space-x-3 text-[11px]">
             <span>Google OR-Tools CP-SAT</span>
@@ -237,6 +284,17 @@ export default function Home() {
         </footer>
 
       </div>
+
+      {/* Edit Profile Modal */}
+      <EditProfileModal
+        isOpen={isEditProfileOpen}
+        onClose={() => setIsEditProfileOpen(false)}
+        currentUser={currentUser}
+        onProfileUpdated={(updated) => {
+          setCurrentUser(updated);
+          showToast("Profile details updated successfully!");
+        }}
+      />
 
       {/* Login & Demo Switcher Modal */}
       <LoginModal
