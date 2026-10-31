@@ -281,6 +281,28 @@ export default function TimetableView() {
                           ) : (
                             <div className="space-y-1.5">
                               {sessions.map((s, idx) => {
+                                const isContinuation = s.duration > 1 && period > s.start_period;
+                                if (isContinuation) {
+                                  return (
+                                    <div
+                                      key={`${s.session_id}-${idx}`}
+                                      onClick={() => setActiveModalSession(s)}
+                                      className="p-1.5 rounded-lg border border-dashed border-emerald-500/40 bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-800 dark:text-emerald-300 cursor-pointer hover:bg-emerald-100/50 dark:hover:bg-emerald-900/30 transition flex items-center justify-between text-xs"
+                                      title={`${s.course_id} 3-Hour Practical Laboratory running from P${s.start_period} to P${s.end_period}`}
+                                    >
+                                      <div className="flex items-center gap-1.5 font-medium truncate">
+                                        <span className="text-[10px] text-emerald-500 font-mono">↳</span>
+                                        <span className="font-bold">{s.course_id}</span>
+                                        <span className="text-slate-500 dark:text-slate-400 text-[10px]">
+                                          (Lab Contd. {period - s.start_period + 1}/{s.duration})
+                                        </span>
+                                      </div>
+                                      <span className="font-mono text-[9px] px-1 py-0.5 rounded bg-white/80 dark:bg-black/30 font-bold">
+                                        {s.room_id}
+                                      </span>
+                                    </div>
+                                  );
+                                }
                                 const colorClass = KIND_COLORS[s.kind] || KIND_COLORS.lecture;
                                 const badgeClass = KIND_BADGES[s.kind] || KIND_BADGES.lecture;
                                 return (
@@ -292,7 +314,7 @@ export default function TimetableView() {
                                     <div className="flex items-center justify-between mb-1">
                                       <span className="font-bold text-xs">{s.course_id}</span>
                                       <span className={`text-[9px] uppercase font-bold px-1.5 py-0.5 rounded ${badgeClass}`}>
-                                        {s.kind} {s.duration > 1 && `(${s.duration}h)`}
+                                        {s.kind} {s.duration > 1 && `(${s.duration}h Block • P${s.start_period}–P${s.end_period})`}
                                       </span>
                                     </div>
                                     <div className="text-[11px] font-medium leading-tight truncate" title={s.course_title}>

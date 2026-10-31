@@ -1,0 +1,256 @@
+{
+ "id": "stress-heavy-0",
+ "dataset": "cit-public-v1",
+ "description": "generated: level=heavy seed=0",
+ "changes": [
+  {
+   "type": "add_faculty",
+   "faculty": {
+    "id": "FX01",
+    "name": "Visiting Faculty FX01",
+    "department": "HSS",
+    "max_hours_per_day": 4,
+    "needs_accessible": false,
+    "unavailable": [],
+    "preferences": []
+   }
+  },
+  {
+   "type": "faculty_unavailable",
+   "faculty_id": "F27",
+   "days": [
+    "MON"
+   ],
+   "periods": [
+    6,
+    7,
+    8,
+    9
+   ],
+   "reason": "stress: F27 out (afternoon)"
+  },
+  {
+   "type": "remove_session",
+   "session_id": "EC204-L3"
+  },
+  {
+   "type": "room_unavailable",
+   "room_id": "LH-2",
+   "days": [
+    "MON",
+    "TUE"
+   ],
+   "periods": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "reason": "stress: LH-2 closed (morning)"
+  },
+  {
+   "type": "add_session",
+   "session": {
+    "id": "PH191-A-P1-N03",
+    "course_id": "PH191",
+    "kind": "lab",
+    "groups": [
+     "Y1-A"
+    ],
+    "faculty_id": "FX01",
+    "size": 90,
+    "duration": 3,
+    "room_types": [
+     "lab_phy"
+    ],
+    "needs_accessible": false,
+    "basket_slot": null,
+    "fixed_slot": null
+   }
+  },
+  {
+   "type": "add_session",
+   "session": {
+    "id": "EC203-L3-N02",
+    "course_id": "EC203",
+    "kind": "lecture",
+    "groups": [
+     "ECE-2"
+    ],
+    "faculty_id": "FX01",
+    "size": 70,
+    "duration": 1,
+    "room_types": [
+     "classroom",
+     "lecture_hall",
+     "auditorium"
+    ],
+    "needs_accessible": false,
+    "basket_slot": null,
+    "fixed_slot": null
+   }
+  },
+  {
+   "type": "room_unavailable",
+   "room_id": "CR-103",
+   "days": [
+    "MON",
+    "TUE",
+    "THU",
+    "FRI"
+   ],
+   "periods": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "reason": "stress: CR-103 closed (full day)"
+  },
+  {
+   "type": "faculty_unavailable",
+   "faculty_id": "F27",
+   "days": [
+    "MON",
+    "THU",
+    "FRI"
+   ],
+   "periods": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "reason": "stress: F27 out (morning)"
+  },
+  {
+   "type": "faculty_unavailable",
+   "faculty_id": "F30",
+   "days": [
+    "MON",
+    "TUE",
+    "THU"
+   ],
+   "periods": [
+    6,
+    7,
+    8,
+    9
+   ],
+   "reason": "stress: F30 out (afternoon)"
+  },
+  {
+   "type": "remove_session",
+   "session_id": "CE201-L2"
+  },
+  {
+   "type": "add_session",
+   "session": {
+    "id": "CE301-L3-N01",
+    "course_id": "CE301",
+    "kind": "lecture",
+    "groups": [
+     "CE-3"
+    ],
+    "faculty_id": "F20",
+    "size": 45,
+    "duration": 1,
+    "room_types": [
+     "classroom",
+     "lecture_hall",
+     "auditorium"
+    ],
+    "needs_accessible": false,
+    "basket_slot": null,
+    "fixed_slot": null
+   }
+  },
+  {
+   "type": "faculty_unavailable",
+   "faculty_id": "F02",
+   "days": [
+    "WED"
+   ],
+   "periods": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "reason": "stress: F02 out (full day)"
+  },
+  {
+   "type": "room_unavailable",
+   "room_id": "ELEC-LAB-2",
+   "days": [
+    "TUE",
+    "WED",
+    "THU",
+    "FRI"
+   ],
+   "periods": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "reason": "stress: ELEC-LAB-2 closed (full day)"
+  },
+  {
+   "type": "room_unavailable",
+   "room_id": "CR-104",
+   "days": [
+    "FRI"
+   ],
+   "periods": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "reason": "stress: CR-104 closed (full day)"
+  },
+  {
+   "type": "add_session",
+   "session": {
+    "id": "EC391-P1-N00",
+    "course_id": "EC391",
+    "kind": "lab",
+    "groups": [
+     "ECE-3"
+    ],
+    "faculty_id": "F26",
+    "size": 65,
+    "duration": 3,
+    "room_types": [
+     "lab_elec"
+    ],
+    "needs_accessible": false,
+    "basket_slot": null,
+    "fixed_slot": null
+   }
+  }
+ ]
+}

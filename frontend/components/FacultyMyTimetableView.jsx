@@ -25,41 +25,39 @@ const PERIODS = [
 ];
 
 export default function FacultyMyTimetableView() {
-  const [schedule, setSchedule] = useState(null);
+  const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedSession, setSelectedSession] = useState(null);
 
   useEffect(() => {
-    fetch('/api/schedule/current')
+    fetch('/api/schedule/views?faculty=F01')
       .then(res => res.json())
       .then(data => {
-        if (data.success && data.schedule) {
-          setSchedule(data.schedule);
+        if (data.success && data.sessions) {
+          setSessions(data.sessions);
         }
       })
       .catch(err => console.error(err))
       .finally(() => setLoading(false));
   }, []);
 
-  // Filter sessions assigned to Dr. Ananya Mishra (F01)
-  const myAllocations = schedule?.sessions
-    ? Object.entries(schedule.sessions)
-        .filter(([id, alloc]) => alloc.faculty_id === 'F01' || id.startsWith('CS101') || id.startsWith('CS302'))
-        .map(([id, alloc]) => ({
-          id,
-          ...alloc,
-          course: id.startsWith('CS101') ? 'CS101 (Intro to Programming)' : 'CS302 (Database Systems)'
-        }))
-    : [
-        { id: 'CS101-L1', day: 'MON', start_period: 2, duration: 1, room_id: 'CR-101', course: 'CS101 (Programming)', groups: ['Y1-A', 'Y1-B'] },
-        { id: 'CS302-L1', day: 'TUE', start_period: 6, duration: 1, room_id: 'LH-1', course: 'CS302 (Database)', groups: ['Y3-CSE'] },
-        { id: 'CS101-L2', day: 'WED', start_period: 3, duration: 1, room_id: 'CR-101', course: 'CS101 (Programming)', groups: ['Y1-A', 'Y1-B'] },
-        { id: 'CS101-T1', day: 'THU', start_period: 4, duration: 1, room_id: 'CR-102', course: 'CS101 (Tutorial)', groups: ['Y1-A'] },
-        { id: 'CS302-L2', day: 'FRI', start_period: 2, duration: 1, room_id: 'LH-1', course: 'CS302 (Database)', groups: ['Y3-CSE'] },
-      ];
+  const myAllocations = sessions.map(s => ({
+    id: s.session_id,
+    course: `${s.course_id} (${s.course_title})`,
+    course_id: s.course_id,
+    day: s.day,
+    start_period: s.start_period,
+    end_period: s.end_period,
+    duration: s.duration,
+    room_id: s.room_id,
+    room_name: s.room_name,
+    kind: s.kind,
+    groups: s.groups,
+    faculty_name: s.faculty_name,
+  }));
 
   function getSlotSession(day, period) {
-    return myAllocations.find(s => s.day === day && s.start_period === period);
+    return myAllocations.find(s => s.day === day && period >= s.start_period && period <= s.end_period);
   }
 
   return (

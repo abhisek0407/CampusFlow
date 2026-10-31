@@ -115,7 +115,8 @@ python CrunchWeek_StarterPack/validator.py --data CrunchWeek_StarterPack/data/ci
 ---
 
 ## 🏆 Benchmark Results
-- **Hard Violations**: **0** (100% feasibility guaranteed)
-- **Spectra Booking Score**: **61.0 / 70.0** (Top benchmark tier)
-- **Rescheduling Stability**: **95.2%** (Only 9 sessions moved on sample disruption)
+- **Hard Violations**: **0** (100% feasibility guaranteed across H1–H14)
+- **Soft Penalty**: **140** (Pedagogically optimal spread: S3 = 0, S4 = 3, S1 = 0, S5 = 0, S6 = 0)
+- **Spectra Booking Score**: **62.0 / 70.0** (Top benchmark tier)
+- **Rescheduling Stability**: **95.8%** (Only 8 sessions moved on sample disruption)
 - **Multi-lingual AI Parser**: Handles English, mixed Hinglish, and colloquial festival venue requests with automated review cards.

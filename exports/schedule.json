@@ -5,8 +5,8 @@
     {
       "session_id": "MA101-AB-L1",
       "day": "THU",
-      "start_period": 2,
-      "room_id": "LH-2"
+      "start_period": 3,
+      "room_id": "LH-1"
     },
     {
       "session_id": "MA101-AB-L2",
@@ -16,14 +16,14 @@
     },
     {
       "session_id": "MA101-AB-L3",
-      "day": "MON",
-      "start_period": 3,
+      "day": "FRI",
+      "start_period": 5,
       "room_id": "LH-1"
     },
     {
       "session_id": "MA101-CD-L1",
       "day": "TUE",
-      "start_period": 1,
+      "start_period": 3,
       "room_id": "LH-2"
     },
     {
@@ -53,8 +53,8 @@
     {
       "session_id": "PH101-A-L2",
       "day": "MON",
-      "start_period": 2,
-      "room_id": "LH-5"
+      "start_period": 6,
+      "room_id": "LH-1"
     },
     {
       "session_id": "PH101-A-L3",
@@ -82,8 +82,8 @@
     },
     {
       "session_id": "CS191-A-P1",
-      "day": "TUE",
-      "start_period": 6,
+      "day": "MON",
+      "start_period": 2,
       "room_id": "CS-LAB-1"
     },
     {
@@ -106,9 +106,9 @@
     },
     {
       "session_id": "MA101-B-T1",
-      "day": "TUE",
-      "start_period": 8,
-      "room_id": "LH-2"
+      "day": "THU",
+      "start_period": 2,
+      "room_id": "LH-6"
     },
     {
       "session_id": "PH101-B-L1",
@@ -148,14 +148,14 @@
     },
     {
       "session_id": "CS191-B-P1",
-      "day": "FRI",
+      "day": "TUE",
       "start_period": 6,
       "room_id": "CS-LAB-2"
     },
     {
       "session_id": "WS101-B-P1",
-      "day": "THU",
-      "start_period": 6,
+      "day": "FRI",
+      "start_period": 2,
       "room_id": "MECH-WS"
     },
     {
@@ -185,7 +185,7 @@
     {
       "session_id": "PH101-C-L2",
       "day": "TUE",
-      "start_period": 2,
+      "start_period": 1,
       "room_id": "LH-2"
     },
     {
@@ -202,15 +202,15 @@
     },
     {
       "session_id": "CS101-C-L1",
-      "day": "MON",
-      "start_period": 8,
+      "day": "TUE",
+      "start_period": 2,
       "room_id": "LH-1"
     },
     {
       "session_id": "CS101-C-L2",
-      "day": "FRI",
-      "start_period": 8,
-      "room_id": "CR-201"
+      "day": "MON",
+      "start_period": 2,
+      "room_id": "LH-1"
     },
     {
       "session_id": "CS191-C-P1",
@@ -262,8 +262,8 @@
     },
     {
       "session_id": "PH191-D-P1",
-      "day": "MON",
-      "start_period": 2,
+      "day": "THU",
+      "start_period": 6,
       "room_id": "PHY-LAB"
     },
     {
@@ -282,7 +282,7 @@
       "session_id": "CS191-D-P1",
       "day": "TUE",
       "start_period": 6,
-      "room_id": "CS-LAB-2"
+      "room_id": "CS-LAB-1"
     },
     {
       "session_id": "WS101-D-P1",
@@ -448,9 +448,9 @@
     },
     {
       "session_id": "EC203-L2",
-      "day": "MON",
-      "start_period": 1,
-      "room_id": "CR-102"
+      "day": "FRI",
+      "start_period": 8,
+      "room_id": "CR-204"
     },
     {
       "session_id": "EC203-L3",
@@ -484,8 +484,8 @@
     },
     {
       "session_id": "EC292-P1",
-      "day": "FRI",
-      "start_period": 2,
+      "day": "THU",
+      "start_period": 6,
       "room_id": "CS-LAB-1"
     },
     {
@@ -586,9 +586,9 @@
     },
     {
       "session_id": "ME201-L2",
-      "day": "MON",
-      "start_period": 3,
-      "room_id": "CR-104"
+      "day": "FRI",
+      "start_period": 8,
+      "room_id": "CR-105"
     },
     {
       "session_id": "ME201-L3",
@@ -642,7 +642,7 @@
       "session_id": "ME204-L1",
       "day": "MON",
       "start_period": 1,
-      "room_id": "CR-101"
+      "room_id": "LH-6"
     },
     {
       "session_id": "ME204-L2",
@@ -677,8 +677,8 @@
     {
       "session_id": "CE201-L2",
       "day": "MON",
-      "start_period": 1,
-      "room_id": "LH-6"
+      "start_period": 3,
+      "room_id": "LH-3"
     },
     {
       "session_id": "CE201-L3",
@@ -760,9 +760,9 @@
     },
     {
       "session_id": "HS201-H1-L1",
-      "day": "WED",
-      "start_period": 8,
-      "room_id": "LH-2"
+      "day": "THU",
+      "start_period": 4,
+      "room_id": "LH-1"
     },
     {
       "session_id": "HS201-H2-L1",
@@ -772,14 +772,14 @@
     },
     {
       "session_id": "HS201-H1-L2",
-      "day": "TUE",
-      "start_period": 2,
+      "day": "MON",
+      "start_period": 5,
       "room_id": "LH-1"
     },
     {
       "session_id": "HS201-H2-L2",
-      "day": "MON",
-      "start_period": 4,
+      "day": "TUE",
+      "start_period": 5,
       "room_id": "LH-2"
     },
     {
@@ -874,9 +874,9 @@
     },
     {
       "session_id": "EC302-L3",
-      "day": "MON",
-      "start_period": 1,
-      "room_id": "LH-4"
+      "day": "THU",
+      "start_period": 5,
+      "room_id": "CR-204"
     },
     {
       "session_id": "EC303-L1",
@@ -886,8 +886,8 @@
     },
     {
       "session_id": "EC303-L2",
-      "day": "THU",
-      "start_period": 5,
+      "day": "WED",
+      "start_period": 8,
       "room_id": "CR-204"
     },
     {
@@ -930,7 +930,7 @@
       "session_id": "EE302-L2",
       "day": "MON",
       "start_period": 1,
-      "room_id": "CR-105"
+      "room_id": "LH-4"
     },
     {
       "session_id": "EE302-L3",
@@ -958,9 +958,9 @@
     },
     {
       "session_id": "EE391-P1",
-      "day": "MON",
+      "day": "TUE",
       "start_period": 2,
-      "room_id": "ELEC-LAB-1"
+      "room_id": "ELEC-LAB-2"
     },
     {
       "session_id": "ME301-L1",
@@ -1025,8 +1025,8 @@
     {
       "session_id": "CE301-L1",
       "day": "MON",
-      "start_period": 2,
-      "room_id": "CR-204"
+      "start_period": 1,
+      "room_id": "CR-101"
     },
     {
       "session_id": "CE301-L2",
@@ -1066,78 +1066,295 @@
     },
     {
       "session_id": "CE303-L2",
-      "day": "MON",
-      "start_period": 1,
-      "room_id": "CR-204"
-    },
-    {
-      "session_id": "CE303-L3",
       "day": "THU",
-      "start_period": 6,
+      "start_period": 8,
       "room_id": "CR-205"
     },
     {
+      "session_id": "CE303-L3",
+      "day": "WED",
+      "start_period": 8,
+      "room_id": "CR-203"
+    },
+    {
       "session_id": "CE391-P1",
-      "day": "FRI",
-      "start_period": 6,
+      "day": "MON",
+      "start_period": 2,
       "room_id": "CIVIL-LAB"
     },
     {
       "session_id": "OE301-L1",
       "day": "WED",
-      "start_period": 8,
-      "room_id": "LH-6"
+      "start_period": 7,
+      "room_id": "LH-2"
     },
     {
       "session_id": "OE301-L2",
       "day": "THU",
       "start_period": 4,
-      "room_id": "LH-2"
+      "room_id": "LH-5"
     },
     {
       "session_id": "OE301-L3",
-      "day": "WED",
-      "start_period": 5,
-      "room_id": "LH-2"
+      "day": "FRI",
+      "start_period": 8,
+      "room_id": "LH-1"
     },
     {
       "session_id": "OE302-L1",
       "day": "WED",
-      "start_period": 8,
-      "room_id": "LH-4"
+      "start_period": 7,
+      "room_id": "LH-6"
     },
     {
       "session_id": "OE302-L2",
       "day": "THU",
       "start_period": 4,
-      "room_id": "LH-6"
+      "room_id": "LH-2"
     },
     {
       "session_id": "OE302-L3",
-      "day": "WED",
-      "start_period": 5,
-      "room_id": "LH-4"
+      "day": "FRI",
+      "start_period": 8,
+      "room_id": "LH-6"
     },
     {
       "session_id": "OE303-L1",
       "day": "WED",
-      "start_period": 8,
-      "room_id": "LH-1"
+      "start_period": 7,
+      "room_id": "CR-201"
     },
     {
       "session_id": "OE303-L2",
       "day": "THU",
       "start_period": 4,
-      "room_id": "LH-5"
+      "room_id": "CR-102"
     },
     {
       "session_id": "OE303-L3",
-      "day": "WED",
-      "start_period": 5,
-      "room_id": "CR-102"
+      "day": "FRI",
+      "start_period": 8,
+      "room_id": "CR-201"
     }
   ],
-  "bookings": [],
+  "fest_week": {
+    "bookings": [
+      {
+        "request_id": "BR-01",
+        "status": "alternative_offered",
+        "day": "MON",
+        "start_period": 10,
+        "end_period": 11,
+        "room_id": "AUD",
+        "reason": "Requested slot unavailable; alternative offered in AUD on MON P10-P11"
+      },
+      {
+        "request_id": "BR-11a",
+        "status": "approved",
+        "day": "THU",
+        "start_period": 6,
+        "end_period": 9,
+        "room_id": "OAT",
+        "reason": "Approved in OAT for institute_event"
+      },
+      {
+        "request_id": "BR-11b",
+        "status": "approved",
+        "day": "FRI",
+        "start_period": 6,
+        "end_period": 9,
+        "room_id": "OAT",
+        "reason": "Approved in OAT for institute_event"
+      },
+      {
+        "request_id": "BR-20",
+        "status": "approved",
+        "day": "FRI",
+        "start_period": 4,
+        "end_period": 5,
+        "room_id": "AUD",
+        "reason": "Approved in AUD for institute_event"
+      },
+      {
+        "request_id": "BR-16",
+        "status": "approved",
+        "day": "FRI",
+        "start_period": 10,
+        "end_period": 13,
+        "room_id": "OAT",
+        "reason": "Approved in OAT for institute_event"
+      },
+      {
+        "request_id": "BR-03",
+        "status": "approved",
+        "day": "WED",
+        "start_period": 6,
+        "end_period": 7,
+        "room_id": "AUD",
+        "reason": "Approved in AUD for guest_lecture"
+      },
+      {
+        "request_id": "BR-19",
+        "status": "approved",
+        "day": "MON",
+        "start_period": 9,
+        "end_period": 9,
+        "room_id": "LH-1",
+        "reason": "Approved in LH-1 for guest_lecture"
+      },
+      {
+        "request_id": "BR-08",
+        "status": "approved",
+        "day": "THU",
+        "start_period": 8,
+        "end_period": 8,
+        "room_id": "LH-1",
+        "reason": "Approved in LH-1 for department_event"
+      },
+      {
+        "request_id": "BR-13",
+        "status": "approved",
+        "day": "WED",
+        "start_period": 10,
+        "end_period": 11,
+        "room_id": "LH-1",
+        "reason": "Approved in LH-1 for department_event"
+      },
+      {
+        "request_id": "BR-18",
+        "status": "alternative_offered",
+        "day": "MON",
+        "start_period": 10,
+        "end_period": 12,
+        "room_id": "MECH-WS",
+        "reason": "Requested slot unavailable; alternative offered in MECH-WS on MON P10-P12"
+      },
+      {
+        "request_id": "BR-02",
+        "status": "approved",
+        "day": "FRI",
+        "start_period": 6,
+        "end_period": 11,
+        "room_id": "CS-LAB-1",
+        "reason": "Approved in CS-LAB-1 for club_event"
+      },
+      {
+        "request_id": "BR-06",
+        "status": "approved",
+        "day": "THU",
+        "start_period": 10,
+        "end_period": 11,
+        "room_id": "SH-1",
+        "reason": "Approved in SH-1 for club_event"
+      },
+      {
+        "request_id": "BR-05a",
+        "status": "approved",
+        "day": "MON",
+        "start_period": 11,
+        "end_period": 12,
+        "room_id": "OAT",
+        "reason": "Approved in OAT for club_event"
+      },
+      {
+        "request_id": "BR-05b",
+        "status": "approved",
+        "day": "TUE",
+        "start_period": 11,
+        "end_period": 12,
+        "room_id": "OAT",
+        "reason": "Approved in OAT for club_event"
+      },
+      {
+        "request_id": "BR-05c",
+        "status": "approved",
+        "day": "WED",
+        "start_period": 11,
+        "end_period": 12,
+        "room_id": "OAT",
+        "reason": "Approved in OAT for club_event"
+      },
+      {
+        "request_id": "BR-05d",
+        "status": "approved",
+        "day": "THU",
+        "start_period": 11,
+        "end_period": 12,
+        "room_id": "OAT",
+        "reason": "Approved in OAT for club_event"
+      },
+      {
+        "request_id": "BR-05e",
+        "status": "approved",
+        "day": "FRI",
+        "start_period": 11,
+        "end_period": 12,
+        "room_id": "SH-1",
+        "reason": "Approved in SH-1 for club_event"
+      },
+      {
+        "request_id": "BR-04",
+        "status": "rejected",
+        "reason": "Cancelled by requester"
+      },
+      {
+        "request_id": "BR-07",
+        "status": "approved",
+        "day": "THU",
+        "start_period": 10,
+        "end_period": 12,
+        "room_id": "AUD",
+        "reason": "Approved in AUD for club_event"
+      },
+      {
+        "request_id": "BR-09",
+        "status": "rejected",
+        "reason": "No venue seats 1200 people"
+      },
+      {
+        "request_id": "BR-10",
+        "status": "approved",
+        "day": "FRI",
+        "start_period": 1,
+        "end_period": 9,
+        "room_id": "SH-1",
+        "reason": "Approved in SH-1 for club_event"
+      },
+      {
+        "request_id": "BR-12",
+        "status": "approved",
+        "day": "TUE",
+        "start_period": 9,
+        "end_period": 9,
+        "room_id": "AUD",
+        "reason": "Approved in AUD for club_event"
+      },
+      {
+        "request_id": "BR-14",
+        "status": "approved",
+        "day": "WED",
+        "start_period": 11,
+        "end_period": 12,
+        "room_id": "LH-2",
+        "reason": "Approved in LH-2 for club_event"
+      },
+      {
+        "request_id": "BR-15",
+        "status": "approved",
+        "day": "FRI",
+        "start_period": 10,
+        "end_period": 12,
+        "room_id": "AUD",
+        "reason": "Approved in AUD for club_event"
+      },
+      {
+        "request_id": "BR-17",
+        "status": "rejected",
+        "reason": "No conflict-free venue available in requested windows"
+      }
+    ],
+    "session_overrides": []
+  },
   "exams": [
     {
       "exam_id": "EX-MA101",
@@ -1146,7 +1363,7 @@
       "rooms": [
         "AUD",
         "LH-1",
-        "CR-104"
+        "CR-103"
       ]
     },
     {
@@ -1154,8 +1371,7 @@
       "day": "THU",
       "session": "AM",
       "rooms": [
-        "CR-102",
-        "CR-202"
+        "LH-2"
       ]
     },
     {
@@ -1163,7 +1379,8 @@
       "day": "THU",
       "session": "AM",
       "rooms": [
-        "SH-1"
+        "CR-101",
+        "CR-203"
       ]
     },
     {
@@ -1171,7 +1388,7 @@
       "day": "THU",
       "session": "AM",
       "rooms": [
-        "LH-5"
+        "LH-4"
       ]
     },
     {
@@ -1179,7 +1396,7 @@
       "day": "THU",
       "session": "AM",
       "rooms": [
-        "LH-3"
+        "LH-5"
       ]
     },
     {
@@ -1195,7 +1412,7 @@
       "day": "THU",
       "session": "AM",
       "rooms": [
-        "CR-101",
+        "CR-102",
         "CR-201"
       ]
     },
@@ -1204,7 +1421,7 @@
       "day": "THU",
       "session": "AM",
       "rooms": [
-        "LH-2"
+        "SH-1"
       ]
     },
     {
@@ -1212,7 +1429,7 @@
       "day": "THU",
       "session": "AM",
       "rooms": [
-        "LH-4"
+        "LH-3"
       ]
     },
     {
@@ -1412,12 +1629,9 @@
       "day": "MON",
       "session": "AM",
       "rooms": [
-        "LH-2",
-        "LH-4",
-        "LH-5",
-        "LH-6",
-        "CR-102",
-        "CR-104"
+        "AUD",
+        "LH-3",
+        "SH-2"
       ]
     },
     {
@@ -1425,8 +1639,12 @@
       "day": "MON",
       "session": "AM",
       "rooms": [
-        "AUD",
-        "SH-1"
+        "LH-1",
+        "LH-4",
+        "CR-103",
+        "CR-104",
+        "CR-201",
+        "CR-203"
       ]
     },
     {
@@ -1434,11 +1652,10 @@
       "day": "MON",
       "session": "AM",
       "rooms": [
-        "LH-1",
-        "LH-3",
-        "CR-101",
-        "CR-201",
-        "SH-2"
+        "LH-2",
+        "LH-5",
+        "LH-6",
+        "SH-1"
       ]
     },
     {
@@ -1489,223 +1706,5 @@
         "SH-2"
       ]
     }
-  ],
-  "fest_week": {
-    "bookings": [
-      {
-        "request_id": "BR-01",
-        "status": "alternative_offered",
-        "day": "MON",
-        "start_period": 10,
-        "end_period": 11,
-        "room_id": "AUD",
-        "reason": "Requested slot unavailable; alternative offered in AUD on MON P10-P11"
-      },
-      {
-        "request_id": "BR-11a",
-        "status": "approved",
-        "day": "THU",
-        "start_period": 6,
-        "end_period": 9,
-        "room_id": "OAT",
-        "reason": "Approved in OAT for institute_event"
-      },
-      {
-        "request_id": "BR-11b",
-        "status": "approved",
-        "day": "FRI",
-        "start_period": 6,
-        "end_period": 9,
-        "room_id": "OAT",
-        "reason": "Approved in OAT for institute_event"
-      },
-      {
-        "request_id": "BR-20",
-        "status": "approved",
-        "day": "FRI",
-        "start_period": 4,
-        "end_period": 5,
-        "room_id": "AUD",
-        "reason": "Approved in AUD for institute_event"
-      },
-      {
-        "request_id": "BR-16",
-        "status": "approved",
-        "day": "FRI",
-        "start_period": 10,
-        "end_period": 13,
-        "room_id": "OAT",
-        "reason": "Approved in OAT for institute_event"
-      },
-      {
-        "request_id": "BR-03",
-        "status": "approved",
-        "day": "WED",
-        "start_period": 6,
-        "end_period": 7,
-        "room_id": "AUD",
-        "reason": "Approved in AUD for guest_lecture"
-      },
-      {
-        "request_id": "BR-19",
-        "status": "approved",
-        "day": "MON",
-        "start_period": 9,
-        "end_period": 9,
-        "room_id": "LH-1",
-        "reason": "Approved in LH-1 for guest_lecture"
-      },
-      {
-        "request_id": "BR-08",
-        "status": "approved",
-        "day": "THU",
-        "start_period": 8,
-        "end_period": 8,
-        "room_id": "LH-1",
-        "reason": "Approved in LH-1 for department_event"
-      },
-      {
-        "request_id": "BR-13",
-        "status": "approved",
-        "day": "WED",
-        "start_period": 10,
-        "end_period": 11,
-        "room_id": "LH-1",
-        "reason": "Approved in LH-1 for department_event"
-      },
-      {
-        "request_id": "BR-18",
-        "status": "approved",
-        "day": "THU",
-        "start_period": 7,
-        "end_period": 9,
-        "room_id": "CIVIL-LAB",
-        "reason": "Approved in CIVIL-LAB for department_event"
-      },
-      {
-        "request_id": "BR-02",
-        "status": "approved",
-        "day": "THU",
-        "start_period": 6,
-        "end_period": 11,
-        "room_id": "CS-LAB-1",
-        "reason": "Approved in CS-LAB-1 for club_event"
-      },
-      {
-        "request_id": "BR-06",
-        "status": "approved",
-        "day": "THU",
-        "start_period": 10,
-        "end_period": 11,
-        "room_id": "SH-1",
-        "reason": "Approved in SH-1 for club_event"
-      },
-      {
-        "request_id": "BR-05a",
-        "status": "approved",
-        "day": "MON",
-        "start_period": 11,
-        "end_period": 12,
-        "room_id": "OAT",
-        "reason": "Approved in OAT for club_event"
-      },
-      {
-        "request_id": "BR-05b",
-        "status": "approved",
-        "day": "TUE",
-        "start_period": 11,
-        "end_period": 12,
-        "room_id": "OAT",
-        "reason": "Approved in OAT for club_event"
-      },
-      {
-        "request_id": "BR-05c",
-        "status": "approved",
-        "day": "WED",
-        "start_period": 11,
-        "end_period": 12,
-        "room_id": "OAT",
-        "reason": "Approved in OAT for club_event"
-      },
-      {
-        "request_id": "BR-05d",
-        "status": "approved",
-        "day": "THU",
-        "start_period": 11,
-        "end_period": 12,
-        "room_id": "OAT",
-        "reason": "Approved in OAT for club_event"
-      },
-      {
-        "request_id": "BR-05e",
-        "status": "approved",
-        "day": "FRI",
-        "start_period": 11,
-        "end_period": 12,
-        "room_id": "SH-1",
-        "reason": "Approved in SH-1 for club_event"
-      },
-      {
-        "request_id": "BR-04",
-        "status": "rejected",
-        "reason": "Cancelled by requester"
-      },
-      {
-        "request_id": "BR-07",
-        "status": "approved",
-        "day": "THU",
-        "start_period": 10,
-        "end_period": 12,
-        "room_id": "AUD",
-        "reason": "Approved in AUD for club_event"
-      },
-      {
-        "request_id": "BR-09",
-        "status": "rejected",
-        "reason": "No venue seats 1200 people"
-      },
-      {
-        "request_id": "BR-10",
-        "status": "approved",
-        "day": "FRI",
-        "start_period": 1,
-        "end_period": 9,
-        "room_id": "SH-1",
-        "reason": "Approved in SH-1 for club_event"
-      },
-      {
-        "request_id": "BR-12",
-        "status": "approved",
-        "day": "TUE",
-        "start_period": 9,
-        "end_period": 9,
-        "room_id": "AUD",
-        "reason": "Approved in AUD for club_event"
-      },
-      {
-        "request_id": "BR-14",
-        "status": "approved",
-        "day": "WED",
-        "start_period": 11,
-        "end_period": 12,
-        "room_id": "LH-2",
-        "reason": "Approved in LH-2 for club_event"
-      },
-      {
-        "request_id": "BR-15",
-        "status": "approved",
-        "day": "FRI",
-        "start_period": 10,
-        "end_period": 12,
-        "room_id": "AUD",
-        "reason": "Approved in AUD for club_event"
-      },
-      {
-        "request_id": "BR-17",
-        "status": "rejected",
-        "reason": "No conflict-free venue available in requested windows"
-      }
-    ],
-    "session_overrides": []
-  }
+  ]
 }

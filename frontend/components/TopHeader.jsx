@@ -103,7 +103,9 @@ export default function TopHeader({
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             <span>0 Hard Violations</span>
             <span className="text-emerald-400">•</span>
-            <span>61.0 Booking Score</span>
+            <span>62.0 Booking Score</span>
+            <span className="text-emerald-400">•</span>
+            <span>Optimal 140 Soft Penalty</span>
           </div>
 
           {/* Admin Reset Demo Data Button */}
