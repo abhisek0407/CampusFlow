@@ -1,10 +1,7 @@
 import mongoose from 'mongoose';
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://abhisekpanda366_db_user:CTC123@cluster0.zlny5ec.mongodb.net/orchestrai_db?retryWrites=true&w=majority';
-
-if (!MONGODB_URI) {
-  throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
-}
+const DEFAULT_LOCAL_URI = 'mongodb://127.0.0.1:27017/orchestrai_db';
+const PRIMARY_URI = process.env.MONGODB_URI || DEFAULT_LOCAL_URI;
 
 let cached = global.mongoose;
 
@@ -20,17 +17,29 @@ async function connectToDatabase() {
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
-      serverSelectionTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 3000,
     };
 
-    cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongooseInstance) => {
-      console.log('MongoDB connected successfully to', mongooseInstance.connection.name);
-      return mongooseInstance;
-    }).catch((err) => {
-      console.error('MongoDB connection error:', err.message);
-      cached.promise = null;
-      throw err;
-    });
+    cached.promise = (async () => {
+      try {
+        const instance = await mongoose.connect(PRIMARY_URI, opts);
+        console.log('Connected to MongoDB database:', instance.connection.name);
+        return instance;
+      } catch (primaryErr) {
+        if (PRIMARY_URI !== DEFAULT_LOCAL_URI) {
+          console.warn('Primary MongoDB connection failed. Falling back to local MongoDB:', primaryErr.message);
+          try {
+            const fallbackInstance = await mongoose.connect(DEFAULT_LOCAL_URI, opts);
+            console.log('Connected to fallback local MongoDB database:', fallbackInstance.connection.name);
+            return fallbackInstance;
+          } catch (fallbackErr) {
+            console.error('Local fallback MongoDB also failed:', fallbackErr.message);
+            throw fallbackErr;
+          }
+        }
+        throw primaryErr;
+      }
+    })();
   }
 
   try {

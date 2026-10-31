@@ -1,14 +1,14 @@
-import "./globals.css";
-
 export const metadata = {
-  title: "CampusFlow | CIT Campus Scheduling & Venue Management",
-  description: "Official scheduling and venue platform for Chilika Institute of Technology",
+  title: "CampusFlow API Server | Chilika Institute of Technology",
+  description: "REST API service for campus scheduling and venue management",
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col font-sans bg-gray-50 text-gray-900">{children}</body>
+    <html lang="en">
+      <body style={{ margin: 0, padding: 0, backgroundColor: '#f8fafc', color: '#0f172a' }}>
+        {children}
+      </body>
     </html>
   );
 }

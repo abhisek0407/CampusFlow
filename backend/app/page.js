@@ -1,157 +1,59 @@
-'use client';
-
-import React, { useState, useEffect } from 'react';
-import Navbar from '../components/Navbar';
-import TimetableView from '../components/TimetableView';
-import BookingsView from '../components/BookingsView';
-import AIAssistantView from '../components/AIAssistantView';
-import DisruptionView from '../components/DisruptionView';
-import ExamsView from '../components/ExamsView';
-import ValidatorView from '../components/ValidatorView';
-import { 
-  CheckCircle2, 
-  ExternalLink, 
-  Code2, 
-  Sparkles, 
-  ShieldCheck, 
-  Layers,
-  GraduationCap
-} from 'lucide-react';
-
-const DEFAULT_USER = {
-  id: 'USER_ADMIN',
-  name: "Dean Academic Office (Admin)",
-  email: 'admin@cit.edu',
-  role: 'admin',
-  department: 'ADMIN',
+export const metadata = {
+  title: "CampusFlow API Server | Chilika Institute of Technology",
+  description: "REST API service for campus scheduling and venue management",
 };
 
-export default function Home() {
-  const [activeTab, setActiveTab] = useState('timetable');
-  const [currentUser, setCurrentUser] = useState(DEFAULT_USER);
-  const [isResetting, setIsResetting] = useState(false);
-  const [toastMessage, setToastMessage] = useState(null);
-
-  useEffect(() => {
-    // Check if user session exists in localStorage
-    const saved = localStorage.getItem('cit_user');
-    if (saved) {
-      try {
-        setCurrentUser(JSON.parse(saved));
-      } catch (e) {}
-    }
-  }, []);
-
-  async function handleSwitchUser(user) {
-    setCurrentUser(user);
-    localStorage.setItem('cit_user', JSON.stringify(user));
-    
-    // Auto-login to receive fresh JWT
-    try {
-      const passwords = {
-        'admin@cit.edu': 'Admin@123',
-        'dept.cse@cit.edu': 'Dept@123',
-        'faculty.f01@cit.edu': 'Faculty@123',
-        'club.dramatics@cit.edu': 'Club@123',
-      };
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: user.email, password: passwords[user.email] || 'Admin@123' }),
-      });
-      const data = await res.json();
-      if (data.success && data.token) {
-        localStorage.setItem('cit_token', data.token);
-      }
-    } catch (e) {}
-
-    showToast(`Switched active role to: ${user.name} (${user.role.toUpperCase()})`);
-  }
-
-  async function handleResetData() {
-    if (!confirm("Reset database to clean starter pack state? This restores all 15 collections and baseline schedule.")) {
-      return;
-    }
-    setIsResetting(true);
-    try {
-      const res = await fetch('/api/admin/reset-database', { method: 'POST' });
-      const data = await res.json();
-      if (data.success) {
-        showToast("Database successfully restored to clean starter dataset state!");
-        setTimeout(() => window.location.reload(), 1200);
-      } else {
-        alert(data.error || "Reset failed");
-      }
-    } catch (e) {
-      console.error('Reset error:', e);
-    } finally {
-      setIsResetting(false);
-    }
-  }
-
-  function showToast(msg) {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 4000);
-  }
-
+export default function BackendStatusPage() {
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col font-sans">
-      
-      {/* Institutional Top Navbar */}
-      <Navbar
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        currentUser={currentUser}
-        onSwitchUser={handleSwitchUser}
-        onResetData={handleResetData}
-        isResetting={isResetting}
-      />
+    <div style={{ 
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', 
+      padding: '3rem 2rem', 
+      maxWidth: '850px', 
+      margin: '0 auto',
+      color: '#1e293b'
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+        <div style={{ 
+          width: '12px', 
+          height: '12px', 
+          borderRadius: '50%', 
+          backgroundColor: '#10b981',
+          boxShadow: '0 0 10px #10b981'
+        }}></div>
+        <h1 style={{ fontSize: '1.75rem', fontWeight: 700, margin: 0 }}>CampusFlow Backend REST API Server</h1>
+      </div>
+      <p style={{ color: '#64748b', fontSize: '0.95rem', margin: '0 0 2rem 0' }}>
+        Chilika Institute of Technology (CIT) • High Performance Scheduling Engine & Database Service
+      </p>
 
-      {/* Toast Notification */}
-      {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 p-4 rounded-2xl bg-slate-900 text-white text-xs font-semibold shadow-2xl border border-slate-700 flex items-center space-x-2 animate-in slide-in-from-bottom duration-200">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-          <span>{toastMessage}</span>
-        </div>
-      )}
+      <div style={{ 
+        backgroundColor: '#f8fafc', 
+        border: '1px solid #e2e8f0', 
+        borderRadius: '12px', 
+        padding: '1.5rem',
+        marginBottom: '2rem'
+      }}>
+        <h2 style={{ fontSize: '1rem', fontWeight: 600, margin: '0 0 1rem 0' }}>Core Backend API Endpoints (20 Routes):</h2>
+        <ul style={{ fontSize: '0.875rem', lineHeight: '1.8', color: '#334155', paddingLeft: '1.25rem', margin: 0 }}>
+          <li><code style={{ color: '#4f46e5' }}>GET /api/dataset/summary</code> — Aggregated dataset statistics (27 rooms, 40 faculty, 189 sessions)</li>
+          <li><code style={{ color: '#4f46e5' }}>POST /api/auth/login</code> — Role-based JWT authentication for 4 official roles</li>
+          <li><code style={{ color: '#4f46e5' }}>GET /api/schedule/views</code> — Filter timetable by student group, faculty, or room</li>
+          <li><code style={{ color: '#4f46e5' }}>GET /api/schedule/current</code> — Retrieve active baseline schedule</li>
+          <li><code style={{ color: '#4f46e5' }}>GET /api/bookings</code> — Spectra fest week venue bookings lifecycle</li>
+          <li><code style={{ color: '#4f46e5' }}>POST /api/bookings/decide</code> — Admin/Coordinator approval, rejection, or alternative allocation</li>
+          <li><code style={{ color: '#4f46e5' }}>POST /api/ai/parse-booking</code> — NLP parsing of English & Hinglish requests with conflict check</li>
+          <li><code style={{ color: '#4f46e5' }}>POST /api/ai/faculty-assistant</code> — Faculty change assistant with constraint validation</li>
+          <li><code style={{ color: '#4f46e5' }}>GET /api/ai/explain</code> — Algorithmic decision explainer for bookings and class placements</li>
+          <li><code style={{ color: '#4f46e5' }}>POST /api/disruptions/apply</code> — Minimal-move disruption solver (95.2% stability retention)</li>
+          <li><code style={{ color: '#4f46e5' }}>GET /api/validator/run</code> — Live verification against official <code>validator.py</code></li>
+          <li><code style={{ color: '#4f46e5' }}>GET /api/export/schedule</code> — Download official <code>schedule.json</code> deliverable</li>
+          <li><code style={{ color: '#4f46e5' }}>GET /api/export/schedule-after</code> — Download official <code>schedule_after.json</code> deliverable</li>
+        </ul>
+      </div>
 
-      {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {activeTab === 'timetable' && <TimetableView />}
-        {activeTab === 'bookings' && <BookingsView currentUser={currentUser} />}
-        {activeTab === 'ai-assistant' && <AIAssistantView currentUser={currentUser} />}
-        {activeTab === 'disruptions' && <DisruptionView currentUser={currentUser} />}
-        {activeTab === 'exams' && <ExamsView />}
-        {activeTab === 'validator' && <ValidatorView />}
-      </main>
-
-      {/* Institutional Footer */}
-      <footer className="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-6 mt-12 text-xs text-slate-500 dark:text-slate-400">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center space-x-2">
-            <GraduationCap className="w-5 h-5 text-indigo-600" />
-            <span className="font-bold text-slate-800 dark:text-slate-200">CampusFlow • OrchestrAI</span>
-            <span>— Chilika Institute of Technology Autonomous Scheduling Platform</span>
-          </div>
-
-          <div className="flex items-center space-x-4">
-            <a 
-              href="https://github.com/abhisek0407/CampusFlow"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center space-x-1 hover:text-slate-900 dark:hover:text-white transition font-medium"
-            >
-              <Code2 className="w-4 h-4" />
-              <span>GitHub Repository</span>
-            </a>
-            <span>•</span>
-            <span>Google OR-Tools CP-SAT</span>
-            <span>•</span>
-            <span className="text-emerald-600 font-semibold">0 Hard Violations</span>
-          </div>
-        </div>
-      </footer>
-
+      <p style={{ fontSize: '0.875rem', color: '#94a3b8' }}>
+        Note: The user-facing interactive frontend is hosted separately in the <code>/frontend</code> directory.
+      </p>
     </div>
   );
 }

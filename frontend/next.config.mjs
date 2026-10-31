@@ -1,16 +1,15 @@
 /** @type {import('next').NextConfig} */
+const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000';
+
 const nextConfig = {
-  /* config options here */
-  cacheComponents: true,
-  partialPrefetching: true,
-  reactCompiler: true,
-  turbopack: {
-    rules: {
-      "*.css": {
-        loaders: ["@tailwindcss/turbopack"],
-        as: "*.css",
+  reactStrictMode: false,
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: `${backendUrl}/api/:path*`,
       },
-    },
+    ];
   },
 };
 

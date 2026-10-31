@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import bcrypt from 'bcryptjs';
-import connectToDatabase from './mongodb';
+import connectToDatabase from './mongodb.js';
 import {
   Room,
   Faculty,
@@ -18,7 +18,7 @@ import {
   Disruption,
   ScheduleVersion,
   AuditLog,
-} from '../models';
+} from '../models/index.js';
 
 export async function seedDatabase(options = { resetAll: true }) {
   await connectToDatabase();
