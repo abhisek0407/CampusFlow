@@ -1,6 +1,0 @@
-# API layer only.  The scheduler itself needs requirements.txt (ortools, pandas, numpy).
-fastapi>=0.110
-uvicorn[standard]>=0.29      # [standard] brings the WebSocket support (websockets)
-pydantic>=2.5
-httpx>=0.27                  # used by fastapi.testclient in the integration tests
-python-dotenv>=1.0

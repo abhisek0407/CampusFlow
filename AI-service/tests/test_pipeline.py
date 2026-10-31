@@ -18,8 +18,11 @@ from scheduler.repair import repair_all, solve_repair, forced_moves             
 from scheduler.export_schedule import build_schedule, read_assignments           # noqa: E402
 from scheduler.validate_output import run_validator                              # noqa: E402
 
-DATA = load_dataset(ROOT / "data" / "cit_public.json")
-VALIDATOR = ROOT / "validator.py"
+REPO_ROOT = ROOT.parent
+DATA_PATH = REPO_ROOT / "CrunchWeek_StarterPack" / "data" / "cit_public.json"
+VALIDATOR_PATH = REPO_ROOT / "CrunchWeek_StarterPack" / "validator.py"
+DATA = load_dataset(DATA_PATH)
+VALIDATOR = VALIDATOR_PATH
 TL, WK = 120, 8
 _cache = {}
 
