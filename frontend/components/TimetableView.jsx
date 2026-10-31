@@ -153,28 +153,54 @@ export default function TimetableView() {
             className="text-xs font-medium bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-1.5 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
             {filterType === 'group' && (
-              <>
-                <optgroup label="Year 1 Sections">
-                  <option value="Y1-A">Year 1 - Section A (90 students)</option>
-                  <option value="Y1-B">Year 1 - Section B (90 students)</option>
-                  <option value="Y1-C">Year 1 - Section C (90 students)</option>
-                  <option value="Y1-D">Year 1 - Section D (90 students)</option>
-                </optgroup>
-                <optgroup label="Year 2 Departments">
-                  <option value="Y2-CSE">Year 2 - CSE (70 students)</option>
-                  <option value="Y2-ECE">Year 2 - ECE (70 students)</option>
-                  <option value="Y2-EE">Year 2 - EE (70 students)</option>
-                  <option value="Y2-ME">Year 2 - ME (70 students)</option>
-                  <option value="Y2-CE">Year 2 - CE (70 students)</option>
-                </optgroup>
-                <optgroup label="Year 3 Departments">
-                  <option value="Y3-CSE">Year 3 - CSE (70 students)</option>
-                  <option value="Y3-ECE">Year 3 - ECE (70 students)</option>
-                  <option value="Y3-EE">Year 3 - EE (70 students)</option>
-                  <option value="Y3-ME">Year 3 - ME (70 students)</option>
-                  <option value="Y3-CE">Year 3 - CE (70 students)</option>
-                </optgroup>
-              </>
+              timetableData?.student_groups && timetableData.student_groups.length > 0 ? (
+                <>
+                  <optgroup label="Year 1 Common Sections">
+                    {timetableData.student_groups.filter(g => g.year === 1).map(g => (
+                      <option key={g.id} value={g.id}>
+                        {g.id} — {g.name} ({g.size || 90} students)
+                      </option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="Year 2 Department Cohorts">
+                    {timetableData.student_groups.filter(g => g.year === 2).map(g => (
+                      <option key={g.id} value={g.id}>
+                        {g.id} — {g.name} ({g.size || 60} students)
+                      </option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="Year 3 Department Cohorts">
+                    {timetableData.student_groups.filter(g => g.year === 3).map(g => (
+                      <option key={g.id} value={g.id}>
+                        {g.id} — {g.name} ({g.size || 55} students)
+                      </option>
+                    ))}
+                  </optgroup>
+                </>
+              ) : (
+                <>
+                  <optgroup label="Year 1 Common Sections">
+                    <option value="Y1-A">Y1-A — B.Tech Year 1, Section A (90 students)</option>
+                    <option value="Y1-B">Y1-B — B.Tech Year 1, Section B (90 students)</option>
+                    <option value="Y1-C">Y1-C — B.Tech Year 1, Section C (90 students)</option>
+                    <option value="Y1-D">Y1-D — B.Tech Year 1, Section D (90 students)</option>
+                  </optgroup>
+                  <optgroup label="Year 2 Department Cohorts">
+                    <option value="CSE-2">CSE-2 — CSE Year 2 (80 students)</option>
+                    <option value="ECE-2">ECE-2 — ECE Year 2 (70 students)</option>
+                    <option value="EE-2">EE-2 — EE Year 2 (60 students)</option>
+                    <option value="ME-2">ME-2 — ME Year 2 (60 students)</option>
+                    <option value="CE-2">CE-2 — CE Year 2 (50 students)</option>
+                  </optgroup>
+                  <optgroup label="Year 3 Department Cohorts">
+                    <option value="CSE-3">CSE-3 — CSE Year 3 (75 students)</option>
+                    <option value="ECE-3">ECE-3 — ECE Year 3 (65 students)</option>
+                    <option value="EE-3">EE-3 — EE Year 3 (55 students)</option>
+                    <option value="ME-3">ME-3 — ME Year 3 (55 students)</option>
+                    <option value="CE-3">CE-3 — CE Year 3 (45 students)</option>
+                  </optgroup>
+                </>
+              )
             )}
 
             {filterType === 'faculty' && (timetableData?.faculty_list || []).map((f) => (
@@ -208,7 +234,7 @@ export default function TimetableView() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-            {(timetableData?.room_utilization || []).map((r) => {
+            {(timetableData?.room_utilisation || timetableData?.room_utilization || []).map((r) => {
               const pct = r.utilization_percentage || 0;
               const barColor = pct > 60 ? 'bg-rose-500' : pct > 35 ? 'bg-emerald-500' : 'bg-amber-400';
               return (

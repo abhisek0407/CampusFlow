@@ -24,8 +24,8 @@ export default function FacultyOverviewView({ setActiveTab }) {
     { id: 'CS101-L1', course: 'CS101 (Intro to Programming)', day: 'MON', period: 'P2 (09:00)', room: 'CR-101', groups: 'Y1-A, Y1-B', accessible: true },
     { id: 'CS101-L2', course: 'CS101 (Intro to Programming)', day: 'WED', period: 'P3 (10:00)', room: 'CR-101', groups: 'Y1-A, Y1-B', accessible: true },
     { id: 'CS101-T1', course: 'CS101 Tutorial Section 1', day: 'THU', period: 'P4 (11:00)', room: 'CR-102', groups: 'Y1-A', accessible: true },
-    { id: 'CS302-L1', course: 'CS302 (Database Systems)', day: 'TUE', period: 'P6 (14:00)', room: 'LH-1', groups: 'Y3-CSE', accessible: true },
-    { id: 'CS302-L2', course: 'CS302 (Database Systems)', day: 'FRI', period: 'P2 (09:00)', room: 'LH-1', groups: 'Y3-CSE', accessible: true },
+    { id: 'CS301-L1', course: 'CS301 (Operating Systems)', day: 'TUE', period: 'P6 (14:00)', room: 'LH-1', groups: 'CSE-3', accessible: true },
+    { id: 'CS301-L2', course: 'CS301 (Operating Systems)', day: 'FRI', period: 'P2 (09:00)', room: 'LH-1', groups: 'CSE-3', accessible: true },
   ];
 
   return (

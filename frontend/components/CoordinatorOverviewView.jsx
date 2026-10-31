@@ -90,7 +90,7 @@ export default function CoordinatorOverviewView({ setActiveTab }) {
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm">
           <div className="text-slate-500 text-xs font-semibold uppercase">Student Cohorts</div>
           <div className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-1">6 Cohorts</div>
-          <p className="text-[11px] text-slate-500 mt-0.5">Y1 (A-D), Y2-CSE, Y3-CSE</p>
+          <p className="text-[11px] text-slate-500 mt-0.5">Y1 (A-D), CSE-2, CSE-3</p>
         </div>
       </div>
 
@@ -139,7 +139,7 @@ export default function CoordinatorOverviewView({ setActiveTab }) {
               >
                 <div>
                   <div className="font-semibold text-xs text-slate-800 dark:text-slate-200">Inspect CSE Timetable</div>
-                  <div className="text-[10px] text-slate-500">Filter Y2-CSE and Y3-CSE student schedules</div>
+                  <div className="text-[10px] text-slate-500">Filter CSE-2 and CSE-3 student schedules</div>
                 </div>
                 <ArrowRight className="w-4 h-4 text-slate-600" />
               </button>

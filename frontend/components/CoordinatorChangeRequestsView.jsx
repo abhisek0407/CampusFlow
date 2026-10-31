@@ -24,7 +24,7 @@ export default function CoordinatorChangeRequestsView() {
       id: 'CR-101',
       session_id: 'CS202-T2',
       course: 'CS202 (Data Structures)',
-      request: 'Add extra tutorial section for Y2-CSE',
+      request: 'Add extra tutorial section for CSE-2',
       status: 'Applied (Disruption D-01)',
       date: '2026-10-31'
     }
@@ -38,11 +38,11 @@ export default function CoordinatorChangeRequestsView() {
           // CSE courses
           const cseCourseIds = new Set(d.courses.filter(c => c.department === 'CSE').map(c => c._id));
           setSessions([
-            { id: 'CS101-L1', title: 'Intro to Programming (Lecture 1)', groups: 'Y1-A, Y1-B', faculty: 'F01' },
-            { id: 'CS101-T1', title: 'Intro to Programming (Tutorial 1)', groups: 'Y1-A', faculty: 'F01' },
-            { id: 'CS201-L1', title: 'Data Structures & Algorithms', groups: 'Y2-CSE', faculty: 'F02' },
-            { id: 'CS201-Lab1', title: 'Data Structures Lab (3h)', groups: 'Y2-CSE', faculty: 'F02' },
-            { id: 'CS301-L1', title: 'Operating Systems', groups: 'Y3-CSE', faculty: 'F03' },
+            { id: 'CS101-A-L1', title: 'Intro to Programming (CS101-A-L1)', groups: 'Y1-A', faculty: 'F01' },
+            { id: 'CS101-B-L1', title: 'Intro to Programming (CS101-B-L1)', groups: 'Y1-B', faculty: 'F01' },
+            { id: 'CS201-L1', title: 'Data Structures & Algorithms', groups: 'CSE-2', faculty: 'F02' },
+            { id: 'CS201-Lab1', title: 'Data Structures Lab (3h)', groups: 'CSE-2', faculty: 'F02' },
+            { id: 'CS301-L1', title: 'Operating Systems', groups: 'CSE-3', faculty: 'F01' },
           ]);
         }
       });

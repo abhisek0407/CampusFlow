@@ -55,16 +55,16 @@ export default function DisruptionView({ currentUser }) {
           {
             type: "faculty_unavailable",
             faculty_id: "F07",
-            days: ["MON", "TUE", "WED", "THU", "FRI"],
+            days: ["MON"],
             periods: [1, 2, 3, 4, 5, 6, 7, 8, 9],
-            reason: "Medical emergency leave"
+            reason: "Conference travel every Monday for the rest of the semester"
           },
           {
             type: "room_unavailable",
             room_id: "CR-102",
-            days: ["TUE", "WED"],
+            days: ["MON", "TUE", "WED", "THU", "FRI"],
             periods: [1, 2, 3, 4, 5, 6, 7, 8, 9],
-            reason: "Ceiling water leakage repair"
+            reason: "Water leak, room closed for the rest of the semester"
           },
           {
             type: "add_session",
@@ -72,11 +72,11 @@ export default function DisruptionView({ currentUser }) {
               id: "CS202-T2",
               course_id: "CS202",
               kind: "tutorial",
-              groups: ["Y2-CSE"],
-              faculty_id: "F04",
-              size: 35,
+              groups: ["CSE-2"],
+              faculty_id: "F06",
+              size: 80,
               duration: 1,
-              room_types: ["classroom", "lecture_hall"],
+              room_types: ["classroom", "lecture_hall", "auditorium"],
               needs_accessible: false,
               basket_slot: null,
               fixed_slot: null

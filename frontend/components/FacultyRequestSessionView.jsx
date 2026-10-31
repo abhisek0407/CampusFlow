@@ -124,9 +124,11 @@ export default function FacultyRequestSessionView() {
                   onChange={(e) => setTargetGroup(e.target.value)}
                   className="w-full p-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                 >
-                  <option value="Y1-A">Year 1 - Section A</option>
-                  <option value="Y1-B">Year 1 - Section B</option>
-                  <option value="Y3-CSE">Year 3 - CSE</option>
+                  <option value="Y1-A">Year 1 - Section A (Y1-A)</option>
+                  <option value="Y1-B">Year 1 - Section B (Y1-B)</option>
+                  <option value="CSE-2">Year 2 - CSE (CSE-2)</option>
+                  <option value="CSE-3">Year 3 - CSE (CSE-3)</option>
+                  <option value="ME-3">Year 3 - ME (ME-3)</option>
                 </select>
               </div>
 
