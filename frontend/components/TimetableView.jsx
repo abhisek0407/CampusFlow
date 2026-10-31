@@ -255,7 +255,7 @@ export default function TimetableView() {
                         13:00 - 14:00
                       </td>
                       <td colSpan={5} className="py-2 px-4 text-center text-amber-700 dark:text-amber-300 font-semibold tracking-wider uppercase text-[11px]">
-                        🍽️ Official Institute Lunch Break (Protected by Constraint H7)
+                        🍽️ Official Institute Lunch Break (Protected by Institute Timing Rule H9)
                       </td>
                     </tr>
                   );
