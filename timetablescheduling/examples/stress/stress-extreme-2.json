@@ -1,0 +1,395 @@
+{
+ "id": "stress-extreme-2",
+ "dataset": "cit-public-v1",
+ "description": "generated: level=extreme seed=2",
+ "changes": [
+  {
+   "type": "add_faculty",
+   "faculty": {
+    "id": "FX21",
+    "name": "Visiting Faculty FX21",
+    "department": "ME",
+    "max_hours_per_day": 4,
+    "needs_accessible": false,
+    "unavailable": [],
+    "preferences": []
+   }
+  },
+  {
+   "type": "add_faculty",
+   "faculty": {
+    "id": "FX22",
+    "name": "Visiting Faculty FX22",
+    "department": "EE",
+    "max_hours_per_day": 4,
+    "needs_accessible": false,
+    "unavailable": [],
+    "preferences": []
+   }
+  },
+  {
+   "type": "room_unavailable",
+   "room_id": "LH-2",
+   "days": [
+    "MON"
+   ],
+   "periods": [
+    6,
+    7,
+    8,
+    9
+   ],
+   "reason": "stress: LH-2 closed (afternoon)"
+  },
+  {
+   "type": "room_unavailable",
+   "room_id": "LH-1",
+   "days": [
+    "MON",
+    "TUE"
+   ],
+   "periods": [
+    6,
+    7,
+    8,
+    9
+   ],
+   "reason": "stress: LH-1 closed (afternoon)"
+  },
+  {
+   "type": "add_session",
+   "session": {
+    "id": "CS101-C-L1-N24",
+    "course_id": "CS101",
+    "kind": "lecture",
+    "groups": [
+     "Y1-C"
+    ],
+    "faculty_id": "FX22",
+    "size": 90,
+    "duration": 1,
+    "room_types": [
+     "classroom",
+     "lecture_hall",
+     "auditorium"
+    ],
+    "needs_accessible": false,
+    "basket_slot": null,
+    "fixed_slot": null
+   }
+  },
+  {
+   "type": "room_unavailable",
+   "room_id": "CR-204",
+   "days": [
+    "TUE",
+    "FRI"
+   ],
+   "periods": [
+    6,
+    7,
+    8,
+    9
+   ],
+   "reason": "stress: CR-204 closed (afternoon)"
+  },
+  {
+   "type": "remove_session",
+   "session_id": "CS291-P1"
+  },
+  {
+   "type": "add_session",
+   "session": {
+    "id": "MA101-B-T1-N23",
+    "course_id": "MA101",
+    "kind": "tutorial",
+    "groups": [
+     "Y1-B"
+    ],
+    "faculty_id": "F36",
+    "size": 90,
+    "duration": 1,
+    "room_types": [
+     "classroom",
+     "lecture_hall",
+     "auditorium"
+    ],
+    "needs_accessible": false,
+    "basket_slot": null,
+    "fixed_slot": null
+   }
+  },
+  {
+   "type": "room_unavailable",
+   "room_id": "CS-LAB-2",
+   "days": [
+    "TUE",
+    "THU"
+   ],
+   "periods": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "reason": "stress: CS-LAB-2 closed (morning)"
+  },
+  {
+   "type": "room_unavailable",
+   "room_id": "LH-2",
+   "days": [
+    "MON",
+    "WED",
+    "THU",
+    "FRI"
+   ],
+   "periods": [
+    6,
+    7,
+    8,
+    9
+   ],
+   "reason": "stress: LH-2 closed (afternoon)"
+  },
+  {
+   "type": "add_session",
+   "session": {
+    "id": "PH101-B-L2-N20",
+    "course_id": "PH101",
+    "kind": "lecture",
+    "groups": [
+     "Y1-B"
+    ],
+    "faculty_id": "F30",
+    "size": 90,
+    "duration": 1,
+    "room_types": [
+     "classroom",
+     "lecture_hall",
+     "auditorium"
+    ],
+    "needs_accessible": false,
+    "basket_slot": null,
+    "fixed_slot": null
+   }
+  },
+  {
+   "type": "faculty_unavailable",
+   "faculty_id": "F23",
+   "days": [
+    "MON",
+    "TUE",
+    "FRI"
+   ],
+   "periods": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "reason": "stress: F23 out (full day)"
+  },
+  {
+   "type": "remove_session",
+   "session_id": "EE204-L3"
+  },
+  {
+   "type": "add_session",
+   "session": {
+    "id": "EC302-L1-N21",
+    "course_id": "EC302",
+    "kind": "lecture",
+    "groups": [
+     "ECE-3"
+    ],
+    "faculty_id": "F10",
+    "size": 65,
+    "duration": 1,
+    "room_types": [
+     "classroom",
+     "lecture_hall",
+     "auditorium"
+    ],
+    "needs_accessible": false,
+    "basket_slot": null,
+    "fixed_slot": null
+   }
+  },
+  {
+   "type": "remove_session",
+   "session_id": "CS202-L2"
+  },
+  {
+   "type": "faculty_unavailable",
+   "faculty_id": "F14",
+   "days": [
+    "MON",
+    "FRI"
+   ],
+   "periods": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "reason": "stress: F14 out (morning)"
+  },
+  {
+   "type": "faculty_unavailable",
+   "faculty_id": "F26",
+   "days": [
+    "MON",
+    "WED",
+    "FRI"
+   ],
+   "periods": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "reason": "stress: F26 out (morning)"
+  },
+  {
+   "type": "faculty_unavailable",
+   "faculty_id": "F36",
+   "days": [
+    "MON",
+    "TUE",
+    "WED",
+    "THU",
+    "FRI"
+   ],
+   "periods": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "reason": "stress: F36 on leave all week"
+  },
+  {
+   "type": "add_session",
+   "session": {
+    "id": "EC301-L3-N25",
+    "course_id": "EC301",
+    "kind": "lecture",
+    "groups": [
+     "ECE-3"
+    ],
+    "faculty_id": "FX22",
+    "size": 65,
+    "duration": 1,
+    "room_types": [
+     "classroom",
+     "lecture_hall",
+     "auditorium"
+    ],
+    "needs_accessible": false,
+    "basket_slot": null,
+    "fixed_slot": null
+   }
+  },
+  {
+   "type": "faculty_unavailable",
+   "faculty_id": "F21",
+   "days": [
+    "FRI"
+   ],
+   "periods": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "reason": "stress: F21 out (morning)"
+  },
+  {
+   "type": "add_session",
+   "session": {
+    "id": "CE292-P1-N22",
+    "course_id": "CE292",
+    "kind": "lab",
+    "groups": [
+     "CE-2"
+    ],
+    "faculty_id": "F35",
+    "size": 50,
+    "duration": 3,
+    "room_types": [
+     "lab_civil"
+    ],
+    "needs_accessible": false,
+    "basket_slot": null,
+    "fixed_slot": null
+   }
+  },
+  {
+   "type": "faculty_unavailable",
+   "faculty_id": "F06",
+   "days": [
+    "THU",
+    "FRI"
+   ],
+   "periods": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "reason": "stress: F06 out (full day)"
+  },
+  {
+   "type": "room_unavailable",
+   "room_id": "CR-101",
+   "days": [
+    "MON",
+    "TUE",
+    "THU",
+    "FRI"
+   ],
+   "periods": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "reason": "stress: CR-101 closed (morning)"
+  },
+  {
+   "type": "faculty_unavailable",
+   "faculty_id": "F11",
+   "days": [
+    "TUE"
+   ],
+   "periods": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "reason": "stress: F11 out (morning)"
+  }
+ ]
+}
