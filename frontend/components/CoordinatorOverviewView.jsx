@@ -32,38 +32,39 @@ export default function CoordinatorOverviewView({ setActiveTab }) {
   return (
     <div className="space-y-6">
       
-      {/* Banner */}
-      <div className="bg-gradient-to-r from-amber-950/70 via-slate-900 to-amber-950/70 border border-amber-800/40 rounded-2xl p-6 text-white shadow-xl">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center space-x-2 mb-2">
-              <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-xs font-semibold border border-amber-500/30">
-                Department Coordinator Portal
-              </span>
-              <span className="text-xs text-slate-300 font-medium">Computer Science & Engineering</span>
-            </div>
-            <h1 className="text-2xl font-bold tracking-tight">Prof. Rajesh Sharma — CSE Dept</h1>
-            <p className="text-slate-300 text-xs mt-1 max-w-2xl leading-relaxed">
-              Section 4 Responsibilities: Request changes to CSE department sessions, book rooms for department events, and approve fest/guest bookings requested in CSE computer labs.
-            </p>
+      {/* Clean Unboxed Page Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-1 pb-1">
+        <div>
+          <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-medium">
+            <span>Chilika Institute of Technology</span>
+            <span>•</span>
+            <span className="text-amber-600 dark:text-amber-400 font-semibold">CSE Department</span>
+            <span>•</span>
+            <span className="text-slate-400">Department Coordinator Portal</span>
           </div>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white mt-1">
+            Prof. Rajesh Sharma
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-2xl">
+            Department timetable management, CSE computer lab booking approvals, and session modification requests.
+          </p>
+        </div>
 
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setActiveTab('department-timetable')}
-              className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs transition flex items-center space-x-2 shadow-lg shadow-amber-600/30"
-            >
-              <Calendar className="w-4 h-4" />
-              <span>CSE Timetable</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('department-bookings')}
-              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold text-xs transition flex items-center space-x-2"
-            >
-              <Building2 className="w-4 h-4" />
-              <span>Lab Approvals</span>
-            </button>
-          </div>
+        <div className="flex items-center gap-2.5 shrink-0">
+          <button
+            onClick={() => setActiveTab('department-timetable')}
+            className="px-3.5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-medium text-xs transition flex items-center space-x-2 shadow-xs cursor-pointer"
+          >
+            <Calendar className="w-3.5 h-3.5" />
+            <span>CSE Timetable</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('department-bookings')}
+            className="px-3.5 py-2 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750 font-medium text-xs transition flex items-center space-x-2 cursor-pointer shadow-2xs"
+          >
+            <Building2 className="w-3.5 h-3.5 text-slate-400" />
+            <span>Lab Approvals</span>
+          </button>
         </div>
       </div>
 

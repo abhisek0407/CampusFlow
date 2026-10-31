@@ -31,40 +31,42 @@ export default function FacultyOverviewView({ setActiveTab }) {
   return (
     <div className="space-y-6">
       
-      {/* Banner */}
-      <div className="bg-gradient-to-r from-blue-950/70 via-slate-900 to-indigo-950/70 border border-blue-800/40 rounded-2xl p-6 text-white shadow-xl">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center space-x-2 mb-2">
-              <span className="px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 text-xs font-semibold border border-blue-500/30">
-                Faculty Portal
-              </span>
-              <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-semibold border border-emerald-500/30">
-                Accessibility Needs Met (Ground/Lift)
-              </span>
-            </div>
-            <h1 className="text-2xl font-bold tracking-tight">{facultyName} ({facultyId})</h1>
-            <p className="text-slate-300 text-xs mt-1 max-w-2xl leading-relaxed">
-              Assistant Professor • {department}. Your teaching schedule is fully optimised with 0 overlaps and strictly adheres to the CIT daily 4-hour teaching cap.
-            </p>
+      {/* Clean Unboxed Page Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-1 pb-1">
+        <div>
+          <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-medium">
+            <span>Chilika Institute of Technology</span>
+            <span>•</span>
+            <span className="text-blue-600 dark:text-blue-400 font-semibold">{department}</span>
+            <span>•</span>
+            <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-medium">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span>Ground-Floor Accessible (Rule H10)</span>
+            </span>
           </div>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white mt-1">
+            {facultyName} <span className="text-slate-400 font-normal text-xl">({facultyId})</span>
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-2xl">
+            Assistant Professor • Teaching schedule verified with 0 overlaps and strictly within CIT daily 4-hour cap.
+          </p>
+        </div>
 
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setActiveTab('my-timetable')}
-              className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs transition flex items-center space-x-2 shadow-lg shadow-blue-600/30"
-            >
-              <Calendar className="w-4 h-4" />
-              <span>View My Timetable</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('ai-faculty-assistant')}
-              className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition flex items-center space-x-2 shadow-lg shadow-indigo-600/30"
-            >
-              <Sparkles className="w-4 h-4" />
-              <span>AI Schedule Assistant</span>
-            </button>
-          </div>
+        <div className="flex items-center gap-2.5 shrink-0">
+          <button
+            onClick={() => setActiveTab('my-timetable')}
+            className="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs transition flex items-center space-x-2 shadow-xs cursor-pointer"
+          >
+            <Calendar className="w-3.5 h-3.5" />
+            <span>View My Timetable</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('ai-faculty-assistant')}
+            className="px-3.5 py-2 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750 font-medium text-xs transition flex items-center space-x-2 cursor-pointer shadow-2xs"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
+            <span>AI Schedule Assistant</span>
+          </button>
         </div>
       </div>
 

@@ -73,84 +73,54 @@ export default function TimetableView() {
   return (
     <div className="space-y-6">
       
-      {/* View Header & Filter Bar */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div>
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <CalendarDays className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-              Master Timetable Matrix
-            </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Multi-dimensional timetable viewing by student cohort, teaching faculty, or campus facility.
-            </p>
-          </div>
-
-          {/* Filter Type Pills */}
-          <div className="flex items-center space-x-2">
-            <div className="inline-flex rounded-xl bg-slate-100 dark:bg-slate-800 p-1 border border-slate-200 dark:border-slate-700">
-              <button
-                onClick={() => { setFilterType('group'); setSelectedItem('Y1-A'); }}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-                  filterType === 'group'
-                    ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-white shadow-sm'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-                }`}
-              >
-                <Users className="w-3.5 h-3.5" />
-                <span>Student Group</span>
-              </button>
-
-              <button
-                onClick={() => { setFilterType('faculty'); setSelectedItem('F01'); }}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-                  filterType === 'faculty'
-                    ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-white shadow-sm'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-                }`}
-              >
-                <UserCheck className="w-3.5 h-3.5" />
-                <span>Faculty</span>
-              </button>
-
-              <button
-                onClick={() => { setFilterType('room'); setSelectedItem('LH-1'); }}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-                  filterType === 'room'
-                    ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-white shadow-sm'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-                }`}
-              >
-                <DoorOpen className="w-3.5 h-3.5" />
-                <span>Room / Lab</span>
-              </button>
-            </div>
-
-            {/* Room Utilization Toggle */}
+      {/* Sleek Professional Timetable Toolbar */}
+      <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-wrap items-center justify-between gap-3 transition-colors">
+        
+        {/* Left: Filter Pills + Selector Dropdown */}
+        <div className="flex flex-wrap items-center gap-2.5">
+          <div className="inline-flex rounded-xl bg-slate-100 dark:bg-slate-800/80 p-1 border border-slate-200 dark:border-slate-700/80">
             <button
-              onClick={() => setShowUtilization(!showUtilization)}
-              className={`flex items-center space-x-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition ${
-                showUtilization
-                  ? 'bg-indigo-50 border-indigo-200 text-indigo-700 dark:bg-indigo-950 dark:border-indigo-800 dark:text-indigo-300'
-                  : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50'
+              onClick={() => { setFilterType('group'); setSelectedItem('Y1-A'); }}
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                filterType === 'group'
+                  ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-white shadow-xs'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
-              <BarChart3 className="w-3.5 h-3.5" />
-              <span>Room Utilisation</span>
+              <Users className="w-3.5 h-3.5" />
+              <span>Cohort</span>
+            </button>
+
+            <button
+              onClick={() => { setFilterType('faculty'); setSelectedItem('F01'); }}
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                filterType === 'faculty'
+                  ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-white shadow-xs'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              <UserCheck className="w-3.5 h-3.5" />
+              <span>Faculty</span>
+            </button>
+
+            <button
+              onClick={() => { setFilterType('room'); setSelectedItem('LH-1'); }}
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                filterType === 'room'
+                  ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-white shadow-xs'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              <DoorOpen className="w-3.5 h-3.5" />
+              <span>Venue</span>
             </button>
           </div>
-        </div>
 
-        {/* Dynamic Selector Dropdown */}
-        <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center gap-3">
-          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-            Viewing {filterType === 'group' ? 'Cohort' : filterType === 'faculty' ? 'Professor' : 'Venue'}:
-          </span>
-
+          {/* Selector Dropdown */}
           <select
             value={selectedItem}
             onChange={(e) => setSelectedItem(e.target.value)}
-            className="text-xs font-medium bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-1.5 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="text-xs font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs"
           >
             {filterType === 'group' && (
               timetableData?.student_groups && timetableData.student_groups.length > 0 ? (
@@ -205,37 +175,47 @@ export default function TimetableView() {
 
             {filterType === 'faculty' && (timetableData?.faculty_list || []).map((f) => (
               <option key={f.id} value={f.id}>
-                {f.id} - {f.name} ({f.department})
+                {f.id} — {f.name} ({f.department})
               </option>
             ))}
 
             {filterType === 'room' && (timetableData?.rooms_list || []).map((r) => (
               <option key={r.id} value={r.id}>
-                {r.id} - {r.name} (Cap: {r.capacity}) [{r.type}]
+                {r.id} — {r.name} (Cap: {r.capacity}) [{r.type}]
               </option>
             ))}
           </select>
+        </div>
 
-          <div className="text-xs text-slate-400 ml-auto flex items-center flex-wrap gap-2">
-            <span>
-              Total Sessions Scheduled: <strong className="text-slate-800 dark:text-slate-200">{timetableData?.total_sessions || 0}</strong>
-            </span>
+        {/* Right: Room Utilization + Daily Breakdown */}
+        <div className="flex items-center flex-wrap gap-2.5">
+          <button
+            onClick={() => setShowUtilization(!showUtilization)}
+            className={`flex items-center space-x-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition ${
+              showUtilization
+                ? 'bg-indigo-50 border-indigo-200 text-indigo-700 dark:bg-indigo-950 dark:border-indigo-800 dark:text-indigo-300'
+                : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/60'
+            }`}
+          >
+            <BarChart3 className="w-3.5 h-3.5 text-indigo-500" />
+            <span>Room Utilisation</span>
+          </button>
+
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 text-[11px] font-semibold text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+            <span>Sessions: <strong className="text-slate-900 dark:text-white">{timetableData?.total_sessions || 0}</strong></span>
             {timetableData?.sessions && timetableData.sessions.length > 0 && (
-              <span className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[11px] font-semibold text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                <span className="text-indigo-600 dark:text-indigo-400">Daily Load:</span>
+              <span className="hidden md:inline-flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
+                <span>•</span>
                 <span>MON: {timetableData.sessions.filter(s => s.day === 'MON').length}</span>
-                <span>•</span>
                 <span>TUE: {timetableData.sessions.filter(s => s.day === 'TUE').length}</span>
-                <span>•</span>
                 <span>WED: {timetableData.sessions.filter(s => s.day === 'WED').length}</span>
-                <span>•</span>
                 <span>THU: {timetableData.sessions.filter(s => s.day === 'THU').length}</span>
-                <span>•</span>
-                <span className="text-emerald-600 dark:text-emerald-400 font-bold">FRI: {timetableData.sessions.filter(s => s.day === 'FRI').length} (Afternoon P6–P8)</span>
+                <span className="text-emerald-600 dark:text-emerald-400 font-bold">FRI: {timetableData.sessions.filter(s => s.day === 'FRI').length}</span>
               </span>
             )}
           </div>
         </div>
+
       </div>
 
       {/* Room Utilisation Heatmap Drawer */}
