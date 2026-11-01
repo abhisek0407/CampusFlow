@@ -23,6 +23,13 @@ export async function POST(request) {
       return NextResponse.json({ success: false, error: `Disruption '${disruption_id}' not found` }, { status: 404 });
     }
 
+    if (disruption.status === 'approved') {
+      return NextResponse.json({
+        success: false,
+        error: 'Disruption has already been approved.',
+      }, { status: 409 });
+    }
+
     if (disruption.status !== 'analyzed') {
       return NextResponse.json({
         success: false,
