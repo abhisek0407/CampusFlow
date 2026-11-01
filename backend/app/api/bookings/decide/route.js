@@ -5,16 +5,15 @@ import { BookingRequest, AuditLog } from '../../../../models';
 export async function POST(request) {
   try {
     await connectToDatabase();
-    const {
-      request_id,
-      status, // 'approved', 'rejected', 'alternative_offered'
-      assigned_room,
-      assigned_day,
-      assigned_start_period,
-      assigned_end_period,
-      decision_reason,
-      reviewer_name = 'Admin Officer',
-    } = await request.json();
+    const body = await request.json();
+    const request_id = body.request_id;
+    const status = body.status || (body.decision === 'alternative' ? 'alternative_offered' : (body.decision === 'approve' ? 'approved' : (body.decision === 'reject' ? 'rejected' : body.decision)));
+    const assigned_room = body.assigned_room || body.room_id;
+    const assigned_day = body.assigned_day || body.day;
+    const assigned_start_period = body.assigned_start_period || body.start_period;
+    const assigned_end_period = body.assigned_end_period || body.end_period;
+    const decision_reason = body.decision_reason || body.reason;
+    const reviewer_name = body.reviewer_name || 'Admin Officer';
 
     if (!request_id || !status) {
       return NextResponse.json({ error: 'request_id and status are required' }, { status: 400 });

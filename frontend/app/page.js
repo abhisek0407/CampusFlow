@@ -180,11 +180,11 @@ export default function Home() {
         case 'exams':
           return <ExamsView />;
         case 'bookings':
-          return <BookingsView />;
+          return <BookingsView currentUser={currentUser} />;
         case 'disruptions':
-          return <DisruptionView />;
+          return <DisruptionView currentUser={currentUser} />;
         case 'ai-assistant':
-          return <AIAssistantView />;
+          return <AIAssistantView currentUser={currentUser} />;
         case 'rooms':
           return <RoomManagementView />;
         case 'analytics':
