@@ -47,7 +47,25 @@ export default function LandingPage({
 
   // Contact Form State
   const [contactForm, setContactForm] = useState({ name: '', email: '', message: '' });
-  const [contactSubmitted, setContactSubmitted] = useState(false);
+  const [contactLoading, setContactLoading] = useState(false);
+  const [contactResult, setContactResult] = useState(null); // { success, message, emailSent, emailReason, inquiryId, error }
+
+  // Smooth scroll handler with offset for sticky navbar
+  function scrollToSection(e, targetId) {
+    if (e && e.preventDefault) e.preventDefault();
+    setMobileMenuOpen(false);
+    const target = document.getElementById(targetId);
+    if (target) {
+      const navOffset = 76;
+      const elementPosition = target.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - navOffset;
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+      window.history.pushState(null, '', `#${targetId}`);
+    }
+  }
 
   // Demo user presets for quick 1-click test inside locked modal
   const DEMO_PRESETS = [
@@ -120,14 +138,42 @@ export default function LandingPage({
     }
   }
 
-  function handleContactSubmit(e) {
+  async function handleContactSubmit(e) {
     e.preventDefault();
-    if (!contactForm.name || !contactForm.email) return;
-    setContactSubmitted(true);
-    setTimeout(() => {
-      setContactSubmitted(false);
-      setContactForm({ name: '', email: '', message: '' });
-    }, 4000);
+    if (!contactForm.name || !contactForm.email || !contactForm.message) return;
+    setContactLoading(true);
+    setContactResult(null);
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(contactForm),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setContactResult({
+          success: true,
+          emailSent: Boolean(data.emailSent),
+          emailReason: data.emailReason,
+          message: data.message || "Your inquiry has been successfully logged with the Dean's Academic Scheduling Office.",
+          inquiryId: data.inquiryId,
+        });
+        setContactForm({ name: '', email: '', message: '' });
+      } else {
+        setContactResult({
+          success: false,
+          error: data.error || 'Failed to transmit inquiry. Please try again.',
+        });
+      }
+    } catch (err) {
+      setContactResult({
+        success: false,
+        error: 'Network connection error. Please ensure the backend server is running.',
+      });
+    } finally {
+      setContactLoading(false);
+    }
   }
 
   return (
@@ -140,7 +186,11 @@ export default function LandingPage({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           
           {/* Brand Identity */}
-          <a href="#hero" className="flex items-center space-x-2.5 group cursor-pointer">
+          <a
+            href="#hero"
+            onClick={(e) => scrollToSection(e, 'hero')}
+            className="flex items-center space-x-2.5 group cursor-pointer"
+          >
             <img
               src="/logo.png"
               alt="CIT CampusFlow Logo"
@@ -160,7 +210,8 @@ export default function LandingPage({
           <nav className="hidden md:flex items-center space-x-1 lg:space-x-2 text-xs font-semibold">
             <a
               href="#hero"
-              className="px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 transition"
+              onClick={(e) => scrollToSection(e, 'hero')}
+              className="px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 transition cursor-pointer"
             >
               Home
             </a>
@@ -193,21 +244,24 @@ export default function LandingPage({
 
             <a
               href="#features"
-              className="px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 transition"
+              onClick={(e) => scrollToSection(e, 'features')}
+              className="px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 transition cursor-pointer"
             >
               Features
             </a>
 
             <a
               href="#faq"
-              className="px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 transition"
+              onClick={(e) => scrollToSection(e, 'faq')}
+              className="px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 transition cursor-pointer"
             >
               FAQ
             </a>
 
             <a
               href="#contact"
-              className="px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 transition"
+              onClick={(e) => scrollToSection(e, 'contact')}
+              className="px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 transition cursor-pointer"
             >
               Contact
             </a>
@@ -273,8 +327,8 @@ export default function LandingPage({
           <div className="md:hidden border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 space-y-2.5 animate-slide-up">
             <a
               href="#hero"
-              onClick={() => setMobileMenuOpen(false)}
-              className="block px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+              onClick={(e) => scrollToSection(e, 'hero')}
+              className="block px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
             >
               Home
             </a>
@@ -295,22 +349,22 @@ export default function LandingPage({
             </button>
             <a
               href="#features"
-              onClick={() => setMobileMenuOpen(false)}
-              className="block px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+              onClick={(e) => scrollToSection(e, 'features')}
+              className="block px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
             >
               Features
             </a>
             <a
               href="#faq"
-              onClick={() => setMobileMenuOpen(false)}
-              className="block px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+              onClick={(e) => scrollToSection(e, 'faq')}
+              className="block px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
             >
               FAQ
             </a>
             <a
               href="#contact"
-              onClick={() => setMobileMenuOpen(false)}
-              className="block px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+              onClick={(e) => scrollToSection(e, 'contact')}
+              className="block px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
             >
               Contact
             </a>
@@ -356,7 +410,7 @@ export default function LandingPage({
       {/* ========================================================================= */}
       {/* 2. HERO SECTION WITH CAMPUS.JPG & FLOATING ANIMATED BADGES                */}
       {/* ========================================================================= */}
-      <section id="hero" className="relative pt-8 sm:pt-14 pb-16 lg:pb-24 overflow-hidden">
+      <section id="hero" className="scroll-mt-20 sm:scroll-mt-24 relative pt-8 sm:pt-14 pb-16 lg:pb-24 overflow-hidden">
         
         {/* Subtle Decorative Ambient Glow */}
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-blue-500/10 dark:bg-blue-600/15 rounded-full blur-3xl pointer-events-none -z-10" />
@@ -398,13 +452,14 @@ export default function LandingPage({
                 )}
               </button>
 
-              <a
-                href="#features"
+              <button
+                type="button"
+                onClick={(e) => scrollToSection(e, 'features')}
                 className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-850 active:scale-95 text-slate-800 dark:text-slate-200 text-sm font-semibold transition cursor-pointer flex items-center justify-center space-x-1.5"
               >
                 <span>Explore Features &amp; Architecture</span>
                 <ChevronDown className="w-4 h-4 text-slate-400" />
-              </a>
+              </button>
             </div>
           </div>
 
@@ -512,7 +567,7 @@ export default function LandingPage({
       {/* ========================================================================= */}
       {/* 4. FOUR CORE FEATURES SECTION (#features)                                 */}
       {/* ========================================================================= */}
-      <section id="features" className="py-16 sm:py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+      <section id="features" className="scroll-mt-20 sm:scroll-mt-24 py-16 sm:py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         
         <div className="text-center max-w-2xl mx-auto space-y-2">
           <span className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
@@ -683,7 +738,7 @@ export default function LandingPage({
       {/* ========================================================================= */}
       {/* 6. FAQ SECTION (#faq)                                                     */}
       {/* ========================================================================= */}
-      <section id="faq" className="py-16 sm:py-24 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+      <section id="faq" className="scroll-mt-20 sm:scroll-mt-24 py-16 sm:py-24 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         
         <div className="text-center space-y-2">
           <span className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
@@ -737,7 +792,7 @@ export default function LandingPage({
       {/* ========================================================================= */}
       {/* 7. CONTACT & DEAN'S OFFICE SECTION (#contact)                             */}
       {/* ========================================================================= */}
-      <section id="contact" className="py-16 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+      <section id="contact" className="scroll-mt-20 sm:scroll-mt-24 py-16 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
@@ -772,57 +827,132 @@ export default function LandingPage({
 
             {/* Quick Contact / Feedback Form */}
             <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200/90 dark:border-slate-700 rounded-3xl p-6 sm:p-8 space-y-4">
-              <h3 className="font-bold text-base text-slate-900 dark:text-white">
-                Submit Academic Scheduling Inquiry
-              </h3>
-              
-              {contactSubmitted ? (
-                <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 text-xs font-medium flex items-center space-x-2 animate-fade-in">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Your message has been received by the Dean's Academic Scheduling Office.</span>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-bold text-base text-slate-900 dark:text-white">
+                    Send Message to Host
+                  </h3>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    Transmits directly to host email configured in backend (.env)
+                  </p>
                 </div>
-              ) : (
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 font-semibold shrink-0">
+                  Host Desk
+                </span>
+              </div>
+
+              {/* Status Banner when result exists */}
+              {contactResult && (
+                <div
+                  className={`p-4 rounded-2xl border text-xs space-y-2 animate-fade-in ${
+                    contactResult.success
+                      ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200'
+                      : 'bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800 text-rose-900 dark:text-rose-200'
+                  }`}
+                >
+                  <div className="flex items-start space-x-2.5">
+                    {contactResult.success ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                    ) : (
+                      <AlertTriangle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
+                    )}
+                    <div className="space-y-1">
+                      <p className="font-semibold">{contactResult.message || contactResult.error}</p>
+                      {contactResult.inquiryId && (
+                        <p className="text-[10px] font-mono opacity-80">
+                          Tracking Reference: <strong>{contactResult.inquiryId}</strong>
+                        </p>
+                      )}
+                      {contactResult.success && (
+                        <div className="text-[11px] pt-1">
+                          {contactResult.emailSent ? (
+                            <span className="inline-flex items-center text-emerald-700 dark:text-emerald-300 font-medium">
+                              ✓ Dispatched directly to the host ({contactResult.hostEmail}) and an acknowledgement sent to your inbox.
+                            </span>
+                          ) : (
+                            <span className="text-slate-600 dark:text-slate-300">
+                              ℹ️ Message recorded in registry for the host ({contactResult.hostEmail}).
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setContactResult(null)}
+                    className="text-[11px] font-bold underline hover:opacity-80 pt-1 cursor-pointer"
+                  >
+                    Send another inquiry
+                  </button>
+                </div>
+              )}
+
+              {/* Form displayed when no success banner is active */}
+              {(!contactResult || !contactResult.success) && (
                 <form onSubmit={handleContactSubmit} className="space-y-3 text-xs">
                   <div>
-                    <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Your Name</label>
+                    <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                      User Name <span className="text-rose-500">*</span>
+                    </label>
                     <input
                       type="text"
                       required
-                      placeholder="e.g. Prof. Rajesh Sharma / Student Lead"
+                      placeholder="Enter your name"
                       value={contactForm.name}
                       onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
-                      className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-blue-600"
+                      disabled={contactLoading}
+                      className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-blue-600 transition disabled:opacity-50"
                     />
                   </div>
                   <div>
-                    <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Official Email</label>
+                    <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                      User Email ID <span className="text-rose-500">*</span>
+                    </label>
                     <input
                       type="email"
                       required
-                      placeholder="name@cit.edu"
+                      placeholder="yourname@gmail.com / name@cit.edu"
                       value={contactForm.email}
                       onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
-                      className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-blue-600"
+                      disabled={contactLoading}
+                      className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-blue-600 transition disabled:opacity-50"
                     />
                   </div>
                   <div>
-                    <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Inquiry / Note</label>
+                    <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                      Message for Host <span className="text-rose-500">*</span>
+                    </label>
                     <textarea
-                      rows={2}
+                      rows={3}
                       required
-                      placeholder="Describe your timetable clash or venue query..."
+                      placeholder="Write the message you want to send to the host..."
                       value={contactForm.message}
                       onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
-                      className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-blue-600"
+                      disabled={contactLoading}
+                      className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-blue-600 transition disabled:opacity-50"
                     />
                   </div>
                   <button
                     type="submit"
-                    className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 font-bold transition flex items-center justify-center space-x-1.5 cursor-pointer shadow-xs"
+                    disabled={contactLoading}
+                    className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:bg-blue-400 text-white font-bold transition flex items-center justify-center space-x-2 cursor-pointer shadow-sm active:scale-98"
                   >
-                    <span>Transmit to Academic Office</span>
-                    <Send className="w-3.5 h-3.5" />
+                    {contactLoading ? (
+                      <>
+                        <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                        <span>Sending message to Host...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Send Message to Host</span>
+                        <Send className="w-3.5 h-3.5" />
+                      </>
+                    )}
                   </button>
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500 text-center">
+                    Message is transmitted directly to the host email specified in the backend environment.
+                  </p>
                 </form>
               )}
             </div>
