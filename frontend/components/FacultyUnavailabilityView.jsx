@@ -60,15 +60,17 @@ export default function FacultyUnavailabilityView() {
   return (
     <div className="space-y-6">
       
-      {/* Header */}
-      <div className="pb-4 border-b border-slate-200 dark:border-slate-800">
-        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 flex items-center space-x-2">
-          <Clock className="w-5 h-5 text-indigo-600" />
-          <span>Mark Faculty Unavailability & Leave (Constraint H7)</span>
-        </h2>
-        <p className="text-xs text-slate-500 mt-0.5">
-          Declare periods when you cannot teach. The CP-SAT solver strictly prohibits allocating classes to unavailable slots.
-        </p>
+      {/* Header (Unboxed, Consistent text-2xl) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
+            <Clock className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+            <span>Mark Faculty Unavailability & Leave (Constraint H7)</span>
+          </h1>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Declare periods when you cannot teach. The CP-SAT solver strictly prohibits allocating classes to unavailable slots.
+          </p>
+        </div>
       </div>
 
       {success && (

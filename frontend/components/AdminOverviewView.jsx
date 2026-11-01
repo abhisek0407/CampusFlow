@@ -132,7 +132,7 @@ export default function AdminOverviewView({ setActiveTab, onResetData, isResetti
       {/* Header */}
       <div className="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Dashboard</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Dashboard</h1>
           <p className="text-xs text-slate-500 dark:text-slate-400">
             Chilika Institute of Technology, Autumn 2026-27
           </p>

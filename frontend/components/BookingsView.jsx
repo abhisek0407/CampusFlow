@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Building2, 
   Search, 
@@ -13,14 +13,83 @@ import {
   Plus, 
   Ban, 
   Sparkles,
-  ArrowRight
+  ArrowRight,
+  ChevronLeft,
+  ChevronRight,
+  MapPin,
+  Users,
+  Timer,
+  X
 } from 'lucide-react';
 
+// ── Toast System ────────────────────────────────────────────────
+function Toast({ toast, onDismiss }) {
+  const styles = {
+    success: {
+      bg: 'bg-emerald-950/95 border-emerald-500 text-emerald-100 shadow-emerald-900/30',
+      icon: <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />,
+      titleColor: 'text-emerald-300',
+    },
+    error: {
+      bg: 'bg-rose-950/95 border-rose-500 text-rose-100 shadow-rose-900/30',
+      icon: <XCircle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />,
+      titleColor: 'text-rose-300',
+    },
+    warning: {
+      bg: 'bg-amber-950/95 border-amber-500 text-amber-100 shadow-amber-900/30',
+      icon: <AlertCircle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />,
+      titleColor: 'text-amber-300',
+    },
+    info: {
+      bg: 'bg-indigo-950/95 border-indigo-500 text-indigo-100 shadow-indigo-900/30',
+      icon: <Sparkles className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />,
+      titleColor: 'text-indigo-300',
+    },
+  };
+  const current = styles[toast.type] || styles.info;
+
+  return (
+    <div className={`p-3.5 rounded-xl border backdrop-blur-md shadow-2xl flex items-start gap-3 transition-all duration-300 pointer-events-auto animate-in slide-in-from-top-3 ${current.bg}`}>
+      {current.icon}
+      <div className="flex-1 min-w-0">
+        {toast.title && (
+          <div className={`text-xs font-bold flex items-center gap-1.5 mb-0.5 ${current.titleColor}`}>
+            <span>{toast.title}</span>
+          </div>
+        )}
+        <p className="text-[11px] leading-snug opacity-95 break-words text-slate-100">
+          {toast.message}
+        </p>
+      </div>
+      <button
+        onClick={() => onDismiss(toast.id)}
+        className="opacity-60 hover:opacity-100 text-white p-0.5 rounded transition shrink-0"
+        title="Dismiss"
+      >
+        <X className="w-4 h-4" />
+      </button>
+    </div>
+  );
+}
+
+function ToastContainer({ toasts, onDismiss }) {
+  if (toasts.length === 0) return null;
+  return (
+    <div className="fixed top-5 right-6 z-[9999] flex flex-col gap-2.5 max-w-md w-full pointer-events-none">
+      {toasts.map(t => (
+        <div key={t.id} className="pointer-events-auto">
+          <Toast toast={t} onDismiss={onDismiss} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 const CATEGORY_WEIGHTS = {
-  institute_event: { label: 'Institute Event', weight: 5, color: 'bg-rose-100 text-rose-800 border-rose-200' },
-  guest_lecture: { label: 'Guest Lecture', weight: 4, color: 'bg-blue-100 text-blue-800 border-blue-200' },
-  department_event: { label: 'Dept Event', weight: 3, color: 'bg-amber-100 text-amber-800 border-amber-200' },
-  club_event: { label: 'Club Event', weight: 2, color: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
+  institute_event: { label: 'Institute Event', weight: 5, color: 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800', dot: 'bg-rose-500' },
+  guest_lecture: { label: 'Guest Lecture', weight: 4, color: 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-800', dot: 'bg-blue-500' },
+  department_event: { label: 'Dept Event', weight: 3, color: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800', dot: 'bg-amber-500' },
+  club_event: { label: 'Club Event', weight: 2, color: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800', dot: 'bg-emerald-500' },
 };
 
 const STATUS_BADGES = {
@@ -37,12 +106,17 @@ export default function BookingsView({ currentUser }) {
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [selectedStatus, setSelectedStatus] = useState('ALL');
-  const [actionModal, setActionModal] = useState(null); // { booking, type: 'approve'|'reject'|'alternative' }
+  const [actionModal, setActionModal] = useState(null);
   const [decisionReason, setDecisionReason] = useState('');
   const [altRoom, setAltRoom] = useState('AUD');
   const [altDay, setAltDay] = useState('MON');
   const [altStart, setAltStart] = useState(10);
   const [showManualModal, setShowManualModal] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const CARDS_PER_PAGE = 8;
+  const [toasts, setToasts] = useState([]);
+  const [decidedIds, setDecidedIds] = useState(new Set());
+  const [confirmModal, setConfirmModal] = useState(null);
   const [manualForm, setManualForm] = useState({
     title: '',
     requester: '',
@@ -56,6 +130,18 @@ export default function BookingsView({ currentUser }) {
     from_period: 10,
     to_period: 11,
   });
+
+  // Toast helpers with title and message
+  const addToast = useCallback((type, titleOrMessage, optionalMessage) => {
+    const id = Date.now() + Math.random();
+    const title = optionalMessage !== undefined ? titleOrMessage : (type === 'success' ? 'Action Completed' : type === 'error' ? 'Action Failed' : 'Notice');
+    const message = optionalMessage !== undefined ? optionalMessage : titleOrMessage;
+    setToasts(prev => [...prev, { id, type, title, message }]);
+    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 5000);
+  }, []);
+  const dismissToast = useCallback((id) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  }, []);
 
   useEffect(() => {
     fetchBookings();
@@ -78,15 +164,28 @@ export default function BookingsView({ currentUser }) {
 
   async function handleDecisionSubmit() {
     if (!actionModal) return;
+    const statusMap = { approve: 'approved', reject: 'rejected', alternative: 'alternative_offered' };
+    const booking = actionModal.booking;
+    const bId = booking._id;
+    const bTitle = booking.title;
+    const bRequester = booking.requester;
+    const bRole = booking.role;
+    const bType = actionModal.type;
+
     try {
+      const assignedRoom = bType === 'alternative' ? altRoom : booking.assigned_room || booking.requested_room || 'Main AUD';
+      const assignedDay = bType === 'alternative' ? altDay : booking.assigned_day || 'MON';
+      const assignedStart = bType === 'alternative' ? Number(altStart) : booking.assigned_start_period || 10;
+      const assignedEnd = bType === 'alternative' ? Number(altStart) + booking.duration_periods - 1 : (booking.assigned_end_period || 11);
+
       const payload = {
-        request_id: actionModal.booking._id,
-        decision: actionModal.type,
-        reason: decisionReason || `${actionModal.type.toUpperCase()} by ${currentUser?.name}`,
-        day: actionModal.type === 'alternative' ? altDay : actionModal.booking.assigned_day || 'MON',
-        start_period: actionModal.type === 'alternative' ? Number(altStart) : actionModal.booking.assigned_start_period || 10,
-        end_period: actionModal.type === 'alternative' ? Number(altStart) + actionModal.booking.duration_periods - 1 : 11,
-        room_id: actionModal.type === 'alternative' ? altRoom : actionModal.booking.assigned_room || 'AUD',
+        request_id: bId,
+        status: statusMap[bType] || bType,
+        decision_reason: decisionReason || `${bType.toUpperCase()} by ${currentUser?.name || 'Dean Academic Office'}`,
+        assigned_day: assignedDay,
+        assigned_start_period: assignedStart,
+        assigned_end_period: assignedEnd,
+        assigned_room: assignedRoom,
       };
 
       const res = await fetch('/api/bookings/decide', {
@@ -96,18 +195,46 @@ export default function BookingsView({ currentUser }) {
       });
       const data = await res.json();
       if (data.success) {
+        // Immediately disappear the card from the view
+        setDecidedIds(prev => new Set([...prev, bId]));
+        setBookings(prev => prev.filter(b => b._id !== bId));
+
         setActionModal(null);
         setDecisionReason('');
+
+        // Rich toast message indicating exactly where it was allocated / sent
+        if (bType === 'approve') {
+          addToast(
+            'success',
+            `Approved & Dispatched (${bId})`,
+            `Successfully approved "${bTitle}"! Allocated to ${assignedRoom} on ${assignedDay} (P${assignedStart}–P${assignedEnd}). Notification sent to ${bRequester} (${bRole}).`
+          );
+        } else if (bType === 'alternative') {
+          addToast(
+            'warning',
+            `Alternative Offered (${bId})`,
+            `Offered alternative for "${bTitle}": Reallocated to ${assignedRoom} on ${assignedDay} (P${assignedStart}–P${assignedEnd}). Sent to ${bRequester}.`
+          );
+        } else {
+          addToast(
+            'error',
+            `Booking Rejected (${bId})`,
+            `Request "${bTitle}" rejected. Official rejection notice dispatched to ${bRequester}.`
+          );
+        }
+
         fetchBookings();
       } else {
-        alert(data.error || 'Decision failed');
+        addToast('error', 'Decision Failed', data.error || 'Failed to submit decision');
       }
     } catch (e) {
       console.error('Decision error:', e);
+      addToast('error', 'Network Error', 'Could not submit decision. Check server status.');
     }
   }
 
   async function handleCancelBooking(requestId) {
+    const targetBooking = bookings.find(b => b._id === requestId);
     if (!confirm(`Are you sure you want to cancel ${requestId}? (Rule B3 enforces that cancelled bookings cannot be approved)`)) return;
     try {
       const res = await fetch('/api/bookings/cancel', {
@@ -117,10 +244,20 @@ export default function BookingsView({ currentUser }) {
       });
       const data = await res.json();
       if (data.success) {
+        setDecidedIds(prev => new Set([...prev, requestId]));
+        setBookings(prev => prev.filter(b => b._id !== requestId));
+        addToast(
+          'info',
+          `Booking Withdrawn (${requestId})`,
+          `Booking "${targetBooking?.title || requestId}" withdrawn by ${targetBooking?.requester || 'Requester'}. Archived under Rule B3.`
+        );
         fetchBookings();
+      } else {
+        addToast('error', 'Cancel Failed', data.error || 'Failed to cancel booking');
       }
     } catch (e) {
       console.error('Cancel error:', e);
+      addToast('error', 'Network Error', 'Failed to cancel booking.');
     }
   }
 
@@ -146,17 +283,23 @@ export default function BookingsView({ currentUser }) {
       });
       const data = await res.json();
       if (data.success) {
+        addToast('success', `Venue request "${manualForm.title}" submitted successfully!`);
         setShowManualModal(false);
         fetchBookings();
       } else {
-        alert(data.error || 'Failed to submit booking');
+        addToast('error', data.error || 'Failed to submit booking');
       }
     } catch (e) {
       console.error('Submit error:', e);
+      addToast('error', 'Network error while submitting booking');
     }
   }
 
   const filteredBookings = bookings.filter((b) => {
+    // In pending review mode, hide cards that were decided in this session
+    if (selectedStatus === 'pending' && decidedIds.has(b._id)) {
+      return false;
+    }
     const matchesSearch = b.title?.toLowerCase().includes(search.toLowerCase()) || 
                           b._id?.toLowerCase().includes(search.toLowerCase()) ||
                           b.requester?.toLowerCase().includes(search.toLowerCase());
@@ -165,77 +308,88 @@ export default function BookingsView({ currentUser }) {
     return matchesSearch && matchesCat && matchesStatus;
   });
 
+  // Pagination logic
+  const totalPages = Math.max(1, Math.ceil(filteredBookings.length / CARDS_PER_PAGE));
+  const safePage = Math.min(currentPage, totalPages);
+  const paginatedBookings = filteredBookings.slice(
+    (safePage - 1) * CARDS_PER_PAGE,
+    safePage * CARDS_PER_PAGE
+  );
+
+  // Reset page when filters change
+  useEffect(() => { setCurrentPage(1); }, [search, selectedCategory, selectedStatus]);
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-2.5">
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
       
-      {/* Unified Professional Header & Action Bar */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-xs space-y-3.5 transition-colors">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-              <span>Spectra Fest Venue Management</span>
-            </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              25 Fest Venue Requests • 67.0 Benchmark Score (Ceiling) • Priority Compliant (Admin &gt; Faculty &gt; Coord &gt; Club)
-            </p>
-          </div>
-
-          <button
-            onClick={() => setShowManualModal(true)}
-            className="flex items-center space-x-2 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm shadow-indigo-500/20 transition self-start sm:self-auto"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Submit Venue Request</span>
-          </button>
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div>
+          <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+            <Building2 className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+            <span>Spectra Fest Venue Management</span>
+          </h1>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+            25 Fest Venue Requests • 67.0 Benchmark Score (Ceiling) • Priority Compliant (Admin &gt; Faculty &gt; Coord &gt; Club)
+          </p>
         </div>
+        <button
+          onClick={() => setShowManualModal(true)}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-xs transition self-start sm:self-auto"
+        >
+          <Plus className="w-3.5 h-3.5" />
+          <span>Submit Request</span>
+        </button>
+      </div>
 
-        {/* Filter and Search Row */}
-        <div className="flex flex-wrap items-center gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
-          <div className="relative flex-1 min-w-[200px]">
-            <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
+      {/* Filter Bar */}
+      <div className="bg-white dark:bg-[#111625] rounded-xl p-2 border border-slate-200/90 dark:border-slate-800/80 shadow-xs">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+          <div className="relative flex-1">
+            <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
-              placeholder="Search by title, ID (BR-01), or requester..."
+              placeholder="Search title, ID, or requester..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full text-xs pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full text-xs pl-8 pr-3 py-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
             />
           </div>
-
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="text-xs font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-slate-700 dark:text-slate-300 focus:outline-none"
-          >
-            <option value="ALL">All Categories</option>
-            <option value="institute_event">Institute Events (5 pts)</option>
-            <option value="guest_lecture">Guest Lectures (4 pts)</option>
-            <option value="department_event">Department Events (3 pts)</option>
-            <option value="club_event">Club Events (2 pts)</option>
-          </select>
-
-          <select
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            className="text-xs font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-slate-700 dark:text-slate-300 focus:outline-none"
-          >
-            <option value="ALL">All Statuses</option>
-            <option value="approved">Approved</option>
-            <option value="alternative_offered">Alternative Offered</option>
-            <option value="rejected">Rejected</option>
-            <option value="cancelled">Cancelled (B3)</option>
-          </select>
-
-          <span className="text-xs text-slate-400 ml-auto font-medium">
-            Showing <strong className="text-slate-800 dark:text-slate-200">{filteredBookings.length}</strong> of {bookings.length} requests
-          </span>
+          <div className="flex items-center gap-2">
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="text-[11px] font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-slate-700 dark:text-slate-300 focus:outline-none flex-1 sm:flex-none"
+            >
+              <option value="ALL">All Categories</option>
+              <option value="institute_event">Institute (5p)</option>
+              <option value="guest_lecture">Guest Lecture (4p)</option>
+              <option value="department_event">Dept Event (3p)</option>
+              <option value="club_event">Club Event (2p)</option>
+            </select>
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className="text-[11px] font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-slate-700 dark:text-slate-300 focus:outline-none flex-1 sm:flex-none"
+            >
+              <option value="ALL">All Statuses</option>
+              <option value="approved">Approved</option>
+              <option value="pending">Pending</option>
+              <option value="alternative_offered">Alt Offered</option>
+              <option value="rejected">Rejected</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium tabular-nums whitespace-nowrap hidden sm:inline px-1">
+              {filteredBookings.length} / {bookings.length}
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Bookings Card List */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredBookings.map((b) => {
+      {/* Card Grid — 2 rows of 4 cards on desktop, compact & non-scrollable */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-2.5 gap-y-3.5">
+        {paginatedBookings.map((b) => {
           const catInfo = CATEGORY_WEIGHTS[b.requested_category] || CATEGORY_WEIGHTS.club_event;
           const statusInfo = STATUS_BADGES[b.status] || STATUS_BADGES.pending;
           const StatusIcon = statusInfo.icon;
@@ -244,117 +398,187 @@ export default function BookingsView({ currentUser }) {
           return (
             <div
               key={b._id}
-              className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm hover:shadow-md transition space-y-3 flex flex-col justify-between"
+              className="group bg-white dark:bg-[#111625] rounded-xl border border-slate-200/90 dark:border-slate-800/80 shadow-xs hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-200 flex flex-col justify-between overflow-hidden h-[154px]"
             >
-              <div>
-                {/* Header: ID, Weight, Status */}
-                <div className="flex items-center justify-between gap-2 mb-2">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-xs font-bold font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
-                      {b._id}
-                    </span>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${catInfo.color}`}>
-                      {catInfo.label} (+{catInfo.weight} pts)
-                    </span>
-                  </div>
-
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border flex items-center gap-1 ${statusInfo.color}`}>
-                    <StatusIcon className="w-3 h-3" />
+              <div className="p-2.5 flex flex-col justify-between flex-1 gap-1.5">
+                {/* Header: ID + Status badge */}
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold font-mono text-slate-500 dark:text-slate-400">
+                    {b._id}
+                  </span>
+                  <span className={`text-[8.5px] font-bold px-1.5 py-0.5 rounded-full border flex items-center gap-0.5 leading-none ${statusInfo.color}`}>
+                    <StatusIcon className="w-2.5 h-2.5" />
                     <span>{statusInfo.label}</span>
                   </span>
                 </div>
 
                 {/* Title & Requester */}
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white leading-snug">
-                  {b.title}
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1">
-                  <User className="w-3 h-3 text-slate-400" />
-                  <span>{b.requester}</span>
-                  <span className="text-slate-300">•</span>
-                  <span className="capitalize">{b.role}</span>
-                </p>
-
-                {/* Logistics Badges */}
-                <div className="grid grid-cols-2 gap-2 mt-3 text-[11px] bg-slate-50 dark:bg-slate-800/60 p-2.5 rounded-xl border border-slate-200/60 dark:border-slate-700/60">
-                  <div>
-                    <span className="text-slate-400 block text-[10px]">Attendance</span>
-                    <span className="font-semibold text-slate-800 dark:text-slate-200">{b.attendance} people</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block text-[10px]">Duration</span>
-                    <span className="font-semibold text-slate-800 dark:text-slate-200">{b.duration_periods} periods ({b.duration_periods} hrs)</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block text-[10px]">Requested Room</span>
-                    <span className="font-semibold text-slate-800 dark:text-slate-200">{b.requested_room || b.room_types?.join(', ')}</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block text-[10px]">Allocated Slot</span>
-                    <span className="font-semibold text-indigo-600 dark:text-indigo-400">
-                      {b.assigned_room ? `${b.assigned_room} (${b.assigned_day} P${b.assigned_start_period})` : 'None'}
+                <div>
+                  <h3 className="text-[12px] font-bold text-slate-900 dark:text-white leading-tight truncate" title={b.title}>
+                    {b.title}
+                  </h3>
+                  <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
+                    <span className="flex items-center gap-1 truncate max-w-[130px]">
+                      <User className="w-2.5 h-2.5 text-slate-400 shrink-0" />
+                      <span className="truncate">{b.requester}</span>
+                    </span>
+                    <span className={`text-[8px] font-bold px-1 py-0.5 rounded-full border shrink-0 ${catInfo.color}`}>
+                      +{catInfo.weight}p
                     </span>
                   </div>
                 </div>
 
-                {/* Decision Reason */}
+                {/* Inline Stats Capsule */}
+                <div className="flex items-center justify-between text-[10px] text-slate-600 dark:text-slate-300 bg-slate-50/80 dark:bg-slate-900/60 px-2 py-1 rounded-md border border-slate-100 dark:border-slate-800/60">
+                  <span className="flex items-center gap-1 font-medium">
+                    <Users className="w-2.5 h-2.5 text-slate-400" />
+                    <span className="font-semibold text-slate-800 dark:text-slate-200">{b.attendance}</span>
+                  </span>
+                  <span className="text-slate-300 dark:text-slate-700">•</span>
+                  <span className="flex items-center gap-1 font-medium">
+                    <Timer className="w-2.5 h-2.5 text-slate-400" />
+                    <span className="font-semibold text-slate-800 dark:text-slate-200">{b.duration_periods}h</span>
+                  </span>
+                  <span className="text-slate-300 dark:text-slate-700">•</span>
+                  <span className="flex items-center gap-1 font-medium truncate max-w-[90px]">
+                    <MapPin className="w-2.5 h-2.5 text-indigo-500 shrink-0" />
+                    <span className="truncate text-indigo-600 dark:text-indigo-400 font-semibold">
+                      {b.assigned_room ? `${b.assigned_room} (${b.assigned_day})` : (b.requested_room || 'Any')}
+                    </span>
+                  </span>
+                </div>
+
+                {/* Decision reason if present */}
                 {b.decision_reason && (
-                  <div className="mt-2.5 p-2 rounded-lg bg-slate-100/70 dark:bg-slate-800/40 text-[11px] text-slate-600 dark:text-slate-300 italic border-l-2 border-indigo-500">
+                  <div className="text-[9px] text-slate-400 dark:text-slate-500 italic truncate border-l-2 border-indigo-400 pl-1.5 -mt-0.5">
                     "{b.decision_reason}"
                   </div>
                 )}
-              </div>
 
-              {/* Bottom Actions based on Role */}
-              <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
-                {canManage ? (
-                  <div className="flex items-center space-x-1.5 w-full">
-                    <button
-                      onClick={() => setActionModal({ booking: b, type: 'approve' })}
-                      className="flex-1 py-1 px-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 text-[11px] font-semibold border border-emerald-200 dark:border-emerald-800 transition text-center"
-                    >
-                      Approve
-                    </button>
-                    <button
-                      onClick={() => setActionModal({ booking: b, type: 'alternative' })}
-                      className="flex-1 py-1 px-2 rounded-lg bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 text-amber-700 dark:text-amber-300 text-[11px] font-semibold border border-amber-200 dark:border-amber-800 transition text-center"
-                    >
-                      Alternative
-                    </button>
-                    <button
-                      onClick={() => setActionModal({ booking: b, type: 'reject' })}
-                      className="flex-1 py-1 px-2 rounded-lg bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 text-rose-700 dark:text-rose-300 text-[11px] font-semibold border border-rose-200 dark:border-rose-800 transition text-center"
-                    >
-                      Reject
-                    </button>
-                  </div>
-                ) : (
-                  b.status !== 'cancelled' && (
-                    <button
-                      onClick={() => handleCancelBooking(b._id)}
-                      className="w-full py-1.5 px-3 rounded-lg bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-200 text-xs font-semibold transition flex items-center justify-center gap-1.5"
-                    >
-                      <Ban className="w-3.5 h-3.5" />
-                      <span>Cancel My Booking (Rule B3)</span>
-                    </button>
-                  )
-                )}
+                {/* Actions */}
+                <div className="pt-1.5 border-t border-slate-100 dark:border-slate-800/60">
+                  {canManage ? (
+                    b.status === 'approved' ? (
+                      <div className="flex items-center justify-between gap-1 w-full">
+                        <span className="flex-1 flex items-center justify-center gap-1 py-1 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-[10px] font-semibold border border-emerald-200/80 dark:border-emerald-800">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                          <span>Approved: {b.assigned_room} ({b.assigned_day} P{b.assigned_start_period})</span>
+                        </span>
+                        <button
+                          onClick={() => setActionModal({ booking: b, type: 'alternative' })}
+                          className="py-1 px-2 rounded-md bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 text-slate-600 dark:text-slate-300 text-[10px] font-semibold border border-slate-200 dark:border-slate-700 transition"
+                          title="Reallocate venue or time slot"
+                        >
+                          Modify
+                        </button>
+                      </div>
+                    ) : b.status === 'rejected' ? (
+                      <div className="w-full py-1 rounded-md bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 text-[10px] font-semibold border border-rose-200/80 dark:border-rose-800 text-center flex items-center justify-center gap-1">
+                        <XCircle className="w-3 h-3 text-rose-500" />
+                        <span>Rejected</span>
+                      </div>
+                    ) : b.status === 'alternative_offered' ? (
+                      <div className="flex items-center justify-between gap-1 w-full">
+                        <span className="flex-1 flex items-center justify-center gap-1 py-1 rounded-md bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 text-[10px] font-semibold border border-amber-200/80 dark:border-amber-800">
+                          <AlertCircle className="w-3 h-3 text-amber-500" />
+                          <span>Alt: {b.assigned_room} ({b.assigned_day})</span>
+                        </span>
+                        <button
+                          onClick={() => setActionModal({ booking: b, type: 'approve' })}
+                          className="py-1 px-2 rounded-md bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 text-[10px] font-semibold border border-emerald-200 dark:border-emerald-800 transition"
+                        >
+                          Approve
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => setActionModal({ booking: b, type: 'approve' })}
+                          className="flex-1 py-1 rounded-md bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-[10px] font-semibold border border-emerald-200/80 dark:border-emerald-800 transition text-center"
+                        >
+                          Approve
+                        </button>
+                        <button
+                          onClick={() => setActionModal({ booking: b, type: 'alternative' })}
+                          className="flex-1 py-1 rounded-md bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/50 text-amber-700 dark:text-amber-300 text-[10px] font-semibold border border-amber-200/80 dark:border-amber-800 transition text-center"
+                        >
+                          Alternative
+                        </button>
+                        <button
+                          onClick={() => setActionModal({ booking: b, type: 'reject' })}
+                          className="flex-1 py-1 rounded-md bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-300 text-[10px] font-semibold border border-rose-200/80 dark:border-rose-800 transition text-center"
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    )
+                  ) : (
+                    b.status !== 'cancelled' && (
+                      <button
+                        onClick={() => handleCancelBooking(b._id)}
+                        className="w-full py-1 rounded-md bg-slate-50 dark:bg-slate-800/40 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-slate-600 dark:text-slate-300 hover:text-rose-600 border border-slate-200 dark:border-slate-700 text-[10px] font-semibold transition flex items-center justify-center gap-1"
+                      >
+                        <Ban className="w-3 h-3" />
+                        Cancel Booking
+                      </button>
+                    )
+                  )}
+                </div>
               </div>
             </div>
           );
         })}
       </div>
 
+      {/* Pagination — shifted lower with larger comfortable buttons */}
+      {totalPages > 1 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-3.5 pb-1">
+          <span className="text-xs text-slate-500 dark:text-slate-400 font-medium tabular-nums">
+            Showing {(safePage - 1) * CARDS_PER_PAGE + 1}–{Math.min(safePage * CARDS_PER_PAGE, filteredBookings.length)} of {filteredBookings.length} requests
+          </span>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={safePage <= 1}
+              className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition"
+              title="Previous Page"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+              <button
+                key={page}
+                onClick={() => setCurrentPage(page)}
+                className={`min-w-[32px] h-8 rounded-lg text-xs font-semibold transition ${
+                  page === safePage
+                    ? 'bg-indigo-600 text-white shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700'
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+            <button
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={safePage >= totalPages}
+              className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition"
+              title="Next Page"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
       {/* Decision Modal */}
       {actionModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4">
-            <h3 className="text-base font-bold text-slate-900 dark:text-white capitalize">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-4 backdrop-blur-xs animate-in fade-in">
+          <div className="bg-white dark:bg-slate-900 rounded-t-2xl sm:rounded-2xl max-w-md w-full p-5 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white capitalize">
               {actionModal.type} Request: {actionModal.booking._id} ({actionModal.booking.title})
             </h3>
 
             {actionModal.type === 'alternative' && (
-              <div className="grid grid-cols-3 gap-2 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
                 <div>
                   <label className="block text-slate-500 mb-1">Room</label>
                   <select
@@ -430,8 +654,8 @@ export default function BookingsView({ currentUser }) {
 
       {/* Manual Request Modal (Requirement 10) */}
       {showManualModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in">
-          <form onSubmit={handleManualSubmit} className="bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full p-6 border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-4 backdrop-blur-xs animate-in fade-in">
+          <form onSubmit={handleManualSubmit} className="bg-white dark:bg-slate-900 rounded-t-2xl sm:rounded-2xl max-w-lg w-full p-5 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <Plus className="w-5 h-5 text-indigo-600" />
               Manual Venue Booking Request (Hard Constraint Checked)

@@ -124,14 +124,14 @@ export default function ClubNewBookingView({ setActiveTab }) {
   return (
     <div className="space-y-6">
       
-      {/* Header */}
-      <div className="pb-4 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* Header (Unboxed, Consistent text-2xl) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 flex items-center space-x-2">
-            <PlusCircle className="w-5 h-5 text-emerald-600" />
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
+            <PlusCircle className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
             <span>New Venue Booking — English & Hinglish NLP</span>
-          </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
+          </h1>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Rule 3: "Accept venue requests written in plain English or Hinglish, turn them into a structured booking, and let the user check and edit it before submitting."
           </p>
         </div>

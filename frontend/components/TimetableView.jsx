@@ -73,8 +73,21 @@ export default function TimetableView() {
   return (
     <div className="space-y-6">
       
+      {/* Page Header (Unboxed, Consistent text-2xl) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
+            <CalendarDays className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+            <span>Master Timetable Management</span>
+          </h1>
+          {/* <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Weekly Academic Master Schedule • Filter by Student Cohort, Faculty Member, or Campus Venue
+          </p> */}
+        </div>
+      </div>
+
       {/* Sleek Professional Timetable Toolbar */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-wrap items-center justify-between gap-3 transition-colors">
+      <div className="bg-white dark:bg-[#111625] rounded-2xl p-4 border border-slate-200/90 dark:border-slate-800/80 shadow-xs flex flex-wrap items-center justify-between gap-3 transition-colors">
         
         {/* Left: Filter Pills + Selector Dropdown */}
         <div className="flex flex-wrap items-center gap-2.5">
@@ -311,23 +324,37 @@ export default function TimetableView() {
                               {sessions.map((s, idx) => {
                                 const isContinuation = s.duration > 1 && period > s.start_period;
                                 if (isContinuation) {
+                                  const contdColorClass = s.kind === 'lab'
+                                    ? 'bg-emerald-50/70 border-emerald-300 dark:bg-emerald-950/30 dark:border-emerald-700/80 text-emerald-900 dark:text-emerald-200'
+                                    : 'bg-indigo-50/70 border-indigo-300 dark:bg-indigo-950/30 dark:border-indigo-700/80 text-indigo-900 dark:text-indigo-200';
+                                  const contdBadgeClass = s.kind === 'lab'
+                                    ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300'
+                                    : 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/60 dark:text-indigo-300';
                                   return (
                                     <div
                                       key={`${s.session_id}-${idx}`}
                                       onClick={() => setActiveModalSession(s)}
-                                      className="p-1.5 rounded-lg border border-dashed border-emerald-500/40 bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-800 dark:text-emerald-300 cursor-pointer hover:bg-emerald-100/50 dark:hover:bg-emerald-900/30 transition flex items-center justify-between text-xs"
-                                      title={`${s.course_id} 3-Hour Practical Laboratory running from P${s.start_period} to P${s.end_period}`}
+                                      className={`p-2.5 rounded-xl border border-dashed ${contdColorClass} cursor-pointer hover:shadow-md transition-all relative overflow-hidden`}
+                                      title={`${s.course_id} Practical Laboratory running from P${s.start_period} to P${s.end_period} (Continuation ${period - s.start_period + 1}/${s.duration})`}
                                     >
-                                      <div className="flex items-center gap-1.5 font-medium truncate">
-                                        <span className="text-[10px] text-emerald-500 font-mono">↳</span>
-                                        <span className="font-bold">{s.course_id}</span>
-                                        <span className="text-slate-500 dark:text-slate-400 text-[10px]">
-                                          (Lab Contd. {period - s.start_period + 1}/{s.duration})
+                                      <div className="flex items-center justify-between mb-1">
+                                        <span className="font-bold text-xs flex items-center gap-1">
+                                          <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono">↳</span>
+                                          {s.course_id}
+                                        </span>
+                                        <span className={`text-[9px] uppercase font-bold px-1.5 py-0.5 rounded ${contdBadgeClass}`}>
+                                          LAB CONTD • {period - s.start_period + 1}/{s.duration}
                                         </span>
                                       </div>
-                                      <span className="font-mono text-[9px] px-1 py-0.5 rounded bg-white/80 dark:bg-black/30 font-bold">
-                                        {s.room_id}
-                                      </span>
+                                      <div className="text-[11px] font-medium leading-tight truncate" title={s.course_title}>
+                                        {s.course_title}
+                                      </div>
+                                      <div className="mt-2 flex items-center justify-between text-[10px] text-slate-600 dark:text-slate-400 font-medium">
+                                        <span className="truncate max-w-[80px]" title={s.faculty_name}>{s.faculty_name}</span>
+                                        <span className="px-1.5 py-0.5 bg-white/70 dark:bg-black/30 rounded font-mono font-bold">
+                                          {s.room_id}
+                                        </span>
+                                      </div>
                                     </div>
                                   );
                                 }

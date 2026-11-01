@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import fs from 'fs';
+import path from 'path';
 import connectToDatabase from '../../../lib/mongodb';
 import { BookingRequest, Room, Schedule, AuditLog } from '../../../models';
 
@@ -9,9 +11,10 @@ export async function GET(request) {
     const role = searchParams.get('role');
 
     await connectToDatabase();
+
     const query = {};
-    if (status) query.status = status;
-    if (role) query.role = role;
+    if (status && status !== 'ALL') query.status = status;
+    if (role && role !== 'ALL') query.role = role;
 
     const bookings = await BookingRequest.find(query).sort({ submitted_at: 1 }).lean();
 

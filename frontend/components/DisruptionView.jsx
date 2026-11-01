@@ -12,7 +12,8 @@ import {
   Sparkles, 
   RotateCcw,
   Layers,
-  ChevronRight
+  ChevronRight,
+  ChevronLeft
 } from 'lucide-react';
 
 export default function DisruptionView({ currentUser }) {
@@ -23,6 +24,8 @@ export default function DisruptionView({ currentUser }) {
   const [activeVersion, setActiveVersion] = useState(1);
   const [isApproving, setIsApproving] = useState(false);
   const [approvedSuccess, setApprovedSuccess] = useState(false);
+  const [diffPage, setDiffPage] = useState(1);
+  const DIFF_PER_PAGE = 5;
 
   useEffect(() => {
     fetchDisruptions();
@@ -130,23 +133,38 @@ export default function DisruptionView({ currentUser }) {
     }
   }
 
+  const allDiffItems = simulationResult?.diff || [
+    { id: 'CS203-L3', old: 'TUE P6 (CR-102)', new: 'TUE P6 (CR-101)', type: 'room_only' },
+    { id: 'CS301-L3', old: 'WED P3 (CR-102)', new: 'WED P3 (CR-103)', type: 'room_only' },
+    { id: 'EC204-L3', old: 'TUE P4 (CR-102)', new: 'TUE P4 (CR-104)', type: 'room_only' },
+    { id: 'EE201-L2', old: 'WED P7 (CR-102)', new: 'WED P7 (CR-101)', type: 'room_only' },
+    { id: 'HS101-C-L2', old: 'TUE P2 (CR-102)', new: 'TUE P2 (CR-105)', type: 'room_only' },
+    { id: 'ME203-L2', old: 'TUE P7 (CR-102)', new: 'TUE P7 (CR-104)', type: 'room_only' },
+    { id: 'ME204-L2', old: 'WED P2 (CR-102)', new: 'WED P2 (CR-104)', type: 'room_only' },
+    { id: 'OE303-L3', old: 'WED P6 (CR-102)', new: 'WED P6 (CR-103)', type: 'room_only' },
+    { id: 'PH101-B-L3', old: 'WED P4 (CR-102)', new: 'WED P5 (CR-103)', type: 'time_and_room' },
+  ];
+  const diffTotalPages = Math.max(1, Math.ceil(allDiffItems.length / DIFF_PER_PAGE));
+  const safeDiffPage = Math.min(diffPage, diffTotalPages);
+  const paginatedDiff = allDiffItems.slice((safeDiffPage - 1) * DIFF_PER_PAGE, safeDiffPage * DIFF_PER_PAGE);
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       
-      {/* Header & Quick Simulation Bar */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+      {/* Header & Quick Simulation Bar (Unboxed, Consistent text-2xl) */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center space-x-2">
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 text-amber-500" />
-              Dynamic Disruption & Minimal-Move Rescheduling
-            </h2>
+          <div className="flex items-center space-x-2.5">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
+              <AlertTriangle className="w-6 h-6 text-amber-500" />
+              Dynamic Disruption Management
+            </h1>
             <span className="text-xs px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold border border-slate-200 dark:border-slate-700">
-              Active Version: v{activeVersion}
+              v{activeVersion}
             </span>
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Handles emergency faculty leaves, room closures, or new sessions with CP-SAT constraint stability (95.2% session retention).
+            Handles emergency faculty leaves, room closures, or new sessions with CP-SAT minimal-move stability (95.2% session retention).
           </p>
         </div>
 
@@ -223,47 +241,42 @@ export default function DisruptionView({ currentUser }) {
 
           {/* Table of Changes */}
           <div>
-            <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
-              Exact Modifications Diff (9 Moved Sessions)
-            </h4>
+            <div className="flex items-center justify-between mb-1.5">
+              <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                Exact Modifications Diff ({((simulationResult.diff || []).length || 9)} Moved Sessions)
+              </h4>
+              <span className="text-[11px] text-slate-400 font-mono">
+                Page {safeDiffPage} of {diffTotalPages}
+              </span>
+            </div>
             <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
               <table className="w-full text-left text-xs">
                 <thead className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold border-b border-slate-200 dark:border-slate-700">
                   <tr>
-                    <th className="py-2.5 px-3">Session ID</th>
-                    <th className="py-2.5 px-3">Baseline Slot</th>
-                    <th className="py-2.5 px-3 text-center">Move</th>
-                    <th className="py-2.5 px-3">Proposed Slot</th>
-                    <th className="py-2.5 px-3">Change Severity</th>
+                    <th className="py-2 px-3 text-[11px]">Session ID</th>
+                    <th className="py-2 px-3 text-[11px]">Baseline Slot</th>
+                    <th className="py-2 px-3 text-center text-[11px]">Move</th>
+                    <th className="py-2 px-3 text-[11px]">Proposed Slot</th>
+                    <th className="py-2 px-3 text-[11px]">Change Severity</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                  {(simulationResult.diff || [
-                    { id: 'CS203-L3', old: 'TUE P6 (CR-102)', new: 'TUE P6 (CR-101)', type: 'room_only' },
-                    { id: 'CS301-L3', old: 'WED P3 (CR-102)', new: 'WED P3 (CR-103)', type: 'room_only' },
-                    { id: 'EC204-L3', old: 'TUE P4 (CR-102)', new: 'TUE P4 (CR-104)', type: 'room_only' },
-                    { id: 'EE201-L2', old: 'WED P7 (CR-102)', new: 'WED P7 (CR-101)', type: 'room_only' },
-                    { id: 'HS101-C-L2', old: 'TUE P2 (CR-102)', new: 'TUE P2 (CR-105)', type: 'room_only' },
-                    { id: 'ME203-L2', old: 'TUE P7 (CR-102)', new: 'TUE P7 (CR-104)', type: 'room_only' },
-                    { id: 'ME204-L2', old: 'WED P2 (CR-102)', new: 'WED P2 (CR-104)', type: 'room_only' },
-                    { id: 'OE303-L3', old: 'WED P6 (CR-102)', new: 'WED P6 (CR-103)', type: 'room_only' },
-                    { id: 'PH101-B-L3', old: 'WED P4 (CR-102)', new: 'WED P5 (CR-103)', type: 'time_and_room' },
-                  ]).map((item, idx) => (
-                    <tr key={idx} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                      <td className="py-2.5 px-3 font-mono font-bold text-slate-900 dark:text-white">
+                  {paginatedDiff.map((item, idx) => (
+                    <tr key={item.id || idx} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                      <td className="py-2 px-3 font-mono font-bold text-slate-900 dark:text-white">
                         {item.id}
                       </td>
-                      <td className="py-2.5 px-3 text-slate-500 line-through">
+                      <td className="py-2 px-3 text-slate-500 line-through text-[11px]">
                         {item.old}
                       </td>
-                      <td className="py-2.5 px-3 text-center text-slate-400">
+                      <td className="py-2 px-3 text-center text-slate-400">
                         &rarr;
                       </td>
-                      <td className="py-2.5 px-3 font-bold text-indigo-600 dark:text-indigo-400">
+                      <td className="py-2 px-3 font-bold text-indigo-600 dark:text-indigo-400 text-[11px]">
                         {item.new}
                       </td>
-                      <td className="py-2.5 px-3">
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                      <td className="py-2 px-3">
+                        <span className={`text-[9.5px] font-bold px-2 py-0.5 rounded-full ${
                           item.type === 'room_only'
                             ? 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300'
                             : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
@@ -276,6 +289,44 @@ export default function DisruptionView({ currentUser }) {
                 </tbody>
               </table>
             </div>
+
+            {/* Pagination Controls for Diff */}
+            {diffTotalPages > 1 && (
+              <div className="flex items-center justify-between pt-2 px-1 text-xs">
+                <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                  Showing {(safeDiffPage - 1) * DIFF_PER_PAGE + 1}–{Math.min(safeDiffPage * DIFF_PER_PAGE, allDiffItems.length)} of {allDiffItems.length}
+                </span>
+                <div className="flex items-center space-x-1">
+                  <button
+                    onClick={() => setDiffPage(p => Math.max(1, p - 1))}
+                    disabled={safeDiffPage === 1}
+                    className="p-1 rounded-md border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:pointer-events-none transition"
+                  >
+                    <ChevronLeft className="w-3.5 h-3.5" />
+                  </button>
+                  {Array.from({ length: diffTotalPages }, (_, i) => i + 1).map(num => (
+                    <button
+                      key={num}
+                      onClick={() => setDiffPage(num)}
+                      className={`min-w-[24px] h-6 px-1.5 rounded-md text-[11px] font-semibold transition ${
+                        safeDiffPage === num
+                          ? 'bg-indigo-600 text-white shadow-xs'
+                          : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700'
+                      }`}
+                    >
+                      {num}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => setDiffPage(p => Math.min(diffTotalPages, p + 1))}
+                    disabled={safeDiffPage === diffTotalPages}
+                    className="p-1 rounded-md border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:pointer-events-none transition"
+                  >
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Admin Approval Button (Section 2 Requirement 5) */}
