@@ -6,20 +6,26 @@ export async function POST(request) {
   try {
     await connectToDatabase();
     const body = await request.json();
-    const request_id = body.request_id;
-    const status = body.status || (body.decision === 'alternative' ? 'alternative_offered' : (body.decision === 'approve' ? 'approved' : (body.decision === 'reject' ? 'rejected' : body.decision)));
+    const request_id = body.request_id || body.booking_id || body.id;
+    let status = body.status;
+    if (!status && body.decision) {
+      if (body.decision === 'approve' || body.decision === 'approved') status = 'approved';
+      else if (body.decision === 'reject' || body.decision === 'rejected') status = 'rejected';
+      else if (body.decision === 'alternative' || body.decision === 'alternative_offered') status = 'alternative_offered';
+      else status = body.decision;
+    }
     const assigned_room = body.assigned_room || body.room_id;
     const assigned_day = body.assigned_day || body.day;
     const assigned_start_period = body.assigned_start_period || body.start_period;
     const assigned_end_period = body.assigned_end_period || body.end_period;
     const decision_reason = body.decision_reason || body.reason;
-    const reviewer_name = body.reviewer_name || 'Admin Officer';
+    const reviewer_name = body.reviewer_name || body.by || 'Coordinator / Admin';
 
     if (!request_id || !status) {
       return NextResponse.json({ error: 'request_id and status are required' }, { status: 400 });
     }
 
-    const booking = await BookingRequest.findById(request_id);
+    const booking = (await BookingRequest.findById(request_id)) || (await BookingRequest.findOne({ _id: request_id }));
     if (!booking) {
       return NextResponse.json({ error: 'Booking request not found' }, { status: 404 });
     }
@@ -29,7 +35,7 @@ export async function POST(request) {
     }
 
     booking.status = status;
-    booking.decision_reason = decision_reason || (status === 'approved' ? 'Approved by Admin' : 'Slot unavailable');
+    booking.decision_reason = decision_reason || (status === 'approved' ? 'Approved by Coordinator / Admin' : 'Slot unavailable');
     if (assigned_room) booking.assigned_room = assigned_room;
     if (assigned_day) booking.assigned_day = assigned_day;
     if (assigned_start_period) booking.assigned_start_period = Number(assigned_start_period);

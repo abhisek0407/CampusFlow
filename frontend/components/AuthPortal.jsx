@@ -74,9 +74,9 @@ export const ROLE_PRESETS = [
   },
 ];
 
-export default function AuthPortal({ onLoginSuccess }) {
+export default function AuthPortal({ onLoginSuccess, initialView = 'signin', onBackToLanding }) {
   // 'signin' | 'register' | 'forgot' | 'reset'
-  const [authView, setAuthView] = useState('signin');
+  const [authView, setAuthView] = useState(initialView);
   const [selectedRole, setSelectedRole] = useState('admin');
 
   // Sign-in Form (Starts completely blank per user request)
@@ -275,17 +275,17 @@ export default function AuthPortal({ onLoginSuccess }) {
       {/* ========================================================================= */}
       {/* MAIN TWO-COLUMN CONTAINER: COLLEGE PHOTO (LEFT) + SIGN-IN FORM (RIGHT)    */}
       {/* ========================================================================= */}
-      <div className="relative z-10 w-full max-w-5xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col md:flex-row min-h-[580px]">
+      <div className="relative z-10 w-full max-w-5xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col md:flex-row min-h-[580px] animate-slide-up">
         
         {/* ===================================================================== */}
         {/* LEFT COLUMN: COLLEGE PHOTO (CHILIKA INSTITUTE OF TECHNOLOGY)          */}
         {/* ===================================================================== */}
-        <div className="relative hidden md:block md:w-1/2 min-h-[540px] bg-slate-900 overflow-hidden">
+        <div className="relative hidden md:block md:w-1/2 min-h-[540px] bg-slate-900 overflow-hidden group">
           {/* Real Campus Image */}
           <img
             src="/campus.jpg"
             alt="Chilika Institute of Technology (CIT) Campus"
-            className="absolute inset-0 w-full h-full object-cover object-center"
+            className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-1000 ease-out group-hover:scale-105"
           />
 
           {/* Elegant Dark Gradient Overlay for High Contrast Text */}
@@ -318,6 +318,20 @@ export default function AuthPortal({ onLoginSuccess }) {
         {/* ===================================================================== */}
         <div className="w-full md:w-1/2 p-6 sm:p-8 flex flex-col justify-center bg-white">
           
+          {/* Back to Public Landing Page button */}
+          {onBackToLanding && (
+            <div className="mb-2">
+              <button
+                type="button"
+                onClick={onBackToLanding}
+                className="inline-flex items-center space-x-1.5 text-xs text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 font-semibold transition cursor-pointer"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Back to Public Landing Page</span>
+              </button>
+            </div>
+          )}
+
           {/* Header with CIT Logo & Brand */}
           <div className="text-center mb-5">
             <img
@@ -341,7 +355,7 @@ export default function AuthPortal({ onLoginSuccess }) {
           {/* VIEW 1: SIGN-IN FORM (WITH 4 SMALL ROLE BOXES IN 1 SINGLE ROW)      */}
           {/* =================================================================== */}
           {authView === 'signin' && (
-            <div className="space-y-4">
+            <div key="signin" className="space-y-4 animate-fade-in">
               
               {/* 4 Small Role Boxes in 1 Single Horizontal Row */}
               <div>
@@ -365,7 +379,7 @@ export default function AuthPortal({ onLoginSuccess }) {
                         key={preset.id}
                         type="button"
                         onClick={() => handleSelectRole(preset)}
-                        className={`py-2 px-1.5 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center ${
+                        className={`py-2 px-1.5 rounded-xl border text-center transition-all duration-200 hover:-translate-y-0.5 active:scale-95 cursor-pointer flex flex-col items-center justify-center ${
                           isSelected
                             ? `${preset.activeClass} shadow-xs`
                             : 'border-slate-200 bg-slate-50/80 hover:bg-white hover:border-slate-300 text-slate-700'
@@ -454,10 +468,10 @@ export default function AuthPortal({ onLoginSuccess }) {
                 <button
                   type="submit"
                   disabled={loginLoading}
-                  className="w-full py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition shadow-md hover:shadow-lg flex items-center justify-center space-x-2 disabled:opacity-60 cursor-pointer mt-1"
+                  className="w-full py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white text-xs font-bold transition-all shadow-md hover:shadow-lg flex items-center justify-center space-x-2 disabled:opacity-60 cursor-pointer mt-1 group"
                 >
                   <span>{loginLoading ? 'Authenticating...' : 'Sign In to CampusFlow Dashboard'}</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                 </button>
               </form>
 
@@ -486,7 +500,7 @@ export default function AuthPortal({ onLoginSuccess }) {
           {/* VIEW 2: REGISTRATION VIEW                                           */}
           {/* =================================================================== */}
           {authView === 'register' && (
-            <div className="space-y-3.5">
+            <div key="register" className="space-y-3.5 animate-fade-in">
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-base font-bold text-slate-900">Create New Account</h2>
@@ -628,7 +642,7 @@ export default function AuthPortal({ onLoginSuccess }) {
           {/* VIEW 3: FORGOT PASSWORD VIEW                                        */}
           {/* =================================================================== */}
           {authView === 'forgot' && (
-            <div className="space-y-4">
+            <div key="forgot" className="space-y-4 animate-fade-in">
               <div>
                 <h2 className="text-base font-bold text-slate-900 flex items-center gap-1.5">
                   <KeyRound className="w-4 h-4 text-blue-600" />

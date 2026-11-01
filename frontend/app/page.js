@@ -6,6 +6,7 @@ import TopHeader, { DEMO_USERS } from '../components/TopHeader';
 import LoginModal from '../components/LoginModal';
 import AuthPortal from '../components/AuthPortal';
 import EditProfileModal from '../components/EditProfileModal';
+import LandingPage from '../components/LandingPage';
 
 // Shared & Admin Views
 import AdminOverviewView from '../components/AdminOverviewView';
@@ -44,6 +45,8 @@ export default function Home() {
   const [isResetting, setIsResetting] = useState(false);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
+  const [currentView, setCurrentView] = useState('landing'); // 'landing' | 'operations' | 'auth'
+  const [authInitialView, setAuthInitialView] = useState('signin');
 
   useEffect(() => {
     // If on mobile screen, default sidebar to collapsed
@@ -75,6 +78,7 @@ export default function Home() {
   function handleLoginSuccess(user) {
     setCurrentUser(user);
     setActiveTab('overview');
+    setCurrentView('operations');
     showToast(`Welcome back, ${user.name}! (${user.role.toUpperCase()})`);
   }
 
@@ -114,6 +118,7 @@ export default function Home() {
     localStorage.removeItem('cit_token');
     setCurrentUser(null);
     setActiveTab('overview');
+    setCurrentView('landing');
     showToast("Logged out successfully");
   }
 
@@ -156,11 +161,69 @@ export default function Home() {
   }
 
   // =========================================================================
-  // VIEW 1: AUTHENTICATION HOME PORTAL (SIGN-IN, REGISTER, FORGOT, RESET)
-  // Renders when user is not logged in. Uses /logo.png as background picture.
+  // VIEW 1: PUBLIC LANDING PAGE (DEFAULT FOR ALL VISITORS)
+  // Features hero campus.jpg, animations, 4 pillars, FAQ, contact & locked ops
   // =========================================================================
+  if (currentView === 'landing') {
+    return (
+      <LandingPage
+        currentUser={currentUser}
+        onOpenOperations={() => {
+          if (currentUser) {
+            setCurrentView('operations');
+          }
+        }}
+        onOpenSignIn={() => {
+          setAuthInitialView('signin');
+          setCurrentView('auth');
+        }}
+        onOpenRegister={() => {
+          setAuthInitialView('register');
+          setCurrentView('auth');
+        }}
+        onSwitchUser={(user) => {
+          handleSwitchUser(user);
+          setCurrentView('operations');
+        }}
+        onLogout={handleLogout}
+      />
+    );
+  }
+
+  // =========================================================================
+  // VIEW 2: AUTHENTICATION PORTAL (SIGN-IN, REGISTER, FORGOT, RESET)
+  // =========================================================================
+  if (currentView === 'auth') {
+    return (
+      <AuthPortal
+        initialView={authInitialView}
+        onLoginSuccess={handleLoginSuccess}
+        onBackToLanding={() => setCurrentView('landing')}
+      />
+    );
+  }
+
+  // Fallback if operations view is accessed without being logged in
   if (!currentUser) {
-    return <AuthPortal onLoginSuccess={handleLoginSuccess} />;
+    return (
+      <LandingPage
+        currentUser={null}
+        onOpenOperations={() => {}}
+        onOpenSignIn={() => {
+          setAuthInitialView('signin');
+          setCurrentView('auth');
+        }}
+        onOpenRegister={() => {
+          setAuthInitialView('register');
+          setCurrentView('auth');
+        }}
+        onSwitchUser={(user) => {
+          handleSwitchUser(user);
+          setCurrentView('operations');
+        }}
+        onLogout={handleLogout}
+      />
+    );
   }
 
   // =========================================================================
@@ -216,9 +279,9 @@ export default function Home() {
     if (role === 'faculty') {
       switch (activeTab) {
         case 'overview':
-          return <FacultyOverviewView setActiveTab={setActiveTab} />;
+          return <FacultyOverviewView currentUser={currentUser} setActiveTab={setActiveTab} />;
         case 'my-timetable':
-          return <FacultyMyTimetableView />;
+          return <FacultyMyTimetableView currentUser={currentUser} setActiveTab={setActiveTab} />;
         case 'mark-unavailability':
           return <FacultyUnavailabilityView />;
         case 'request-extra-session':
@@ -286,6 +349,7 @@ export default function Home() {
           onOpenLoginModal={() => setIsLoginModalOpen(true)}
           onLogout={handleLogout}
           onOpenEditProfile={() => setIsEditProfileOpen(true)}
+          onGoToLanding={() => setCurrentView('landing')}
         />
 
         {/* View Content - Single Page Viewport */}
@@ -293,18 +357,10 @@ export default function Home() {
           {renderActiveView()}
         </main>
 
-        {/* Compact Footer */}
-        <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-2 px-4 sm:px-6 text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-1 shrink-0">
-          <div>
-            <strong>CampusFlow</strong> • Chilika Institute of Technology (CIT) Autonomous Scheduling System
-          </div>
-          <div className="flex items-center space-x-3 text-[11px]">
-            <span>Google OR-Tools CP-SAT</span>
-            <span>•</span>
-            <span>0 Hard Violations</span>
-            <span>•</span>
-            <span>Next.js 16</span>
-          </div>
+        {/* Simple Footer */}
+        <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-2.5 px-4 sm:px-6 text-xs text-slate-400 dark:text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-1 shrink-0">
+          <span>© 2026 Chilika Institute of Technology</span>
+          <span>CampusFlow</span>
         </footer>
 
       </div>

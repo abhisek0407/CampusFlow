@@ -11,7 +11,8 @@ import {
   Calendar,
   Layers,
   LogOut,
-  UserCog
+  UserCog,
+  Compass
 } from 'lucide-react';
 import { ROLE_NAV_CONFIG } from './Sidebar';
 import ThemeToggle from './ThemeToggle';
@@ -62,7 +63,8 @@ export default function TopHeader({
   setSidebarCollapsed,
   onOpenLoginModal,
   onLogout,
-  onOpenEditProfile
+  onOpenEditProfile,
+  onGoToLanding
 }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const roleConfig = ROLE_NAV_CONFIG[currentUser?.role] || ROLE_NAV_CONFIG.admin;
@@ -106,6 +108,18 @@ export default function TopHeader({
             <span className="text-slate-300 dark:text-slate-700">•</span>
             <span className="text-slate-500 dark:text-slate-400">3 Soft Penalty</span>
           </div>
+
+          {/* Public Landing Page Button */}
+          {onGoToLanding && (
+            <button
+              onClick={onGoToLanding}
+              title="Return to Public Home / Landing Page"
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-semibold transition cursor-pointer"
+            >
+              <Compass className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+              <span className="hidden md:inline font-bold">Public Home</span>
+            </button>
+          )}
 
           {/* Light / Dark Mode Toggle */}
           <ThemeToggle />
