@@ -101,6 +101,7 @@ const STATUS_BADGES = {
 };
 
 export default function BookingsView({ currentUser }) {
+  const activeUser = currentUser || { role: 'admin', name: "Dean's Office (Admin)" };
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -179,13 +180,14 @@ export default function BookingsView({ currentUser }) {
       const assignedEnd = bType === 'alternative' ? Number(altStart) + booking.duration_periods - 1 : (booking.assigned_end_period || 11);
 
       const payload = {
-        request_id: bId,
-        status: statusMap[bType] || bType,
-        decision_reason: decisionReason || `${bType.toUpperCase()} by ${currentUser?.name || 'Dean Academic Office'}`,
-        assigned_day: assignedDay,
-        assigned_start_period: assignedStart,
-        assigned_end_period: assignedEnd,
-        assigned_room: assignedRoom,
+        request_id: actionModal.booking._id,
+        status: actionModal.type === 'alternative' ? 'alternative_offered' : (actionModal.type === 'approve' ? 'approved' : 'rejected'),
+        decision_reason: decisionReason || `${actionModal.type.toUpperCase()} by ${activeUser.name}`,
+        assigned_day: actionModal.type === 'alternative' ? altDay : actionModal.booking.assigned_day || 'MON',
+        assigned_start_period: actionModal.type === 'alternative' ? Number(altStart) : actionModal.booking.assigned_start_period || 10,
+        assigned_end_period: actionModal.type === 'alternative' ? Number(altStart) + actionModal.booking.duration_periods - 1 : 11,
+        assigned_room: actionModal.type === 'alternative' ? altRoom : actionModal.booking.assigned_room || 'AUD',
+        reviewer_name: activeUser.name,
       };
 
       const res = await fetch('/api/bookings/decide', {
@@ -393,7 +395,7 @@ export default function BookingsView({ currentUser }) {
           const catInfo = CATEGORY_WEIGHTS[b.requested_category] || CATEGORY_WEIGHTS.club_event;
           const statusInfo = STATUS_BADGES[b.status] || STATUS_BADGES.pending;
           const StatusIcon = statusInfo.icon;
-          const canManage = currentUser?.role === 'admin' || currentUser?.role === 'department_coordinator';
+          const canManage = activeUser.role === 'admin' || activeUser.role === 'department_coordinator';
 
           return (
             <div

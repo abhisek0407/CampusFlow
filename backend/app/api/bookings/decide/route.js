@@ -6,20 +6,14 @@ export async function POST(request) {
   try {
     await connectToDatabase();
     const body = await request.json();
-    const {
-      request_id,
-      booking_id,
-      id,
-      status, // 'approved', 'rejected', 'alternative_offered'
-      decision,
-      assigned_room,
-      assigned_day,
-      assigned_start_period,
-      assigned_end_period,
-      decision_reason,
-      reason,
-      reviewer_name = 'Admin Officer',
-    } = body;
+    const request_id = body.request_id;
+    const status = body.status || (body.decision === 'alternative' ? 'alternative_offered' : (body.decision === 'approve' ? 'approved' : (body.decision === 'reject' ? 'rejected' : body.decision)));
+    const assigned_room = body.assigned_room || body.room_id;
+    const assigned_day = body.assigned_day || body.day;
+    const assigned_start_period = body.assigned_start_period || body.start_period;
+    const assigned_end_period = body.assigned_end_period || body.end_period;
+    const decision_reason = body.decision_reason || body.reason;
+    const reviewer_name = body.reviewer_name || 'Admin Officer';
 
     const targetId = request_id || booking_id || id;
     let targetStatus = status || decision;
