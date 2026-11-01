@@ -4,6 +4,28 @@ import path from 'path';
 import connectToDatabase from '../../../../lib/mongodb';
 import { Schedule, Session, Course, Faculty, Room, StudentGroup } from '../../../../models';
 
+// Normalize cohort IDs across conventions (e.g. Y3-ME, Y3ME, ME-3, ME3 -> ME-3)
+function normalizeGroupId(id) {
+  if (!id) return '';
+  const s = String(id).trim().toUpperCase();
+  // Map Y2-CSE -> CSE-2, Y3-ME -> ME-3, Y2ME -> ME-2, etc.
+  const yMatch = s.match(/^Y([23])-?([A-Z]+)$/);
+  if (yMatch) {
+    return `${yMatch[2]}-${yMatch[1]}`;
+  }
+  // Map Y1-A, Y1A -> Y1-A
+  const y1Match = s.match(/^Y1-?([A-D])$/);
+  if (y1Match) {
+    return `Y1-${y1Match[1]}`;
+  }
+  // Map ME3 -> ME-3, CSE2 -> CSE-2
+  const deptMatch = s.match(/^([A-Z]+)-?([23])$/);
+  if (deptMatch) {
+    return `${deptMatch[1]}-${deptMatch[2]}`;
+  }
+  return s;
+}
+
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -11,36 +33,77 @@ export async function GET(request) {
     const filterFaculty = searchParams.get('faculty');
     const filterRoom = searchParams.get('room');
 
-    await connectToDatabase();
+    // 1. Fetch current schedule (MongoDB SCHEDULE_CURRENT first, with exports/schedule.json fallback)
+    let schedule = null;
+    try {
+      await connectToDatabase();
+      schedule = await Schedule.findOne({ _id: 'SCHEDULE_CURRENT' }).lean();
+    } catch (e) {
+      console.error('Error querying SCHEDULE_CURRENT:', e);
+    }
 
-    // 1. Fetch current schedule
-    let schedule = await Schedule.findOne({ _id: 'SCHEDULE_CURRENT' }).lean();
     if (!schedule) {
       const schedulePath = path.resolve(process.cwd(), '../exports/schedule.json');
       const altSchedulePath = path.resolve(process.cwd(), 'exports/schedule.json');
       const finalPath = fs.existsSync(schedulePath) ? schedulePath : fs.existsSync(altSchedulePath) ? altSchedulePath : null;
       if (finalPath) {
-        schedule = JSON.parse(fs.readFileSync(finalPath, 'utf8'));
+        try {
+          schedule = JSON.parse(fs.readFileSync(finalPath, 'utf8'));
+        } catch (e) {
+          console.error('Error reading exports/schedule.json fallback:', e);
+        }
       }
     }
 
     if (!schedule || !schedule.sessions) {
-      return NextResponse.json({ error: 'No schedule available' }, { status: 404 });
+      return NextResponse.json({ success: false, error: 'No schedule available' }, { status: 404 });
     }
 
-    // 2. Fetch metadata from DB or starter pack
-    const [sessions, courses, faculty, rooms, groups] = await Promise.all([
-      Session.find().lean(),
-      Course.find().lean(),
-      Faculty.find().lean(),
-      Room.find().lean(),
-      StudentGroup.find().lean(),
-    ]);
+    // 2. Fetch metadata from DB or authoritative dataset fallback
+    let sessions = [];
+    let courses = [];
+    let faculty = [];
+    let rooms = [];
+    let groups = [];
 
-    const sessionMap = new Map(sessions.map((s) => [s._id, s]));
-    const courseMap = new Map(courses.map((c) => [c._id, c]));
-    const facultyMap = new Map(faculty.map((f) => [f._id, f]));
-    const roomMap = new Map(rooms.map((r) => [r._id, r]));
+    try {
+      await connectToDatabase();
+      [sessions, courses, faculty, rooms, groups] = await Promise.all([
+        Session.find().lean(),
+        Course.find().lean(),
+        Faculty.find().lean(),
+        Room.find().lean(),
+        StudentGroup.find().lean(),
+      ]);
+    } catch (dbErr) {
+      console.warn('MongoDB query warning in schedule views, using file fallback:', dbErr.message);
+    }
+
+    // Fallback to cit_public.json if any collection is empty
+    if (!sessions.length || !courses.length || !faculty.length || !rooms.length || !groups.length) {
+      const citPaths = [
+        path.resolve(process.cwd(), '../CrunchWeek_StarterPack/data/cit_public.json'),
+        path.resolve(process.cwd(), 'CrunchWeek_StarterPack/data/cit_public.json'),
+      ];
+      const citPath = citPaths.find((p) => fs.existsSync(p));
+      if (citPath) {
+        try {
+          const citData = JSON.parse(fs.readFileSync(citPath, 'utf8'));
+          if (!sessions.length) sessions = (citData.sessions || []).map((s) => ({ _id: s.id, ...s }));
+          if (!courses.length) courses = (citData.courses || []).map((c) => ({ _id: c.id, ...c }));
+          if (!faculty.length) faculty = (citData.faculty || []).map((f) => ({ _id: f.id, ...f }));
+          if (!rooms.length) rooms = (citData.rooms || []).map((r) => ({ _id: r.id, ...r }));
+          if (!groups.length) groups = (citData.student_groups || []).map((g) => ({ _id: g.id, ...g }));
+        } catch (citErr) {
+          console.error('Failed reading cit_public.json fallback:', citErr);
+        }
+      }
+    }
+
+    const sessionMap = new Map(sessions.map((s) => [s._id || s.id, s]));
+    const courseMap = new Map(courses.map((c) => [c._id || c.id, c]));
+    const facultyMap = new Map(faculty.map((f) => [f._id || f.id, f]));
+    const roomMap = new Map(rooms.map((r) => [r._id || r.id, r]));
 
     // 3. Build enriched timetable entries
     const enrichedSessions = schedule.sessions.map((item) => {
@@ -73,7 +136,11 @@ export async function GET(request) {
     // 4. Filter by query
     let filtered = enrichedSessions;
     if (filterGroup) {
-      filtered = filtered.filter((s) => s.groups.includes(filterGroup));
+      const targetGroup = normalizeGroupId(filterGroup);
+      filtered = filtered.filter((s) => {
+        const sessionGroups = (s.groups || []).map(normalizeGroupId);
+        return sessionGroups.includes(targetGroup) || (s.groups || []).includes(filterGroup);
+      });
     }
     if (filterFaculty) {
       filtered = filtered.filter((s) => s.faculty_id === filterFaculty);
@@ -85,7 +152,8 @@ export async function GET(request) {
     // 5. Calculate Room Utilisation across 45 teaching periods (5 days * 9 periods)
     const roomUsageCounts = {};
     for (const r of rooms) {
-      roomUsageCounts[r._id] = 0;
+      const rid = r._id || r.id;
+      roomUsageCounts[rid] = 0;
     }
 
     for (const s of enrichedSessions) {
@@ -95,11 +163,12 @@ export async function GET(request) {
     }
 
     const roomUtilisation = rooms.map((r) => {
-      const hoursUsed = roomUsageCounts[r._id] || 0;
+      const rid = r._id || r.id;
+      const hoursUsed = roomUsageCounts[rid] || 0;
       const totalPeriods = 45; // 5 days * 9 periods
       const pct = Math.round((hoursUsed / totalPeriods) * 100);
       return {
-        room_id: r._id,
+        room_id: rid,
         name: r.name,
         type: r.type,
         capacity: r.capacity,
@@ -140,11 +209,26 @@ export async function GET(request) {
       grid,
       sessions: filtered,
       room_utilisation: roomUtilisation,
-      student_groups: groups.map((g) => ({ id: g._id, name: g.name, year: g.year, department: g.department })),
-      faculty_list: faculty.map((f) => ({ id: f._id, name: f.name, department: f.department })),
-      rooms_list: rooms.map((r) => ({ id: r._id, name: r.name, type: r.type, capacity: r.capacity })),
+      student_groups: groups.map((g) => ({
+        id: g._id || g.id,
+        name: g.name,
+        year: g.year,
+        department: g.department,
+        size: g.size,
+      })),
+      faculty_list: faculty.map((f) => ({
+        id: f._id || f.id,
+        name: f.name,
+        department: f.department,
+      })),
+      rooms_list: rooms.map((r) => ({
+        id: r._id || r.id,
+        name: r.name,
+        type: r.type,
+        capacity: r.capacity,
+      })),
     });
   } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

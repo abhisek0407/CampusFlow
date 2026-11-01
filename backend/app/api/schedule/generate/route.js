@@ -4,9 +4,14 @@ import path from 'path';
 import connectToDatabase from '../../../../lib/mongodb';
 import { Schedule, AuditLog } from '../../../../models';
 import { runValidator } from '../../../../lib/validatorRunner';
+import { requireAuth } from '../../../../lib/auth';
 
 export async function POST(request) {
   try {
+    const authResult = await requireAuth(request, ['admin']);
+    if (authResult instanceof Response) return authResult;
+    const { user } = authResult;
+
     await connectToDatabase();
 
     const schedulePath = path.resolve(process.cwd(), '../exports/schedule.json');
@@ -14,7 +19,7 @@ export async function POST(request) {
     const finalPath = fs.existsSync(schedulePath) ? schedulePath : fs.existsSync(altSchedulePath) ? altSchedulePath : null;
 
     if (!finalPath) {
-      return NextResponse.json({ error: 'Generated schedule file not found. Run solver first.' }, { status: 404 });
+      return NextResponse.json({ success: false, error: 'Generated schedule file not found. Run solver first.' }, { status: 404 });
     }
 
     const scheduleData = JSON.parse(fs.readFileSync(finalPath, 'utf8'));
@@ -31,7 +36,7 @@ export async function POST(request) {
         sessions: scheduleData.sessions || [],
         fest_week: scheduleData.fest_week || { bookings: [], session_overrides: [] },
         exams: scheduleData.exams || [],
-        approved_by: 'Dean Academic Office',
+        approved_by: user.name || 'Dean Academic Office',
       },
       { upsert: true, new: true }
     );
@@ -49,7 +54,7 @@ export async function POST(request) {
     try {
       await AuditLog.create({
         _id: `LOG-SCHED-${Date.now()}`,
-        user_id: 'ADMIN',
+        user_id: user.id || 'ADMIN',
         action: 'TIMETABLE_GENERATED',
         entity_type: 'schedule',
         entity_id: 'SCHEDULE_CURRENT',
@@ -66,6 +71,6 @@ export async function POST(request) {
     });
   } catch (error) {
     console.error('Schedule generation error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

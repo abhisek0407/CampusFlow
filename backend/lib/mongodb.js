@@ -1,9 +1,29 @@
 import mongoose from 'mongoose';
+import dns from 'dns';
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://abhisekpanda366_db_user:CTC123@cluster0.zlny5ec.mongodb.net/orchestrai_db?retryWrites=true&w=majority';
+function applyDns() {
+  try {
+    const dnsStr = process.env.DNS_SERVERS || '8.8.8.8,1.1.1.1';
+    const servers = dnsStr.split(',').map((s) => s.trim()).filter(Boolean);
+    if (servers.length > 0) {
+      dns.setServers(servers);
+    }
+  } catch (e) {}
+}
+applyDns();
 
-if (!MONGODB_URI) {
-  throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
+function normalizeMongoUri(rawUri) {
+  if (!rawUri || typeof rawUri !== 'string') return rawUri;
+  // If URI is mongodb+srv for cluster0.zlny5ec.mongodb.net, convert directly to standard replica set URI (no SRV DNS lookups needed)
+  if (rawUri.includes('cluster0.zlny5ec.mongodb.net')) {
+    const srvMatch = rawUri.match(/^mongodb\+srv:\/\/([^@]+)@([^/?]+)(?:\/([^?]*))?(?:\?(.*))?$/);
+    if (srvMatch) {
+      const auth = srvMatch[1];
+      const db = srvMatch[3] || 'orchestrai_db';
+      return `mongodb://${auth}@ac-uvfq2rq-shard-00-00.zlny5ec.mongodb.net:27017,ac-uvfq2rq-shard-00-01.zlny5ec.mongodb.net:27017,ac-uvfq2rq-shard-00-02.zlny5ec.mongodb.net:27017/${db}?ssl=true&replicaSet=atlas-qbhc28-shard-0&authSource=admin&retryWrites=true&w=majority`;
+    }
+  }
+  return rawUri;
 }
 
 let cached = global.mongoose;
@@ -13,6 +33,14 @@ if (!cached) {
 }
 
 async function connectToDatabase() {
+  applyDns();
+  const rawTargetUri = process.env.MONGODB_URI || process.env.MONGODB_ATLAS_URI || '';
+  const targetUri = normalizeMongoUri(rawTargetUri);
+
+  if (!targetUri) {
+    throw new Error('MONGODB_URI environment variable is not defined.');
+  }
+
   if (cached.conn) {
     return cached.conn;
   }
@@ -20,17 +48,19 @@ async function connectToDatabase() {
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
-      serverSelectionTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 10000,
     };
 
-    cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongooseInstance) => {
-      console.log('MongoDB connected successfully to', mongooseInstance.connection.name);
-      return mongooseInstance;
-    }).catch((err) => {
-      console.error('MongoDB connection error:', err.message);
-      cached.promise = null;
-      throw err;
-    });
+    cached.promise = (async () => {
+      try {
+        const instance = await mongoose.connect(targetUri, opts);
+        console.log('Connected to MongoDB database:', instance.connection.name);
+        return instance;
+      } catch (err) {
+        console.error('MongoDB connection error:', err.message);
+        throw err;
+      }
+    })();
   }
 
   try {

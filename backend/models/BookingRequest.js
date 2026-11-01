@@ -44,6 +44,8 @@ const BookingRequestSchema = new mongoose.Schema({
   assigned_end_period: { type: Number, default: null },
   reviewed_by: { type: String, default: null },
   reviewed_at: { type: Date, default: null },
+  idempotency_key: { type: String, default: null, index: true },
+  check_result: { type: mongoose.Schema.Types.Mixed, default: null },
 }, {
   timestamps: true,
   _id: false,

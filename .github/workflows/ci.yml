@@ -1,0 +1,150 @@
+name: CI
+
+# Runs on every pull request into main (and on direct pushes to main).
+# Branch protection on main should require the single check "CI passed" (see CI-SETUP.md).
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # 1) Frontend must compile
+  frontend-build:
+    name: Frontend build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - name: Lint (informational - does not block the merge)
+        run: npm run lint
+        continue-on-error: true
+      - name: Build
+        run: npm run build
+
+  # 2) Solver tests: AI-service/tests (bookings, exams, repair, pipeline). Takes a few minutes.
+  ai-service-tests:
+    name: AI service tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: AI-service/requirements.txt
+      - run: pip install -r AI-service/requirements.txt pytest
+      - run: pytest AI-service/tests -q
+
+  # 3) Backend + agent tests against a real MongoDB: smoke.sh, smoke.py, agent tests
+  integration-tests:
+    name: Backend and agent tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      mongo:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ping:1})'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      MONGODB_URI: mongodb://127.0.0.1:27017/orchestrai_db
+      JWT_SECRET: ci-only-jwt-secret
+      AGENT_SHARED_SECRET: ci-only-agent-secret
+      GOOGLE_API_KEY: ci-dummy-key          # the agent tests use a mocked LLM; no real key needed
+      BACKEND_URL: http://127.0.0.1:5000
+      # Deliberately unreachable: smoke test 9 checks the "agent down" fallback (503).
+      AGENT_URL: http://127.0.0.1:9
+      SMOKE_ALLOW_APPROVE: "1"              # also run approve-twice / stale-proposal checks (CI DB is disposable)
+      # AI_SERVICE_URL is NOT set, so the backend spawns Python itself (same as local dev).
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install Python dependencies
+        run: pip install -r AI-service/requirements.txt -r agent-service/requirements.txt pytest
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+      - name: Seed database
+        working-directory: backend
+        run: npm run seed
+      - name: Build and start backend (port 5000)
+        working-directory: backend
+        run: |
+          npm run build
+          nohup npx next start -p 5000 > "$RUNNER_TEMP/backend.log" 2>&1 &
+      - name: Wait for backend
+        run: |
+          for i in $(seq 1 60); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:5000/api/schedule/current || true)
+            if [ "$code" = "200" ]; then echo "backend ready"; exit 0; fi
+            sleep 2
+          done
+          echo "backend did not become ready"; tail -n 50 "$RUNNER_TEMP/backend.log"; exit 1
+      - name: Smoke tests (bash)
+        run: bash backend/tests/smoke.sh
+      - name: Smoke tests (python)
+        run: python backend/tests/smoke.py
+      - name: Agent tests (mocked LLM)
+        working-directory: agent-service
+        run: python -m pytest test_mocked_llm.py -q
+      - name: Agent end-to-end mock runner (informational)
+        working-directory: agent-service
+        run: python test_e2e_mock_runner.py
+        continue-on-error: true
+      - name: Auth API test (informational)
+        working-directory: backend
+        run: node tests/test_auth_full.mjs
+        continue-on-error: true
+      - name: Upload backend log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-log
+          path: ${{ runner.temp }}/backend.log
+
+  # One stable name to require in branch protection.
+  ci-passed:
+    name: CI passed
+    if: always()
+    needs: [frontend-build, ai-service-tests, integration-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if any required job failed
+        run: |
+          echo "frontend-build:    ${{ needs.frontend-build.result }}"
+          echo "ai-service-tests:  ${{ needs.ai-service-tests.result }}"
+          echo "integration-tests: ${{ needs.integration-tests.result }}"
+          if [ "${{ needs.frontend-build.result }}" != "success" ] || \
+             [ "${{ needs.ai-service-tests.result }}" != "success" ] || \
+             [ "${{ needs.integration-tests.result }}" != "success" ]; then
+            exit 1
+          fi

@@ -38,7 +38,3 @@ All decisions, validity checks, and allocations are governed exclusively by **de
 - **Decision Explanations**: `backend/app/api/ai/explain/route.js`
 
 ---
-
-## 4. AI Tools Used to Build the Project
-
-- **Antigravity (Google DeepMind)**: Assisted in scaffolding Mongoose schemas, CP-SAT solver constraint modeling, and Next.js App Router API route handlers.

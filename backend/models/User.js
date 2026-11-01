@@ -13,6 +13,8 @@ const UserSchema = new mongoose.Schema({
   department: { type: String, default: 'COMMON' },
   linked_faculty_id: { type: String, default: null },
   is_active: { type: Boolean, default: true },
+  reset_password_token: { type: String, default: null },
+  reset_password_expires: { type: Date, default: null },
 }, {
   timestamps: true,
   _id: false,

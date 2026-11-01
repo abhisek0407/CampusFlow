@@ -1,0 +1,133 @@
+{
+ "id": "stress-medium-0",
+ "dataset": "cit-public-v1",
+ "description": "generated: level=medium seed=0",
+ "changes": [
+  {
+   "type": "add_faculty",
+   "faculty": {
+    "id": "FX01",
+    "name": "Visiting Faculty FX01",
+    "department": "HSS",
+    "max_hours_per_day": 4,
+    "needs_accessible": false,
+    "unavailable": [],
+    "preferences": []
+   }
+  },
+  {
+   "type": "remove_session",
+   "session_id": "PH101-D-L1"
+  },
+  {
+   "type": "add_session",
+   "session": {
+    "id": "MA101-AB-L2-N01",
+    "course_id": "MA101",
+    "kind": "lecture",
+    "groups": [
+     "Y1-A",
+     "Y1-B"
+    ],
+    "faculty_id": "F06",
+    "size": 180,
+    "duration": 1,
+    "room_types": [
+     "classroom",
+     "lecture_hall",
+     "auditorium"
+    ],
+    "needs_accessible": false,
+    "basket_slot": null,
+    "fixed_slot": null
+   }
+  },
+  {
+   "type": "room_unavailable",
+   "room_id": "MECH-WS",
+   "days": [
+    "WED"
+   ],
+   "periods": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "reason": "stress: MECH-WS closed (full day)"
+  },
+  {
+   "type": "add_session",
+   "session": {
+    "id": "EE202-L2-N00",
+    "course_id": "EE202",
+    "kind": "lecture",
+    "groups": [
+     "EE-2"
+    ],
+    "faculty_id": "FX01",
+    "size": 60,
+    "duration": 1,
+    "room_types": [
+     "classroom",
+     "lecture_hall",
+     "auditorium"
+    ],
+    "needs_accessible": false,
+    "basket_slot": null,
+    "fixed_slot": null
+   }
+  },
+  {
+   "type": "faculty_unavailable",
+   "faculty_id": "F31",
+   "days": [
+    "MON",
+    "WED",
+    "THU"
+   ],
+   "periods": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "reason": "stress: F31 out (morning)"
+  },
+  {
+   "type": "room_unavailable",
+   "room_id": "LH-1",
+   "days": [
+    "WED",
+    "FRI"
+   ],
+   "periods": [
+    6,
+    7,
+    8,
+    9
+   ],
+   "reason": "stress: LH-1 closed (afternoon)"
+  },
+  {
+   "type": "faculty_unavailable",
+   "faculty_id": "F05",
+   "days": [
+    "WED"
+   ],
+   "periods": [
+    6,
+    7,
+    8,
+    9
+   ],
+   "reason": "stress: F05 out (afternoon)"
+  }
+ ]
+}

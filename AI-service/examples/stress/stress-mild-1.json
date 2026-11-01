@@ -1,0 +1,66 @@
+{
+ "id": "stress-mild-1",
+ "dataset": "cit-public-v1",
+ "description": "generated: level=mild seed=1",
+ "changes": [
+  {
+   "type": "faculty_unavailable",
+   "faculty_id": "F10",
+   "days": [
+    "MON",
+    "WED",
+    "THU"
+   ],
+   "periods": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "reason": "stress: F10 out (morning)"
+  },
+  {
+   "type": "room_unavailable",
+   "room_id": "CIVIL-LAB",
+   "days": [
+    "MON",
+    "TUE",
+    "WED",
+    "THU"
+   ],
+   "periods": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "reason": "stress: CIVIL-LAB closed (full day)"
+  },
+  {
+   "type": "add_session",
+   "session": {
+    "id": "EC291-P1-N10",
+    "course_id": "EC291",
+    "kind": "lab",
+    "groups": [
+     "ECE-2"
+    ],
+    "faculty_id": "F11",
+    "size": 70,
+    "duration": 3,
+    "room_types": [
+     "lab_elec"
+    ],
+    "needs_accessible": false,
+    "basket_slot": null,
+    "fixed_slot": null
+   }
+  }
+ ]
+}

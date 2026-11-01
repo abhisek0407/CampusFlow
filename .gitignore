@@ -43,3 +43,12 @@ gemini.md
 GEMINI.md
 local_mongodb_data/
 report*.json
+
+tokens.json
+
+backend/backups/
+*.zip
+CampusFlow-file-tree.txt
+
+
+KNOWN_ISSUES.md

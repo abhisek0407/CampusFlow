@@ -1,0 +1,253 @@
+{
+ "id": "stress-heavy-1",
+ "dataset": "cit-public-v1",
+ "description": "generated: level=heavy seed=1",
+ "changes": [
+  {
+   "type": "add_faculty",
+   "faculty": {
+    "id": "FX11",
+    "name": "Visiting Faculty FX11",
+    "department": "ME",
+    "max_hours_per_day": 4,
+    "needs_accessible": false,
+    "unavailable": [],
+    "preferences": []
+   }
+  },
+  {
+   "type": "add_session",
+   "session": {
+    "id": "EC201-L3-N10",
+    "course_id": "EC201",
+    "kind": "lecture",
+    "groups": [
+     "ECE-2"
+    ],
+    "faculty_id": "F09",
+    "size": 70,
+    "duration": 1,
+    "room_types": [
+     "classroom",
+     "lecture_hall",
+     "auditorium"
+    ],
+    "needs_accessible": false,
+    "basket_slot": null,
+    "fixed_slot": null
+   }
+  },
+  {
+   "type": "faculty_unavailable",
+   "faculty_id": "F30",
+   "days": [
+    "MON",
+    "FRI"
+   ],
+   "periods": [
+    6,
+    7,
+    8,
+    9
+   ],
+   "reason": "stress: F30 out (afternoon)"
+  },
+  {
+   "type": "add_session",
+   "session": {
+    "id": "MA101-B-T1-N13",
+    "course_id": "MA101",
+    "kind": "tutorial",
+    "groups": [
+     "Y1-B"
+    ],
+    "faculty_id": "F37",
+    "size": 90,
+    "duration": 1,
+    "room_types": [
+     "classroom",
+     "lecture_hall",
+     "auditorium"
+    ],
+    "needs_accessible": false,
+    "basket_slot": null,
+    "fixed_slot": null
+   }
+  },
+  {
+   "type": "room_unavailable",
+   "room_id": "MECH-WS",
+   "days": [
+    "MON",
+    "WED"
+   ],
+   "periods": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "reason": "stress: MECH-WS closed (full day)"
+  },
+  {
+   "type": "add_session",
+   "session": {
+    "id": "CS292-P1-N12",
+    "course_id": "CS292",
+    "kind": "lab",
+    "groups": [
+     "CSE-2"
+    ],
+    "faculty_id": "F07",
+    "size": 80,
+    "duration": 3,
+    "room_types": [
+     "lab_elec"
+    ],
+    "needs_accessible": false,
+    "basket_slot": null,
+    "fixed_slot": null
+   }
+  },
+  {
+   "type": "remove_session",
+   "session_id": "ME301-L1"
+  },
+  {
+   "type": "room_unavailable",
+   "room_id": "CR-205",
+   "days": [
+    "TUE",
+    "THU",
+    "FRI"
+   ],
+   "periods": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "reason": "stress: CR-205 closed (full day)"
+  },
+  {
+   "type": "faculty_unavailable",
+   "faculty_id": "F22",
+   "days": [
+    "MON",
+    "TUE",
+    "FRI"
+   ],
+   "periods": [
+    6,
+    7,
+    8,
+    9
+   ],
+   "reason": "stress: F22 out (afternoon)"
+  },
+  {
+   "type": "room_unavailable",
+   "room_id": "CR-205",
+   "days": [
+    "WED"
+   ],
+   "periods": [
+    6,
+    7,
+    8,
+    9
+   ],
+   "reason": "stress: CR-205 closed (afternoon)"
+  },
+  {
+   "type": "faculty_unavailable",
+   "faculty_id": "F34",
+   "days": [
+    "TUE",
+    "THU"
+   ],
+   "periods": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "reason": "stress: F34 out (full day)"
+  },
+  {
+   "type": "room_unavailable",
+   "room_id": "CR-105",
+   "days": [
+    "TUE"
+   ],
+   "periods": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "reason": "stress: CR-105 closed (morning)"
+  },
+  {
+   "type": "add_session",
+   "session": {
+    "id": "ME291-P1-N11",
+    "course_id": "ME291",
+    "kind": "lab",
+    "groups": [
+     "ME-2"
+    ],
+    "faculty_id": "FX11",
+    "size": 60,
+    "duration": 3,
+    "room_types": [
+     "workshop"
+    ],
+    "needs_accessible": true,
+    "basket_slot": null,
+    "fixed_slot": null
+   }
+  },
+  {
+   "type": "faculty_unavailable",
+   "faculty_id": "F15",
+   "days": [
+    "TUE",
+    "WED",
+    "FRI"
+   ],
+   "periods": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "reason": "stress: F15 out (full day)"
+  },
+  {
+   "type": "remove_session",
+   "session_id": "EE201-L3"
+  }
+ ]
+}

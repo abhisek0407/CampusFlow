@@ -1,18 +1,18 @@
-import Room from './Room';
-import Faculty from './Faculty';
-import StudentGroup from './StudentGroup';
-import Course from './Course';
-import Session from './Session';
-import RoomUnavailability from './RoomUnavailability';
-import BookingRequest from './BookingRequest';
-import Cancellation from './Cancellation';
-import Exam from './Exam';
-import User from './User';
-import InstituteConfig from './InstituteConfig';
-import Schedule from './Schedule';
-import Disruption from './Disruption';
-import ScheduleVersion from './ScheduleVersion';
-import AuditLog from './AuditLog';
+import Room from './Room.js';
+import Faculty from './Faculty.js';
+import StudentGroup from './StudentGroup.js';
+import Course from './Course.js';
+import Session from './Session.js';
+import RoomUnavailability from './RoomUnavailability.js';
+import BookingRequest from './BookingRequest.js';
+import Cancellation from './Cancellation.js';
+import Exam from './Exam.js';
+import User from './User.js';
+import InstituteConfig from './InstituteConfig.js';
+import Schedule from './Schedule.js';
+import Disruption from './Disruption.js';
+import ScheduleVersion from './ScheduleVersion.js';
+import AuditLog from './AuditLog.js';
 
 export {
   Room,

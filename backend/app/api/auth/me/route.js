@@ -1,28 +1,22 @@
 import { NextResponse } from 'next/server';
-import { extractAuthToken, verifyJwt } from '../../../../lib/auth';
+import { requireAuth } from '../../../../lib/auth';
 import connectToDatabase from '../../../../lib/mongodb';
 import { User } from '../../../../models';
 
 export async function GET(request) {
   try {
-    const token = extractAuthToken(request);
-    if (!token) {
-      return NextResponse.json({ error: 'Authorization token required' }, { status: 401 });
-    }
-
-    const decoded = verifyJwt(token);
-    if (!decoded) {
-      return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
-    }
+    const authResult = await requireAuth(request);
+    if (authResult instanceof Response) return authResult;
+    const { user } = authResult;
 
     await connectToDatabase();
-    const user = await User.findById(decoded.userId).select('-password_hash');
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    const dbUser = await User.findById(user.id).select('-password_hash');
+    if (!dbUser) {
+      return NextResponse.json({ success: false, error: 'User not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true, user });
+    return NextResponse.json({ success: true, user: dbUser });
   } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

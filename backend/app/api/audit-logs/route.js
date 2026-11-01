@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server';
 import connectToDatabase from '../../../lib/mongodb';
 import { AuditLog } from '../../../models';
+import { requireAuth } from '../../../lib/auth';
 
 export async function GET(request) {
   try {
+    const authResult = await requireAuth(request, ['admin']);
+    if (authResult instanceof Response) return authResult;
+
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit') || '50', 10);
 
@@ -16,6 +20,6 @@ export async function GET(request) {
       logs,
     });
   } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
