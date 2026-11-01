@@ -3,20 +3,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { apiFetch } from '@/lib/api';
 
-const WS_BASE = (process.env.NEXT_PUBLIC_AGENT_WS_URL || 'ws://localhost:8001').replace(/\/$/, '');
+const DEFAULT_AGENT_WS_URL =
+  process.env.NODE_ENV === 'production' ? 'wss://campusflow-agent.onrender.com' : 'ws://localhost:8001';
+const WS_BASE = (process.env.NEXT_PUBLIC_AGENT_WS_URL || DEFAULT_AGENT_WS_URL).replace(/\/$/, '');
 const TARGET_RATE = 16000;
-
-// AudioWorklet source (inlined as a Blob so no extra file in /public is needed)
-const WORKLET_SRC = `
-class PcmTap extends AudioWorkletProcessor {
-  process(inputs) {
-    const ch = inputs[0] && inputs[0][0];
-    if (ch && ch.length) this.port.postMessage(ch.slice(0));
-    return true;
-  }
-}
-registerProcessor('pcm-tap', PcmTap);
-`;
 
 function toPcm16(float32, inRate) {
   let data = float32;
@@ -157,9 +147,7 @@ export default function useVoiceInput({ onPartial, onFinal, onError, onEnd, lang
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
       ctxRef.current = ctx;
 
-      const blobUrl = URL.createObjectURL(new Blob([WORKLET_SRC], { type: 'application/javascript' }));
-      await ctx.audioWorklet.addModule(blobUrl);
-      URL.revokeObjectURL(blobUrl);
+      await ctx.audioWorklet.addModule('/pcm-tap-worklet.js');
 
       const src = ctx.createMediaStreamSource(stream);
       const node = new AudioWorkletNode(ctx, 'pcm-tap');
