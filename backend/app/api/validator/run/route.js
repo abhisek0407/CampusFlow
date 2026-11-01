@@ -4,9 +4,13 @@ import path from 'path';
 import connectToDatabase from '../../../../lib/mongodb';
 import { Schedule } from '../../../../models';
 import { runValidator } from '../../../../lib/validatorRunner';
+import { requireAuth } from '../../../../lib/auth';
 
-export async function GET() {
+export async function GET(request) {
   try {
+    const authResult = await requireAuth(request, ['admin']);
+    if (authResult instanceof Response) return authResult;
+
     await connectToDatabase();
 
     let scheduleData = await Schedule.findOne({ _id: 'SCHEDULE_CURRENT' }).lean();
@@ -20,7 +24,7 @@ export async function GET() {
     }
 
     if (!scheduleData) {
-      return NextResponse.json({ error: 'No schedule found to validate' }, { status: 404 });
+      return NextResponse.json({ success: false, error: 'No schedule found to validate' }, { status: 404 });
     }
 
     const result = await runValidator({ scheduleData });
@@ -32,6 +36,6 @@ export async function GET() {
       raw_stdout: result.stdout,
     });
   } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

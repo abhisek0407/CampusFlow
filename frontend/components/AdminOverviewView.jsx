@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from '@/lib/api';
 
 import React, { useState, useEffect } from 'react';
 import {
@@ -100,8 +101,8 @@ export default function AdminOverviewView({ setActiveTab, onResetData, isResetti
     async function loadData() {
       try {
         const [sumRes, bookRes] = await Promise.all([
-          fetch('/api/dataset/summary'),
-          fetch('/api/bookings'),
+          apiFetch('/api/dataset/summary'),
+          apiFetch('/api/bookings'),
         ]);
         const sumData = await sumRes.json();
         const bookData = await bookRes.json();

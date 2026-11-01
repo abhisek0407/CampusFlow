@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from '@/lib/api';
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
@@ -151,7 +152,7 @@ export default function BookingsView({ currentUser }) {
   async function fetchBookings() {
     setLoading(true);
     try {
-      const res = await fetch('/api/bookings');
+      const res = await apiFetch('/api/bookings');
       const data = await res.json();
       if (data.success) {
         setBookings(data.bookings || []);
@@ -190,7 +191,7 @@ export default function BookingsView({ currentUser }) {
         reviewer_name: activeUser.name,
       };
 
-      const res = await fetch('/api/bookings/decide', {
+      const res = await apiFetch('/api/bookings/decide', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -239,7 +240,7 @@ export default function BookingsView({ currentUser }) {
     const targetBooking = bookings.find(b => b._id === requestId);
     if (!confirm(`Are you sure you want to cancel ${requestId}? (Rule B3 enforces that cancelled bookings cannot be approved)`)) return;
     try {
-      const res = await fetch('/api/bookings/cancel', {
+      const res = await apiFetch('/api/bookings/cancel', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ request_id: requestId, note: 'Cancelled via Portal by Club' }),
@@ -278,7 +279,7 @@ export default function BookingsView({ currentUser }) {
         windows: [{ day: manualForm.day, from_period: Number(manualForm.from_period), to_period: Number(manualForm.to_period) }],
       };
 
-      const res = await fetch('/api/bookings', {
+      const res = await apiFetch('/api/bookings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

@@ -21,6 +21,7 @@ import {
   LogOut,
   ChevronRight,
   Shield,
+  CalendarDays,
   Briefcase,
   Users,
   DoorOpen
@@ -36,6 +37,7 @@ export const ROLE_NAV_CONFIG = {
     tabs: [
       { id: 'overview', label: 'Overview', icon: LayoutDashboard, desc: 'Institutional KPIs & Status' },
       { id: 'timetable', label: 'Timetable Management', icon: Calendar, desc: 'Weekly Matrix & Allocation' },
+      { id: 'calendar', label: 'Calendar', icon: CalendarDays, desc: 'Faculty Leaves by Date' },
       { id: 'exams', label: 'Exam Scheduling', icon: Clock, desc: 'Midsem Exam Matrix' },
       { id: 'bookings', label: 'Venue Bookings', icon: Building2, desc: 'Spectra Fest Allocations' },
       { id: 'disruptions', label: 'Disruption Management', icon: AlertTriangle, desc: 'Minimal-Move Rescheduling' },
@@ -52,6 +54,7 @@ export const ROLE_NAV_CONFIG = {
     defaultTab: 'overview',
     tabs: [
       { id: 'overview', label: 'Overview', icon: LayoutDashboard, desc: 'Department Metrics & Status' },
+      { id: 'calendar', label: 'Calendar', icon: CalendarDays, desc: 'Faculty Leaves by Date' },
       { id: 'department-timetable', label: 'Department Timetable', icon: Calendar, desc: 'CSE Cohorts & Faculty' },
       { id: 'department-bookings', label: 'Department Bookings', icon: Building2, desc: 'CSE Lab Approvals' },
       { id: 'schedule-change-requests', label: 'Schedule Change Requests', icon: FileEdit, desc: 'Session Move Proposals' },
@@ -65,6 +68,7 @@ export const ROLE_NAV_CONFIG = {
     tabs: [
       { id: 'overview', label: 'Overview', icon: LayoutDashboard, desc: 'Teaching Load & Daily Cap' },
       { id: 'my-timetable', label: 'My Timetable', icon: Calendar, desc: 'Personalized Schedule' },
+      { id: 'calendar', label: 'My Calendar', icon: CalendarDays, desc: 'Classes & Leave by Date' },
       { id: 'mark-unavailability', label: 'Mark Unavailability', icon: Clock, desc: 'Leaves & Avoid Slots' },
       { id: 'request-extra-session', label: 'Request Extra Session', icon: PlusCircle, desc: 'Reschedule or Extra Lab' },
       { id: 'ai-faculty-assistant', label: 'AI Faculty Assistant', icon: Sparkles, desc: 'Natural Language Rescheduling' },
@@ -97,9 +101,8 @@ export default function Sidebar({
 
   return (
     <aside
-      className={`fixed inset-y-0 left-0 z-40 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col transition-all duration-300 shadow-xs ${
-        sidebarCollapsed ? '-translate-x-full md:translate-x-0 md:w-20' : 'translate-x-0 w-72'
-      }`}
+      className={`fixed inset-y-0 left-0 z-40 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col transition-all duration-300 shadow-xs ${sidebarCollapsed ? '-translate-x-full md:translate-x-0 md:w-20' : 'translate-x-0 w-72'
+        }`}
     >
       {/* Brand Header */}
       <div className="h-15 px-4 flex items-center justify-between border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/30">
@@ -138,13 +141,11 @@ export default function Sidebar({
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               title={tab.label}
-              className={`w-full flex items-center rounded-xl transition-all ${
-                sidebarCollapsed ? 'justify-center p-3' : 'px-3 py-2 space-x-3 text-left'
-              } ${
-                isActive
+              className={`w-full flex items-center rounded-xl transition-all ${sidebarCollapsed ? 'justify-center p-3' : 'px-3 py-2 space-x-3 text-left'
+                } ${isActive
                   ? 'bg-indigo-600 text-white font-medium shadow-sm shadow-indigo-600/30'
                   : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-slate-900 dark:hover:text-white'
-              }`}
+                }`}
             >
               <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-500 dark:text-slate-400'}`} />
               {!sidebarCollapsed && (

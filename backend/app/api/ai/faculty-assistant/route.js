@@ -1,131 +1,67 @@
 import { NextResponse } from 'next/server';
-import connectToDatabase from '../../../../lib/mongodb.js';
-import { Schedule, Session, Faculty, Room, Disruption, AuditLog } from '../../../../models/index.js';
+import { requireAuth } from '../../../../lib/auth.js';
+import { parseFacultyRequest } from '../../../../lib/aiParser.js';
+import { createProposal } from '../../../../lib/disruptionService.js';
 
+/**
+ * Rule-based faculty assistant (works WITHOUT the Gemini agent service).
+ * Used as an automatic fallback by the frontend when /api/agent/chat is unavailable.
+ * Body: { message } OR { title, changes } ; admin may include faculty_id
+ */
 export async function POST(request) {
   try {
-    const { faculty_id, prompt, session_id } = await request.json();
+    const authResult = await requireAuth(request, ['faculty', 'admin']);
+    if (authResult instanceof Response) return authResult;
+    const { user } = authResult;
 
-    if (!faculty_id || !prompt) {
-      return NextResponse.json({ error: 'faculty_id and prompt are required' }, { status: 400 });
-    }
+    const body = await request.json().catch(() => ({}));
 
-    await connectToDatabase();
+    let title = body.title;
+    let changes = body.changes;
+    let reason = body.reason || '';
 
-    const faculty = await Faculty.findById(faculty_id).lean();
-    if (!faculty) {
-      return NextResponse.json({ error: `Faculty ${faculty_id} not found` }, { status: 404 });
-    }
-
-    const schedule = await Schedule.findOne({ _id: 'SCHEDULE_CURRENT' }).lean();
-    if (!schedule || !schedule.sessions) {
-      return NextResponse.json({ error: 'No active schedule found to modify' }, { status: 400 });
-    }
-
-    // Normalize schedule.sessions into an array of objects
-    const sessionList = Array.isArray(schedule.sessions)
-      ? schedule.sessions
-      : Object.entries(schedule.sessions).map(([id, alloc]) => ({
-          session_id: id,
-          ...alloc,
-        }));
-
-    const dbSessions = await Session.find({ faculty_id }).lean();
-    const facultySessionIds = new Set(dbSessions.map((s) => s._id));
-
-    const activeFacultySessions = sessionList.filter((s) => facultySessionIds.has(s.session_id));
-
-    // Analyze prompt for days mentioned
-    const lower = prompt.toLowerCase();
-    let targetDay = null;
-    if (lower.includes('mon')) targetDay = 'MON';
-    else if (lower.includes('tue')) targetDay = 'TUE';
-    else if (lower.includes('wed')) targetDay = 'WED';
-    else if (lower.includes('thu')) targetDay = 'THU';
-    else if (lower.includes('fri')) targetDay = 'FRI';
-
-    // Target session
-    let targetSession = null;
-    if (session_id) {
-      targetSession = activeFacultySessions.find((s) => s.session_id === session_id);
-    } else if (targetDay) {
-      targetSession = activeFacultySessions.find((s) => s.day === targetDay);
-    }
-    if (!targetSession && activeFacultySessions.length > 0) {
-      targetSession = activeFacultySessions[0];
-    }
-
-    if (!targetSession) {
-      return NextResponse.json({
-        success: false,
-        explanation: `No scheduled sessions found for ${faculty.name} (${faculty_id}) on ${targetDay || 'the requested days'}.`,
-      });
-    }
-
-    const sessionMeta = dbSessions.find((s) => s._id === targetSession.session_id) || {
-      room_types: ['classroom', 'lecture_hall'],
-      size: 50,
-      duration: 1,
-    };
-
-    // Search for alternative slot: strictly validating constraints (H2, H3, H4, H12)
-    const days = ['MON', 'TUE', 'WED', 'THU', 'FRI'];
-    const rooms = await Room.find().lean();
-    const candidateRooms = rooms.filter((r) => 
-      (!sessionMeta.room_types || sessionMeta.room_types.includes(r.type)) && 
-      r.capacity >= (sessionMeta.size || 30)
-    );
-
-    let proposal = null;
-    for (const d of days) {
-      if (d === targetSession.day) continue; // move to different day
-
-      for (let st = 1; st <= 8; st++) {
-        if (st <= 5 && st + (sessionMeta.duration || 1) - 1 > 5) continue; // lunch check
-
-        // Check if faculty has another class on day d period st
-        const facClash = sessionList.some((s) => facultySessionIds.has(s.session_id) && s.day === d && s.start_period === st);
-        if (facClash) continue;
-
-        // Find available room
-        for (const r of candidateRooms) {
-          const roomTaken = sessionList.some((s) => s.day === d && s.start_period === st && s.room_id === r._id);
-          if (!roomTaken) {
-            proposal = {
-              session_id: targetSession.session_id,
-              original: {
-                day: targetSession.day,
-                start_period: targetSession.start_period,
-                room_id: targetSession.room_id,
-              },
-              proposed: {
-                day: d,
-                start_period: st,
-                room_id: r._id,
-              },
-              reason: `Relocated from ${targetSession.day} to avoid faculty unavailability while respecting group schedules and room capacities.`,
-            };
-            break;
-          }
-        }
-        if (proposal) break;
+    if (!Array.isArray(changes) || changes.length === 0) {
+      const message = body.message || body.prompt || body.raw_text;
+      if (!message || typeof message !== 'string') {
+        return NextResponse.json({ success: false, error: 'message is required' }, { status: 400 });
       }
-      if (proposal) break;
+      const facultyId = user.role === 'faculty' ? user.linked_faculty_id : body.faculty_id || null;
+      const parsed = parseFacultyRequest(message, facultyId);
+      if (!parsed.ok) {
+        return NextResponse.json({ success: true, reply: parsed.error, proposal_id: null, offline: true });
+      }
+      title = parsed.title;
+      changes = [parsed.change];
+      reason = message;
     }
 
-    if (!proposal) {
-      return NextResponse.json({
-        success: false,
-        explanation: `Could not find an alternative slot without creating hard constraint conflicts. All alternative slots either violate faculty daily limit or clash with student cohort lectures.`,
-      });
+    const { status, body: result } = await createProposal({ user, title, changes, reason });
+    if (!result.success) {
+      return NextResponse.json({ success: false, error: result.error }, { status });
     }
+
+    const p = result.proposal;
+    const moved = p.diff ? p.diff.length : 0;
+    const reply = p.feasible
+      ? `Proposal ${result.disruption_id} created: the solver found a conflict-free repair. ${moved} session(s) moved, ${p.unchanged_count ?? 'N/A'} unchanged, 0 hard violations. This is only a PROPOSAL - it is awaiting administrator approval.`
+      : `Proposal ${result.disruption_id} created, but the solver could not find a fully feasible repair (${p.status}). ${Object.keys(p.dropped || {}).length} session(s) could not be placed. An administrator will review it.`;
 
     return NextResponse.json({
       success: true,
-      proposal,
-      explanation: `Proposed moving session ${proposal.session_id} from ${proposal.original.day} P${proposal.original.start_period} (${proposal.original.room_id}) to ${proposal.proposed.day} P${proposal.proposed.start_period} in room ${proposal.proposed.room_id}. This satisfies all 14 hard constraints: no overlap for faculty ${faculty_id}, zero cohort clashes, and venue capacity is verified.`,
+      offline: true,
+      reply,
+      proposal_id: result.disruption_id,
+      proposal: p,
+      tool_trace: [
+        {
+          type: 'response',
+          tool: 'propose_timetable_change',
+          result: { disruption_id: result.disruption_id, proposal: p },
+        },
+      ],
     });
   } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('Faculty assistant error:', error);
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

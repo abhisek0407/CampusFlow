@@ -1,0 +1,69 @@
+# Render Blueprint: three backend services from one repo.
+# Render dashboard -> New -> Blueprint -> pick this repo. Fill every "sync: false" value when asked.
+# Plan "free" sleeps after ~15 min idle (first request then takes ~30-60 s). Use "starter" for a real demo/launch.
+services:
+  # 1) Solver: OR-Tools CP-SAT + official validator (Python / FastAPI)
+  - type: web
+    name: campusflow-ai-service
+    runtime: python
+    region: singapore
+    plan: free
+    buildCommand: pip install -r AI-service/requirements.txt
+    startCommand: cd AI-service && uvicorn server:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: AI_SERVICE_SECRET
+        sync: false
+      - key: MAX_CONCURRENT_SOLVES
+        value: "1"
+
+  # 2) Main API: Next.js route handlers + MongoDB (Node.js)
+  - type: web
+    name: campusflow-backend
+    runtime: node
+    region: singapore
+    plan: free
+    buildCommand: cd backend && npm ci && npm run build
+    startCommand: cd backend && npx next start -p $PORT
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: AI_SERVICE_URL        # https://campusflow-ai-service.onrender.com
+        sync: false
+      - key: AI_SERVICE_SECRET     # same value as on the AI service
+        sync: false
+      - key: AGENT_URL             # https://campusflow-agent.onrender.com
+        sync: false
+      - key: AGENT_SHARED_SECRET   # same value as on the agent service
+        sync: false
+
+  # 3) AI assistant: Gemini (google-adk) + Sarvam speech-to-text websocket (Python / FastAPI)
+  - type: web
+    name: campusflow-agent
+    runtime: python
+    region: singapore
+    plan: free
+    buildCommand: cd agent-service && pip install -r requirements.txt
+    startCommand: cd agent-service && uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: GOOGLE_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-2.5-flash
+      - key: BACKEND_URL           # https://campusflow-backend.onrender.com  (the backend directly, not Vercel)
+        sync: false
+      - key: AGENT_SHARED_SECRET   # same value as on the backend
+        sync: false
+      - key: SARVAM_API_KEY
+        sync: false

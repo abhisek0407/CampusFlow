@@ -22,6 +22,7 @@ const ScheduleVersionSchema = new mongoose.Schema({
   changes: [ChangeRecordSchema],
   sessions_moved: { type: Number, default: 0 },
   approved_by: { type: String, default: null },
+  disruption_id: { type: String, default: null },
 }, {
   timestamps: true,
   _id: false,

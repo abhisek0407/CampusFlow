@@ -2,7 +2,18 @@ import { spawn } from 'child_process';
 import path from 'path';
 import fs from 'fs';
 
+import { aiServiceConfig, callAiService } from './pythonBridge';
+
 export async function runValidator({ scheduleData, disruptionData = null, baselineData = null }) {
+  // Production: validate on the AI service (it has Python + the dataset); local dev: spawn python below.
+  if (aiServiceConfig()) {
+    return callAiService(
+      'validate',
+      { schedule: scheduleData, disruption: disruptionData, baseline: baselineData },
+      120000
+    );
+  }
+
   const tmpDir = path.resolve(process.cwd(), '../tmp_validator');
   if (!fs.existsSync(tmpDir)) {
     fs.mkdirSync(tmpDir, { recursive: true });
@@ -44,8 +55,10 @@ export async function runValidator({ scheduleData, disruptionData = null, baseli
     args.push('--baseline', baselinePath);
   }
 
+  const pythonBin = process.env.PYTHON_BIN || 'python';
+
   return new Promise((resolve, reject) => {
-    const proc = spawn('python', args);
+    const proc = spawn(pythonBin, args);
     let stdout = '';
     let stderr = '';
 

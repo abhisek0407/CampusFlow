@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from '@/lib/api';
 
 import React, { useState, useEffect } from 'react';
 import { 
@@ -32,7 +33,7 @@ export default function ValidatorView() {
   async function runValidator() {
     setLoading(true);
     try {
-      const res = await fetch('/api/validator/run');
+      const res = await apiFetch('/api/validator/run');
       const data = await res.json();
       if (data.success) {
         setValidatorReport(data);
@@ -46,7 +47,7 @@ export default function ValidatorView() {
 
   async function fetchAuditLogs() {
     try {
-      const res = await fetch('/api/audit-logs');
+      const res = await apiFetch('/api/audit-logs');
       const data = await res.json();
       if (data.success) {
         setAuditLogs(data.logs || []);

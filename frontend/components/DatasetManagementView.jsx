@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from '@/lib/api';
 
 import React, { useState, useEffect } from 'react';
 import {
@@ -28,7 +29,7 @@ export default function DatasetManagementView({ onResetData, isResetting }) {
 
   async function fetchSummary() {
     try {
-      const res = await fetch('/api/dataset/summary');
+      const res = await apiFetch('/api/dataset/summary');
       const data = await res.json();
       if (data.success) {
         setSummary(data);
@@ -40,7 +41,7 @@ export default function DatasetManagementView({ onResetData, isResetting }) {
 
   async function fetchAuditLogs() {
     try {
-      const res = await fetch('/api/audit-logs');
+      const res = await apiFetch('/api/audit-logs');
       const data = await res.json();
       if (data.success && data.logs) {
         setAuditLogs(data.logs.slice(0, 10));
@@ -54,7 +55,7 @@ export default function DatasetManagementView({ onResetData, isResetting }) {
     setIsRunningValidator(true);
     setValidatorReport(null);
     try {
-      const res = await fetch('/api/validator/run');
+      const res = await apiFetch('/api/validator/run');
       const data = await res.json();
       setValidatorReport(data);
     } catch (e) {

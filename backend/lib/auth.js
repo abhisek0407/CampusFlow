@@ -1,15 +1,22 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
+import { NextResponse } from 'next/server';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'campusflow_jwt_secret_key_cit_2027_secure';
+function getJwtSecret() {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET environment variable is required');
+  }
+  return secret;
+}
 
 export function signJwt(payload, expiresIn = '7d') {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn });
+  return jwt.sign(payload, getJwtSecret(), { expiresIn });
 }
 
 export function verifyJwt(token) {
   try {
-    return jwt.verify(token, JWT_SECRET);
+    return jwt.verify(token, getJwtSecret());
   } catch (err) {
     return null;
   }
@@ -30,4 +37,32 @@ export function extractAuthToken(request) {
     return authHeader.substring(7);
   }
   return null;
+}
+
+export async function requireAuth(request, allowedRoles = null) {
+  const token = extractAuthToken(request);
+  if (!token) {
+    return NextResponse.json({ success: false, error: 'Unauthorized: Missing authentication token' }, { status: 401 });
+  }
+
+  const decoded = verifyJwt(token);
+  if (!decoded) {
+    return NextResponse.json({ success: false, error: 'Unauthorized: Invalid or expired token' }, { status: 401 });
+  }
+
+  const user = {
+    id: decoded.userId || decoded.id,
+    role: decoded.role,
+    name: decoded.name,
+    department: decoded.department,
+    linked_faculty_id: decoded.linked_faculty_id || null,
+  };
+
+  if (allowedRoles && Array.isArray(allowedRoles) && allowedRoles.length > 0) {
+    if (!allowedRoles.includes(user.role)) {
+      return NextResponse.json({ success: false, error: 'Forbidden: Insufficient role permissions' }, { status: 403 });
+    }
+  }
+
+  return { user };
 }

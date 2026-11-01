@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from '@/lib/api';
 
 import React, { useState } from 'react';
 import {
@@ -13,7 +14,8 @@ import {
   ShieldCheck,
   Send,
   Edit3,
-  PlusCircle
+  PlusCircle,
+  X
 } from 'lucide-react';
 
 const SAMPLE_HINGLISH_PROMPTS = [
@@ -29,6 +31,7 @@ export default function ClubNewBookingView({ setActiveTab }) {
   const [parsedData, setParsedData] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMsg, setSuccessMsg] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
 
   // Editable Structured Form State
   const [title, setTitle] = useState('Spectra Annual Play Rehearsal');
@@ -37,20 +40,19 @@ export default function ClubNewBookingView({ setActiveTab }) {
   const [durationPeriods, setDurationPeriods] = useState(3);
   const [preferredDay, setPreferredDay] = useState('THU');
   const [startPeriod, setStartPeriod] = useState(10); // P10 = 18:00 (Evening events)
-  const [preferredRoom, setPreferredRoom] = useState('AUD-1');
-  const [needs, setNeeds] = useState(['audio_system', 'projector', 'mic']);
+  const [preferredRoom, setPreferredRoom] = useState('AUD');
+  const [needs, setNeeds] = useState(['pa_system', 'projector']);
 
   async function handleParsePrompt() {
     if (!rawText.trim()) return;
     setIsParsing(true);
+    setErrorMsg(null);
     try {
-      const res = await fetch('/api/ai/parse-booking', {
+      const res = await apiFetch('/api/ai/parse-booking', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           raw_text: rawText,
-          requester: 'Dramatics Society',
-          role: 'club'
         }),
       });
       const data = await res.json();
@@ -60,16 +62,31 @@ export default function ClubNewBookingView({ setActiveTab }) {
         setTitle(data.booking.title || title);
         setAttendance(data.booking.attendance || 100);
         setDurationPeriods(data.booking.duration_periods || 3);
-        if (data.booking.requested_room) setPreferredRoom(data.booking.requested_room);
+        if (data.booking.requested_room) {
+          {
+            const known = ['AUD', 'OAT', 'SH-1', 'SH-2', 'LH-1', 'CR-101'];
+            const r = data.booking.requested_room === 'AUD-1' ? 'AUD' : data.booking.requested_room;
+            if (known.includes(r)) setPreferredRoom(r);
+          }
+        }
         if (data.booking.windows && data.booking.windows[0]) {
-          setPreferredDay(data.booking.windows[0].day);
-          setStartPeriod(data.booking.windows[0].periods[0] || 10);
+          const w = data.booking.windows[0];
+          if (w.day) setPreferredDay(w.day);
+          const start = w.from_period ?? (Array.isArray(w.periods) ? w.periods[0] : 10);
+          setStartPeriod(Number(start));
+        }
+        if (data.booking.requested_category) {
+          setCategory(data.booking.requested_category);
+        }
+        if (Array.isArray(data.booking.needs) && data.booking.needs.length > 0) {
+          setNeeds(data.booking.needs);
         }
       } else {
-        alert(data.error || 'Failed to extract booking details');
+        setErrorMsg(data.error || 'Failed to extract booking details');
       }
     } catch (e) {
-      alert('Error parsing text with AI');
+      console.error('Error parsing booking text:', e);
+      setErrorMsg(e.message || 'Error parsing text with AI');
     } finally {
       setIsParsing(false);
     }
@@ -78,25 +95,36 @@ export default function ClubNewBookingView({ setActiveTab }) {
   async function handleFinalSubmit(e) {
     e.preventDefault();
     setIsSubmitting(true);
+    setErrorMsg(null);
     try {
+      const start = Number(startPeriod);
+      const dur = Number(durationPeriods);
       const bookingPayload = {
         title,
-        requester: 'Dramatics Society',
-        role: 'club',
         requested_category: category,
         attendance: Number(attendance),
-        duration_periods: Number(durationPeriods),
+        duration_periods: dur,
         windows: [{
           day: preferredDay,
-          periods: Array.from({ length: Number(durationPeriods) }, (_, i) => Number(startPeriod) + i)
+          from_period: start,
+          to_period: start + dur - 1,
         }],
-        room_types: preferredRoom.includes('AUD') ? ['auditorium'] : preferredRoom.includes('OAT') ? ['open_air_theatre'] : ['seminar_hall'],
-        requested_room: preferredRoom,
+        // FIX: values must match the Room model enum (old code sent 'open_air_theatre')
+        room_types: preferredRoom.includes('AUD')
+          ? ['auditorium']
+          : preferredRoom.includes('OAT')
+            ? ['outdoor']
+            : preferredRoom.includes('SH')
+              ? ['seminar_hall']
+              : preferredRoom.includes('LH')
+                ? ['lecture_hall']
+                : ['classroom'],
+        requested_room: preferredRoom === 'AUD-1' ? 'AUD' : preferredRoom,
         needs,
         raw_text: rawText || 'Submitted via structured booking form',
       };
 
-      const res = await fetch('/api/bookings', {
+      const res = await apiFetch('/api/bookings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(bookingPayload),
@@ -112,10 +140,11 @@ export default function ClubNewBookingView({ setActiveTab }) {
           if (setActiveTab) setActiveTab('my-bookings');
         }, 2500);
       } else {
-        alert(data.error || 'Submission failed');
+        setErrorMsg(data.error || 'Submission failed');
       }
     } catch (e) {
-      alert('Network error submitting booking');
+      console.error('Error submitting booking:', e);
+      setErrorMsg(e.message || 'Network error submitting booking');
     } finally {
       setIsSubmitting(false);
     }
@@ -123,7 +152,6 @@ export default function ClubNewBookingView({ setActiveTab }) {
 
   return (
     <div className="space-y-6 animate-slide-up">
-      
       {/* Header (Unboxed, Consistent text-2xl) */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -140,21 +168,19 @@ export default function ClubNewBookingView({ setActiveTab }) {
         <div className="flex items-center space-x-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
           <button
             onClick={() => setActiveMode('ai')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-              activeMode === 'ai'
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${activeMode === 'ai'
                 ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 shadow-sm'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-            }`}
+              }`}
           >
             AI Natural Language / Hinglish
           </button>
           <button
             onClick={() => setActiveMode('manual')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-              activeMode === 'manual'
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${activeMode === 'manual'
                 ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 shadow-sm'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-            }`}
+              }`}
           >
             Manual Form (Rule 6 Fallback)
           </button>
@@ -165,6 +191,18 @@ export default function ClubNewBookingView({ setActiveTab }) {
         <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 text-xs flex items-center space-x-2">
           <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-600" />
           <span className="font-medium">{successMsg}</span>
+        </div>
+      )}
+
+      {errorMsg && (
+        <div className="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200 text-xs flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <AlertCircle className="w-5 h-5 shrink-0 text-rose-600" />
+            <span className="font-medium">{errorMsg}</span>
+          </div>
+          <button type="button" onClick={() => setErrorMsg(null)} className="text-rose-500 hover:text-rose-700">
+            <X className="w-4 h-4" />
+          </button>
         </div>
       )}
 
@@ -198,7 +236,7 @@ export default function ClubNewBookingView({ setActiveTab }) {
                   onClick={() => setRawText(p)}
                   className="w-full text-left p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/40 hover:bg-emerald-50/60 dark:hover:bg-emerald-950/30 text-[11px] text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700/60 hover:border-emerald-300 dark:hover:border-emerald-700 hover:scale-[1.006] active:scale-[0.99] transition-all duration-200 flex items-center justify-between group cursor-pointer"
                 >
-                  "{p}"
+                  {p}
                 </button>
               ))}
             </div>
@@ -226,7 +264,7 @@ export default function ClubNewBookingView({ setActiveTab }) {
               <span>Step 2: Check and Edit Structured Booking Details</span>
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">
-              Review all extracted parameters and make adjustments before submitting to the Dean's Office.
+              Review all extracted parameters and make adjustments before submitting to the Deans Office.
             </p>
           </div>
           <span className="text-xs font-semibold px-2.5 py-1 rounded bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
@@ -323,11 +361,19 @@ export default function ClubNewBookingView({ setActiveTab }) {
                 onChange={(e) => setStartPeriod(Number(e.target.value))}
                 className="w-full p-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
               >
+                <option value={1}>P1 (08:00 - Morning)</option>
+                <option value={2}>P2 (09:00)</option>
+                <option value={3}>P3 (10:00)</option>
+                <option value={4}>P4 (11:00)</option>
+                <option value={5}>P5 (12:00)</option>
                 <option value={6}>P6 (14:00 - Afternoon)</option>
                 <option value={7}>P7 (15:00)</option>
                 <option value={8}>P8 (16:00)</option>
+                <option value={9}>P9 (17:00)</option>
                 <option value={10}>P10 (18:00 - Evening Event)</option>
                 <option value={11}>P11 (19:00 - Evening Event)</option>
+                <option value={12}>P12 (20:00 - Evening Event)</option>
+                <option value={13}>P13 (21:00 - Evening Event)</option>
               </select>
             </div>
           </div>
@@ -341,11 +387,12 @@ export default function ClubNewBookingView({ setActiveTab }) {
               onChange={(e) => setPreferredRoom(e.target.value)}
               className="w-full p-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
             >
-              <option value="AUD-1">AUD-1: Main Auditorium (Capacity: 300, Projector, Audio System)</option>
+              <option value="AUD">AUD: Main Auditorium (Capacity: 500, Projector, Stage, Audio System)</option>
               <option value="OAT">OAT: Open Air Theatre (Capacity: 400, Outdoor)</option>
               <option value="SH-1">SH-1: Seminar Hall 1 (Capacity: 80, Audio/Video)</option>
               <option value="SH-2">SH-2: Seminar Hall 2 (Capacity: 80, Audio/Video)</option>
               <option value="LH-1">LH-1: Large Lecture Hall 1 (Capacity: 120)</option>
+              <option value="CR-101">CR-101: Classroom 101 (Capacity: 60)</option>
             </select>
           </div>
 

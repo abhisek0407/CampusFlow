@@ -222,6 +222,32 @@ export async function seedDatabase(options = { resetAll: true }) {
     await Disruption.deleteMany({});
     await ScheduleVersion.deleteMany({});
     await AuditLog.deleteMany({});
+
+    // Re-create SCHEDULE_CURRENT at version 1 from exports/schedule.json
+    try {
+      const schedPath = path.resolve(process.cwd(), '../exports/schedule.json');
+      const altSchedPath = path.resolve(process.cwd(), 'exports/schedule.json');
+      const schedFile = fs.existsSync(schedPath) ? schedPath : fs.existsSync(altSchedPath) ? altSchedPath : null;
+
+      if (!schedFile) {
+        throw new Error('Baseline schedule file exports/schedule.json could not be found.');
+      }
+
+      const baselineSched = JSON.parse(fs.readFileSync(schedFile, 'utf8'));
+      await Schedule.create({
+        _id: 'SCHEDULE_CURRENT',
+        team: baselineSched.team || 'OrchestrAI',
+        dataset_id: baselineSched.dataset_id || data.dataset_id || 'cit-public-v1',
+        version: 1,
+        sessions: baselineSched.sessions || [],
+        fest_week: baselineSched.fest_week || { bookings: [], session_overrides: [] },
+        exams: baselineSched.exams || [],
+        status: 'approved',
+        approved_by: 'System Seed',
+      });
+    } catch (err) {
+      throw new Error(`Failed to initialize SCHEDULE_CURRENT from baseline export: ${err.message}`);
+    }
   }
 
   // Initial Audit Log

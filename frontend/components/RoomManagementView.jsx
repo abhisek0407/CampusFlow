@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from '@/lib/api';
 
 import React, { useState, useEffect } from 'react';
 import {
@@ -32,7 +33,7 @@ export default function RoomManagementView() {
 
   async function fetchRooms() {
     try {
-      const res = await fetch('/api/dataset/summary');
+      const res = await apiFetch('/api/dataset/summary');
       const data = await res.json();
       if (data.success && data.rooms) {
         setRooms(data.rooms);

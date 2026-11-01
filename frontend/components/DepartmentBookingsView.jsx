@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from '@/lib/api';
 
 import React, { useState, useEffect } from 'react';
 import {
@@ -33,7 +34,7 @@ export default function DepartmentBookingsView() {
 
   async function fetchBookings() {
     try {
-      const res = await fetch('/api/bookings');
+      const res = await apiFetch('/api/bookings');
       const data = await res.json();
       if (data.success && data.bookings) {
         // Filter bookings requesting lab spaces or department rooms
@@ -60,7 +61,7 @@ export default function DepartmentBookingsView() {
     setSubmitting(true);
     try {
       const reqId = selectedBooking._id || selectedBooking.id;
-      const res = await fetch('/api/bookings/decide', {
+      const res = await apiFetch('/api/bookings/decide', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

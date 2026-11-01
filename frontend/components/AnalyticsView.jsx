@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from '@/lib/api';
 
 import React, { useState, useEffect } from 'react';
 import {
@@ -27,7 +28,7 @@ export default function AnalyticsView() {
 
   async function fetchStats() {
     try {
-      const res = await fetch('/api/schedule/views');
+      const res = await apiFetch('/api/schedule/views');
       const data = await res.json();
       if (data.success && data.room_utilisation) {
         setRoomStats(data.room_utilisation);

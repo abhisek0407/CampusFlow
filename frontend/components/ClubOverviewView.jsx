@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from '@/lib/api';
 
 import React, { useState, useEffect } from 'react';
 import {
@@ -21,7 +22,7 @@ export default function ClubOverviewView({ setActiveTab }) {
   const clubName = 'Dramatics Society';
 
   useEffect(() => {
-    fetch('/api/bookings')
+    apiFetch('/api/bookings')
       .then(res => res.json())
       .then(data => {
         if (data.success && data.bookings) {

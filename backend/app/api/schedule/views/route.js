@@ -33,29 +33,30 @@ export async function GET(request) {
     const filterFaculty = searchParams.get('faculty');
     const filterRoom = searchParams.get('room');
 
-    // 1. Fetch current schedule (Ground truth benchmark exports/schedule.json, with DB fallback)
+    // 1. Fetch current schedule (MongoDB SCHEDULE_CURRENT first, with exports/schedule.json fallback)
     let schedule = null;
-    const schedulePath = path.resolve(process.cwd(), '../exports/schedule.json');
-    const altSchedulePath = path.resolve(process.cwd(), 'exports/schedule.json');
-    const finalPath = fs.existsSync(schedulePath) ? schedulePath : fs.existsSync(altSchedulePath) ? altSchedulePath : null;
-    if (finalPath) {
-      try {
-        schedule = JSON.parse(fs.readFileSync(finalPath, 'utf8'));
-      } catch (e) {
-        console.error('Error reading exports/schedule.json:', e);
-      }
+    try {
+      await connectToDatabase();
+      schedule = await Schedule.findOne({ _id: 'SCHEDULE_CURRENT' }).lean();
+    } catch (e) {
+      console.error('Error querying SCHEDULE_CURRENT:', e);
     }
+
     if (!schedule) {
-      try {
-        await connectToDatabase();
-        schedule = await Schedule.findOne({ _id: 'SCHEDULE_CURRENT' }).lean();
-      } catch (e) {
-        console.error('Error querying SCHEDULE_CURRENT:', e);
+      const schedulePath = path.resolve(process.cwd(), '../exports/schedule.json');
+      const altSchedulePath = path.resolve(process.cwd(), 'exports/schedule.json');
+      const finalPath = fs.existsSync(schedulePath) ? schedulePath : fs.existsSync(altSchedulePath) ? altSchedulePath : null;
+      if (finalPath) {
+        try {
+          schedule = JSON.parse(fs.readFileSync(finalPath, 'utf8'));
+        } catch (e) {
+          console.error('Error reading exports/schedule.json fallback:', e);
+        }
       }
     }
 
     if (!schedule || !schedule.sessions) {
-      return NextResponse.json({ error: 'No schedule available' }, { status: 404 });
+      return NextResponse.json({ success: false, error: 'No schedule available' }, { status: 404 });
     }
 
     // 2. Fetch metadata from DB or authoritative dataset fallback
@@ -228,6 +229,6 @@ export async function GET(request) {
       })),
     });
   } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

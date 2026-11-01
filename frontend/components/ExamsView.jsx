@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from '@/lib/api';
 
 import React, { useState, useEffect } from 'react';
 import { 
@@ -128,12 +129,10 @@ export default function ExamsView() {
 
   async function fetchExams() {
     try {
-      const res = await fetch('/api/schedule/current');
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success && data.schedule?.exams && data.schedule.exams.length > 0) {
-          setExams(data.schedule.exams);
-        }
+      const res = await apiFetch('/api/schedule/current');
+      const data = await res.json();
+      if (res.ok && data.success && data.schedule?.exams?.length > 0) {
+        setExams(data.schedule.exams);
       }
     } catch (e) {
       console.warn('Using baseline exam benchmark data:', e);

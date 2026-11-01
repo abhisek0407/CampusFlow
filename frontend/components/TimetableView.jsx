@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from '@/lib/api';
 
 import React, { useState, useEffect } from 'react';
 import { 
@@ -56,7 +57,7 @@ export default function TimetableView() {
     setLoading(true);
     try {
       const param = filterType === 'group' ? `group=${selectedItem}` : filterType === 'faculty' ? `faculty=${selectedItem}` : `room=${selectedItem}`;
-      const res = await fetch(`/api/schedule/views?${param}`);
+      const res = await apiFetch(`/api/schedule/views?${param}`);
       const data = await res.json();
       if (data.success) {
         setTimetableData(data);

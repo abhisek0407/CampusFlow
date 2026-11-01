@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from '@/lib/api';
 
 import React, { useState, useEffect } from 'react';
 import {
@@ -31,7 +32,7 @@ export default function CoordinatorChangeRequestsView() {
   ]);
 
   useEffect(() => {
-    fetch('/api/dataset/summary')
+    apiFetch('/api/dataset/summary')
       .then(r => r.json())
       .then(d => {
         if (d.success && d.courses) {

@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from '@/lib/api';
 
 import React, { useState, useEffect } from 'react';
 import {
@@ -30,7 +31,7 @@ export default function ClubMyBookingsView({ setActiveTab }) {
 
   async function fetchBookings() {
     try {
-      const res = await fetch('/api/bookings');
+      const res = await apiFetch('/api/bookings');
       const data = await res.json();
       if (data.success && data.bookings) {
         // Filter to club bookings (Dramatics Society or club role)
@@ -56,7 +57,7 @@ export default function ClubMyBookingsView({ setActiveTab }) {
     }
     setCancellingId(bookingId);
     try {
-      const res = await fetch('/api/bookings/cancel', {
+      const res = await apiFetch('/api/bookings/cancel', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -2,15 +2,20 @@ import { NextResponse } from 'next/server';
 import { parseNaturalLanguageBooking } from '../../../../lib/aiParser.js';
 import connectToDatabase from '../../../../lib/mongodb.js';
 import { Room, Schedule } from '../../../../models/index.js';
+import { requireAuth } from '../../../../lib/auth.js';
 
 export async function POST(request) {
   try {
+    const authResult = await requireAuth(request);
+    if (authResult instanceof Response) return authResult;
+    const { user: authUser } = authResult;
+
     const body = await request.json();
     const prompt = body.prompt || body.raw_text;
-    const user = body.user || { role: body.role, requester: body.requester };
+    const user = { role: authUser.role, requester: authUser.name };
 
     if (!prompt || typeof prompt !== 'string') {
-      return NextResponse.json({ error: 'Text prompt (prompt or raw_text) is required' }, { status: 400 });
+      return NextResponse.json({ success: false, error: 'Text prompt (prompt or raw_text) is required' }, { status: 400 });
     }
 
     await connectToDatabase();
@@ -53,6 +58,8 @@ export async function POST(request) {
       success: true,
       booking: structured,
       extracted_booking: structured,
+      parsed: structured,
+      conflict_check: conflicts.length > 0 ? { has_conflict: true, conflicts } : { has_conflict: false },
       suitable_rooms: candidateRooms.map((r) => ({
         id: r._id,
         name: r.name,
@@ -62,6 +69,6 @@ export async function POST(request) {
       potential_conflicts: conflicts,
     });
   } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from '@/lib/api';
 
 import React, { useState, useEffect } from 'react';
 import Sidebar, { ROLE_NAV_CONFIG } from '../components/Sidebar';
@@ -15,6 +16,7 @@ import ExamsView from '../components/ExamsView';
 import BookingsView from '../components/BookingsView';
 import DisruptionView from '../components/DisruptionView';
 import AIAssistantView from '../components/AIAssistantView';
+import CalendarView from '../components/CalendarView';
 import RoomManagementView from '../components/RoomManagementView';
 import AnalyticsView from '../components/AnalyticsView';
 import DatasetManagementView from '../components/DatasetManagementView';
@@ -82,38 +84,42 @@ export default function Home() {
     showToast(`Welcome back, ${user.name}! (${user.role.toUpperCase()})`);
   }
 
-  function handleSwitchUser(user) {
-    setCurrentUser(user);
-    setActiveTab('overview');
-    localStorage.setItem('cit_user', JSON.stringify(user));
-
-    // Request JWT from backend
+  async function handleSwitchUser(user) {
+    // FIX: old code switched the UI first and fetched the JWT in the background, so the new
+    // portal kept using the PREVIOUS user's token (wrong role -> 403 / wrong AI behaviour).
+    // Now: get the new token first, then switch.
     const passwords = {
       'admin@cit.edu': 'Admin@123',
       'dept.cse@cit.edu': 'Dept@123',
       'faculty.f01@cit.edu': 'Faculty@123',
       'club.dramatics@cit.edu': 'Club@123',
     };
-    fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: user.email, password: passwords[user.email] || 'Admin@123' }),
-    })
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.success && d.token) {
-          localStorage.setItem('cit_token', d.token);
-        }
-      })
-      .catch(() => {});
-
-    showToast(`Switched active portal: ${user.name} (${user.role.toUpperCase()})`);
+    try {
+      const r = await apiFetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: user.email, password: passwords[user.email] || 'Admin@123' }),
+      });
+      const d = await r.json();
+      if (d.success && d.token) {
+        localStorage.setItem('cit_token', d.token);
+        const fullUser = { ...user, ...(d.user || {}) };
+        localStorage.setItem('cit_user', JSON.stringify(fullUser));
+        setCurrentUser(fullUser);
+        setActiveTab('overview');
+        showToast(`Switched active portal: ${fullUser.name} (${fullUser.role.toUpperCase()})`);
+        return;
+      }
+      showToast(d.error || 'Could not switch portal (login failed)');
+    } catch (e) {
+      showToast('Could not switch portal - backend unreachable');
+    }
   }
 
   async function handleLogout() {
     try {
       await fetch('/api/auth/logout', { method: 'POST' });
-    } catch (e) {}
+    } catch (e) { }
     localStorage.removeItem('cit_user');
     localStorage.removeItem('cit_token');
     setCurrentUser(null);
@@ -128,7 +134,7 @@ export default function Home() {
     }
     setIsResetting(true);
     try {
-      const res = await fetch('/api/admin/reset-database', { method: 'POST' });
+      const res = await apiFetch('/api/admin/reset-database', { method: 'POST' });
       const data = await res.json();
       if (data.success) {
         showToast("Database successfully restored to clean starter dataset state!");
@@ -238,6 +244,8 @@ export default function Home() {
       switch (activeTab) {
         case 'overview':
           return <AdminOverviewView setActiveTab={setActiveTab} onResetData={handleResetData} isResetting={isResetting} />;
+        case 'calendar':
+          return <CalendarView currentUser={currentUser} setActiveTab={setActiveTab} />;
         case 'timetable':
           return <TimetableView />;
         case 'exams':
@@ -264,6 +272,8 @@ export default function Home() {
       switch (activeTab) {
         case 'overview':
           return <CoordinatorOverviewView setActiveTab={setActiveTab} />;
+        case 'calendar':
+          return <CalendarView currentUser={currentUser} setActiveTab={setActiveTab} />;
         case 'department-timetable':
           return <TimetableView />;
         case 'department-bookings':
@@ -280,6 +290,8 @@ export default function Home() {
       switch (activeTab) {
         case 'overview':
           return <FacultyOverviewView currentUser={currentUser} setActiveTab={setActiveTab} />;
+        case 'calendar':
+          return <CalendarView currentUser={currentUser} setActiveTab={setActiveTab} />;
         case 'my-timetable':
           return <FacultyMyTimetableView currentUser={currentUser} setActiveTab={setActiveTab} />;
         case 'mark-unavailability':
@@ -287,7 +299,7 @@ export default function Home() {
         case 'request-extra-session':
           return <FacultyRequestSessionView />;
         case 'ai-faculty-assistant':
-          return <AIAssistantView />;
+          return <AIAssistantView currentUser={currentUser} />;
         default:
           return <FacultyOverviewView setActiveTab={setActiveTab} />;
       }
@@ -314,7 +326,7 @@ export default function Home() {
 
   return (
     <div className="h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans flex overflow-hidden">
-      
+
       {/* Role-Based Sidebar */}
       <Sidebar
         currentUser={currentUser}
@@ -336,7 +348,7 @@ export default function Home() {
 
       {/* Main Content Area */}
       <div className={`flex-1 flex flex-col h-screen overflow-hidden transition-all duration-300 ${sidebarCollapsed ? 'md:ml-20 ml-0' : 'md:ml-72 ml-0'}`}>
-        
+
         {/* Top Header */}
         <TopHeader
           currentUser={currentUser}

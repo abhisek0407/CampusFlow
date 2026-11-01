@@ -85,6 +85,32 @@ When a user logs in (or switches demo profile), CampusFlow dynamically identifie
 
 ---
 
+## 🤖 Run the Agent
+
+**Prerequisites**: Node.js 18+, Python 3.10+ venv, MongoDB Atlas URI, Google Gemini API key.
+
+**Environment variables to set** (names only, see `.env.example` in respective folders):
+- `backend/.env.local`: `MONGODB_URI`, `JWT_SECRET`, `PYTHON_BIN`, `AGENT_URL`, `AGENT_SHARED_SECRET`
+- `agent-service/.env`: `GOOGLE_API_KEY`, `GEMINI_MODEL`, `BACKEND_URL`, `AGENT_PORT`, `AGENT_SHARED_SECRET`
+
+**Commands in order**:
+1. Seed database: `cd backend && npm run seed`
+2. Start backend (port 5000): `cd backend && npm run dev`
+3. Start frontend (port 3000): `cd frontend && npm run dev`
+4. Start agent service (port 8001): `cd agent-service && uvicorn main:app --port 8001`
+
+**Demo Logins**:
+- **Admin**: `admin@cit.edu` / `Admin@123`
+- **Dept Coordinator**: `dept.cse@cit.edu` / `Dept@123`
+- **Faculty (F01)**: `faculty.f01@cit.edu` / `Faculty@123`
+- **Club Rep**: `club.dramatics@cit.edu` / `Club@123`
+
+**Offline Fallback**: If the agent service is down or unreachable, `/api/agent/chat` returns HTTP 503 (`ai_unavailable`) and the UI falls back to manual mode so booking submissions continue to work.
+
+> **Notice**: Never click Reset Demo Data during a demo; it clears audit logs.
+
+---
+
 ## 🚀 Running the Project
 
 ### 1. Start the Backend API Server (Port 5000)
@@ -103,7 +129,23 @@ npm run start
 # Runs on http://localhost:3000
 ```
 
-### 3. Verify Baseline & Disruption with Official Validator
+### 3. Start the AI Agent Service (Port 8001)
+`ash
+cd agent-service
+# Copy agent-service/.env.example to agent-service/.env and set your GOOGLE_API_KEY
+python -m uvicorn main:app --port 8001
+# Runs on http://localhost:8001 (proxied server-to-server via backend /api/agent/chat)
+`
+
+### 4. Run Smoke Tests
+`ash
+# Automated end-to-end verification of auth, role caps, CP-SAT solver, concurrency, and fallbacks:
+bash backend/tests/smoke.sh
+# or on Windows:
+python backend/tests/smoke.py
+`
+
+### 5. Verify Baseline & Disruption with Official Validator
 ```bash
 # Baseline check
 python CrunchWeek_StarterPack/validator.py --data CrunchWeek_StarterPack/data/cit_public.json --schedule exports/schedule.json

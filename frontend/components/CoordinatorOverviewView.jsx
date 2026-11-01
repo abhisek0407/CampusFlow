@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from '@/lib/api';
 
 import React, { useState, useEffect } from 'react';
 import {
@@ -19,7 +20,7 @@ export default function CoordinatorOverviewView({ setActiveTab }) {
   const [summary, setSummary] = useState(null);
 
   useEffect(() => {
-    fetch('/api/dataset/summary')
+    apiFetch('/api/dataset/summary')
       .then(res => res.json())
       .then(data => { if (data.success) setSummary(data); })
       .catch(err => console.error(err));
