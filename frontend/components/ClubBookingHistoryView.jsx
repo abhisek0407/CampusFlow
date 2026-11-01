@@ -53,7 +53,7 @@ export default function ClubBookingHistoryView() {
   ]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-slide-up">
       
       {/* Header (Unboxed, Consistent text-2xl) */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -70,7 +70,7 @@ export default function ClubBookingHistoryView() {
 
       <div className="space-y-3">
         {history.map((item) => (
-          <div key={item.id} className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm text-xs space-y-2">
+          <div key={item.id} className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs hover:shadow-md card-interactive text-xs space-y-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <span className="font-bold font-mono text-slate-900 dark:text-slate-100">{item.id}</span>

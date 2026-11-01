@@ -59,15 +59,18 @@ export default function DepartmentBookingsView() {
     if (!selectedBooking) return;
     setSubmitting(true);
     try {
+      const reqId = selectedBooking._id || selectedBooking.id;
       const res = await fetch('/api/bookings/decide', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          request_id: selectedBooking._id || selectedBooking.id,
-          booking_id: selectedBooking._id || selectedBooking.id,
+          request_id: reqId,
+          booking_id: reqId,
           status: actionType, // 'approved' or 'rejected'
           decision: actionType,
+          decision_reason: decisionReason || (actionType === 'approved' ? 'Approved by CSE Department Coordinator' : 'Denied due to lab equipment maintenance'),
           reason: decisionReason || (actionType === 'approved' ? 'Approved by CSE Department Coordinator' : 'Denied due to lab equipment maintenance'),
+          reviewer_name: 'Prof. Rajesh Sharma (Coordinator)',
         }),
       });
       const data = await res.json();

@@ -5,13 +5,16 @@ import { BookingRequest, Cancellation, AuditLog } from '../../../../models';
 export async function POST(request) {
   try {
     await connectToDatabase();
-    const { request_id, cancelled_by = 'Club Representative', note = 'Withdrawn by requester' } = await request.json();
+    const body = await request.json();
+    const request_id = body.request_id || body.booking_id || body.id;
+    const cancelled_by = body.cancelled_by || body.by || 'Club Representative';
+    const note = body.note || 'Withdrawn by requester per Section 4';
 
     if (!request_id) {
       return NextResponse.json({ error: 'request_id is required' }, { status: 400 });
     }
 
-    const booking = await BookingRequest.findById(request_id);
+    const booking = (await BookingRequest.findById(request_id)) || (await BookingRequest.findOne({ _id: request_id }));
     if (!booking) {
       return NextResponse.json({ error: 'Booking request not found' }, { status: 404 });
     }

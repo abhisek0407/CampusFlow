@@ -60,7 +60,9 @@ export default function ClubMyBookingsView({ setActiveTab }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          request_id: bookingId,
           booking_id: bookingId,
+          cancelled_by: 'Dramatics Society Lead',
           by: 'Dramatics Society Lead',
           note: 'Cancelled from club self-service portal'
         })
@@ -88,7 +90,7 @@ export default function ClubMyBookingsView({ setActiveTab }) {
   );
 
   return (
-    <div className="space-y-2.5">
+    <div className="space-y-6 animate-slide-up">
       
       {/* Header (Unboxed, Consistent text-xl) */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -129,7 +131,7 @@ export default function ClubMyBookingsView({ setActiveTab }) {
           return (
             <div
               key={reqId}
-              className={`p-3 rounded-xl border transition ${
+              className={`p-5 rounded-2xl border transition-all duration-200 card-interactive ${
                 isCancelled
                   ? 'bg-slate-50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 opacity-60'
                   : isApproved
@@ -169,7 +171,7 @@ export default function ClubMyBookingsView({ setActiveTab }) {
                       onClick={() => handleCancel(reqId)}
                       disabled={cancellingId === reqId}
                       title="Withdraw request (Rule B3)"
-                      className="px-2.5 py-1 rounded-lg bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/40 text-rose-700 dark:text-rose-300 text-[11px] font-semibold border border-rose-200 dark:border-rose-800 transition flex items-center space-x-1"
+                      className="px-3 py-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/40 active:scale-95 text-rose-700 dark:text-rose-300 text-xs font-semibold border border-rose-200 dark:border-rose-800 transition-all flex items-center space-x-1.5 cursor-pointer"
                     >
                       <Ban className="w-3 h-3" />
                       <span>{cancellingId === reqId ? 'Cancelling...' : 'Cancel Request'}</span>
