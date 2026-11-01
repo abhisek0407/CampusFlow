@@ -67,11 +67,8 @@ export const ROLE_NAV_CONFIG = {
     defaultTab: 'overview',
     tabs: [
       { id: 'overview', label: 'Overview', icon: LayoutDashboard, desc: 'Teaching Load & Daily Cap' },
-      { id: 'my-timetable', label: 'My Timetable', icon: Calendar, desc: 'Personalized Schedule' },
       { id: 'calendar', label: 'My Calendar', icon: CalendarDays, desc: 'Classes & Leave by Date' },
-      { id: 'mark-unavailability', label: 'Mark Unavailability', icon: Clock, desc: 'Leaves & Avoid Slots' },
       { id: 'request-extra-session', label: 'Request Extra Session', icon: PlusCircle, desc: 'Reschedule or Extra Lab' },
-      { id: 'ai-faculty-assistant', label: 'AI Faculty Assistant', icon: Sparkles, desc: 'Natural Language Rescheduling' },
     ]
   },
   club: {
@@ -83,7 +80,6 @@ export const ROLE_NAV_CONFIG = {
       { id: 'overview', label: 'Overview', icon: LayoutDashboard, desc: 'Fest Quota & Requests' },
       { id: 'new-venue-booking', label: 'New Venue Booking', icon: PlusCircle, desc: 'Hinglish & Form Booking' },
       { id: 'my-bookings', label: 'My Bookings', icon: CalendarCheck2, desc: 'Live Status & Cancellation' },
-      { id: 'booking-history', label: 'Booking History', icon: History, desc: 'Past Decisions & Logs' },
     ]
   }
 };

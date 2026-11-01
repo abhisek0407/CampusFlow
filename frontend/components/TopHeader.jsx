@@ -71,7 +71,7 @@ export default function TopHeader({
   const currentTabObj = roleConfig.tabs.find(t => t.id === activeTab) || roleConfig.tabs[0];
 
   return (
-    <header className="sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-xs transition-colors duration-200">
+    <header className="sticky top-0 z-40 bg-white dark:bg-[#0b0f19] border-b border-slate-200 dark:border-slate-800 shadow-xs transition-colors duration-200">
       <div className="px-3 sm:px-6 h-13 sm:h-14 flex items-center justify-between">
         
         {/* Left: Sidebar Toggle + Breadcrumb */}

@@ -146,7 +146,7 @@ export default function RoomManagementView() {
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-500 uppercase tracking-wider font-semibold border-b border-slate-200 dark:border-slate-800">
+            <thead className="bg-slate-100/90 dark:bg-slate-900/90 text-slate-900 dark:text-white uppercase tracking-wider font-bold border-b border-slate-200 dark:border-slate-800">
               <tr>
                 <th className="px-3 py-2 text-[11px]">Room ID</th>
                 <th className="px-3 py-2 text-[11px]">Name</th>
@@ -259,3 +259,5 @@ export default function RoomManagementView() {
     </div>
   );
 }
+
+

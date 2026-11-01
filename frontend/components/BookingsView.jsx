@@ -1,7 +1,7 @@
 'use client';
-import { apiFetch } from '@/lib/api';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { apiFetch } from '@/lib/api';
 import { 
   Building2, 
   Search, 
@@ -20,37 +20,42 @@ import {
   MapPin,
   Users,
   Timer,
-  X
+  X,
+  Check,
+  ArrowRightLeft,
+  MessageSquare,
+  ShieldCheck,
+  FileText
 } from 'lucide-react';
 
-// ── Toast System ────────────────────────────────────────────────
+// ── Toast Notification Component ─────────────────────────────────
 function Toast({ toast, onDismiss }) {
   const styles = {
     success: {
       bg: 'bg-emerald-950/95 border-emerald-500 text-emerald-100 shadow-emerald-900/30',
-      icon: <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />,
+      icon: <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />,
       titleColor: 'text-emerald-300',
     },
     error: {
       bg: 'bg-rose-950/95 border-rose-500 text-rose-100 shadow-rose-900/30',
-      icon: <XCircle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />,
+      icon: <XCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />,
       titleColor: 'text-rose-300',
     },
     warning: {
       bg: 'bg-amber-950/95 border-amber-500 text-amber-100 shadow-amber-900/30',
-      icon: <AlertCircle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />,
+      icon: <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />,
       titleColor: 'text-amber-300',
     },
     info: {
       bg: 'bg-indigo-950/95 border-indigo-500 text-indigo-100 shadow-indigo-900/30',
-      icon: <Sparkles className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />,
+      icon: <Sparkles className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />,
       titleColor: 'text-indigo-300',
     },
   };
   const current = styles[toast.type] || styles.info;
 
   return (
-    <div className={`p-3.5 rounded-xl border backdrop-blur-md shadow-2xl flex items-start gap-3 transition-all duration-300 pointer-events-auto animate-in slide-in-from-top-3 ${current.bg}`}>
+    <div className={`p-3 rounded-xl border backdrop-blur-md shadow-2xl flex items-start gap-2.5 transition-all duration-300 pointer-events-auto animate-in slide-in-from-top-3 ${current.bg}`}>
       {current.icon}
       <div className="flex-1 min-w-0">
         {toast.title && (
@@ -67,7 +72,7 @@ function Toast({ toast, onDismiss }) {
         className="opacity-60 hover:opacity-100 text-white p-0.5 rounded transition shrink-0"
         title="Dismiss"
       >
-        <X className="w-4 h-4" />
+        <X className="w-3.5 h-3.5" />
       </button>
     </div>
   );
@@ -76,7 +81,7 @@ function Toast({ toast, onDismiss }) {
 function ToastContainer({ toasts, onDismiss }) {
   if (toasts.length === 0) return null;
   return (
-    <div className="fixed top-5 right-6 z-[9999] flex flex-col gap-2.5 max-w-md w-full pointer-events-none">
+    <div className="fixed top-5 right-6 z-[9999] flex flex-col gap-2 max-w-md w-full pointer-events-none">
       {toasts.map(t => (
         <div key={t.id} className="pointer-events-auto">
           <Toast toast={t} onDismiss={onDismiss} />
@@ -95,7 +100,7 @@ const CATEGORY_WEIGHTS = {
 
 const STATUS_BADGES = {
   approved: { label: 'Approved', color: 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800', icon: CheckCircle2 },
-  alternative_offered: { label: 'Alternative Offered', color: 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800', icon: AlertCircle },
+  alternative_offered: { label: 'Alt Offered', color: 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800', icon: AlertCircle },
   rejected: { label: 'Rejected', color: 'bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800', icon: XCircle },
   cancelled: { label: 'Cancelled', color: 'bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700', icon: Ban },
   pending: { label: 'Pending Review', color: 'bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-950 dark:text-indigo-300', icon: Clock },
@@ -115,10 +120,9 @@ export default function BookingsView({ currentUser }) {
   const [altStart, setAltStart] = useState(10);
   const [showManualModal, setShowManualModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const CARDS_PER_PAGE = 8;
+  const ROWS_PER_PAGE = 7; // Perfectly balances table rows to fit single screen without scroll
   const [toasts, setToasts] = useState([]);
   const [decidedIds, setDecidedIds] = useState(new Set());
-  const [confirmModal, setConfirmModal] = useState(null);
   const [manualForm, setManualForm] = useState({
     title: '',
     requester: '',
@@ -133,7 +137,6 @@ export default function BookingsView({ currentUser }) {
     to_period: 11,
   });
 
-  // Toast helpers with title and message
   const addToast = useCallback((type, titleOrMessage, optionalMessage) => {
     const id = Date.now() + Math.random();
     const title = optionalMessage !== undefined ? titleOrMessage : (type === 'success' ? 'Action Completed' : type === 'error' ? 'Action Failed' : 'Notice');
@@ -141,6 +144,7 @@ export default function BookingsView({ currentUser }) {
     setToasts(prev => [...prev, { id, type, title, message }]);
     setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 5000);
   }, []);
+
   const dismissToast = useCallback((id) => {
     setToasts(prev => prev.filter(t => t.id !== id));
   }, []);
@@ -164,9 +168,25 @@ export default function BookingsView({ currentUser }) {
     }
   }
 
+  function openDecisionModal(booking, type) {
+    let defaultReason = '';
+    if (type === 'approve') {
+      defaultReason = `Approved by ${activeUser.name}: Venue capacity verified and zero academic timetable clashes.`;
+    } else if (type === 'alternative') {
+      defaultReason = `Requested window in ${booking.requested_room || 'AUD'} unavailable; alternative venue offered.`;
+    } else {
+      defaultReason = `Rejected by ${activeUser.name}: Venue capacity insufficient for requested time slot.`;
+    }
+
+    setDecisionReason(defaultReason);
+    setAltRoom(booking.requested_room || 'AUD');
+    setAltDay(booking.windows?.[0]?.day || 'MON');
+    setAltStart(booking.windows?.[0]?.from_period || 10);
+    setActionModal({ booking, type });
+  }
+
   async function handleDecisionSubmit() {
     if (!actionModal) return;
-    const statusMap = { approve: 'approved', reject: 'rejected', alternative: 'alternative_offered' };
     const booking = actionModal.booking;
     const bId = booking._id;
     const bTitle = booking.title;
@@ -175,19 +195,22 @@ export default function BookingsView({ currentUser }) {
     const bType = actionModal.type;
 
     try {
-      const assignedRoom = bType === 'alternative' ? altRoom : booking.assigned_room || booking.requested_room || 'Main AUD';
-      const assignedDay = bType === 'alternative' ? altDay : booking.assigned_day || 'MON';
-      const assignedStart = bType === 'alternative' ? Number(altStart) : booking.assigned_start_period || 10;
-      const assignedEnd = bType === 'alternative' ? Number(altStart) + booking.duration_periods - 1 : (booking.assigned_end_period || 11);
+      const assignedRoom = bType === 'alternative' ? altRoom : (actionModal.booking.assigned_room || actionModal.booking.requested_room || 'AUD');
+      const assignedDay = bType === 'alternative' ? altDay : (actionModal.booking.assigned_day || actionModal.booking.windows?.[0]?.day || 'MON');
+      const assignedStart = bType === 'alternative' ? Number(altStart) : (actionModal.booking.assigned_start_period || actionModal.booking.windows?.[0]?.from_period || 10);
+      const assignedEnd = bType === 'alternative' ? Number(altStart) + actionModal.booking.duration_periods - 1 : (actionModal.booking.assigned_end_period || assignedStart + (actionModal.booking.duration_periods || 2) - 1);
+      const newStatus = bType === 'alternative' ? 'alternative_offered' : (bType === 'approve' ? 'approved' : 'rejected');
 
       const payload = {
-        request_id: actionModal.booking._id,
-        status: actionModal.type === 'alternative' ? 'alternative_offered' : (actionModal.type === 'approve' ? 'approved' : 'rejected'),
-        decision_reason: decisionReason || `${actionModal.type.toUpperCase()} by ${activeUser.name}`,
-        assigned_day: actionModal.type === 'alternative' ? altDay : actionModal.booking.assigned_day || 'MON',
-        assigned_start_period: actionModal.type === 'alternative' ? Number(altStart) : actionModal.booking.assigned_start_period || 10,
-        assigned_end_period: actionModal.type === 'alternative' ? Number(altStart) + actionModal.booking.duration_periods - 1 : 11,
-        assigned_room: actionModal.type === 'alternative' ? altRoom : actionModal.booking.assigned_room || 'AUD',
+        request_id: bId,
+        booking_id: bId,
+        status: newStatus,
+        decision: newStatus,
+        decision_reason: decisionReason || `${bType.toUpperCase()} by ${activeUser.name}`,
+        assigned_day: assignedDay,
+        assigned_start_period: assignedStart,
+        assigned_end_period: assignedEnd,
+        assigned_room: assignedRoom,
         reviewer_name: activeUser.name,
       };
 
@@ -198,31 +221,41 @@ export default function BookingsView({ currentUser }) {
       });
       const data = await res.json();
       if (data.success) {
-        // Immediately disappear the card from the view
+        // Track decided IDs so it drops from default Pending view
         setDecidedIds(prev => new Set([...prev, bId]));
-        setBookings(prev => prev.filter(b => b._id !== bId));
+
+        // Update local status so if user filters by "approved", "rejected", etc., it appears immediately
+        setBookings(prev => prev.map(b => b._id === bId ? {
+          ...b,
+          status: newStatus,
+          decision_reason: payload.decision_reason,
+          assigned_room: assignedRoom,
+          assigned_day: assignedDay,
+          assigned_start_period: assignedStart,
+          assigned_end_period: assignedEnd
+        } : b));
 
         setActionModal(null);
         setDecisionReason('');
 
-        // Rich toast message indicating exactly where it was allocated / sent
+        // Dispatched Toast notification
         if (bType === 'approve') {
           addToast(
             'success',
             `Approved & Dispatched (${bId})`,
-            `Successfully approved "${bTitle}"! Allocated to ${assignedRoom} on ${assignedDay} (P${assignedStart}–P${assignedEnd}). Notification sent to ${bRequester} (${bRole}).`
+            `Successfully approved "${bTitle}"! Allocated to ${assignedRoom} on ${assignedDay} (P${assignedStart}–P${assignedEnd}). Notification sent to ${bRequester}.`
           );
         } else if (bType === 'alternative') {
           addToast(
             'warning',
             `Alternative Offered (${bId})`,
-            `Offered alternative for "${bTitle}": Reallocated to ${assignedRoom} on ${assignedDay} (P${assignedStart}–P${assignedEnd}). Sent to ${bRequester}.`
+            `Offered alternative for "${bTitle}": Reallocated to ${assignedRoom} on ${assignedDay} (P${assignedStart}–P${assignedEnd}). Notification sent to ${bRequester}.`
           );
         } else {
           addToast(
             'error',
             `Booking Rejected (${bId})`,
-            `Request "${bTitle}" rejected. Official rejection notice dispatched to ${bRequester}.`
+            `Request "${bTitle}" rejected. Official notice dispatched to ${bRequester}.`
           );
         }
 
@@ -236,41 +269,13 @@ export default function BookingsView({ currentUser }) {
     }
   }
 
-  async function handleCancelBooking(requestId) {
-    const targetBooking = bookings.find(b => b._id === requestId);
-    if (!confirm(`Are you sure you want to cancel ${requestId}? (Rule B3 enforces that cancelled bookings cannot be approved)`)) return;
-    try {
-      const res = await apiFetch('/api/bookings/cancel', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ request_id: requestId, note: 'Cancelled via Portal by Club' }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setDecidedIds(prev => new Set([...prev, requestId]));
-        setBookings(prev => prev.filter(b => b._id !== requestId));
-        addToast(
-          'info',
-          `Booking Withdrawn (${requestId})`,
-          `Booking "${targetBooking?.title || requestId}" withdrawn by ${targetBooking?.requester || 'Requester'}. Archived under Rule B3.`
-        );
-        fetchBookings();
-      } else {
-        addToast('error', 'Cancel Failed', data.error || 'Failed to cancel booking');
-      }
-    } catch (e) {
-      console.error('Cancel error:', e);
-      addToast('error', 'Network Error', 'Failed to cancel booking.');
-    }
-  }
-
   async function handleManualSubmit(e) {
     e.preventDefault();
     try {
       const payload = {
         title: manualForm.title,
-        requester: currentUser?.name || manualForm.requester || 'Club Rep',
-        role: currentUser?.role || manualForm.role,
+        requester: activeUser.name || manualForm.requester || 'Club Rep',
+        role: activeUser.role || manualForm.role,
         requested_category: manualForm.requested_category,
         attendance: Number(manualForm.attendance),
         duration_periods: Number(manualForm.duration_periods),
@@ -298,401 +303,571 @@ export default function BookingsView({ currentUser }) {
     }
   }
 
+  // Filter Bookings logic
   const filteredBookings = bookings.filter((b) => {
-    // In pending review mode, hide cards that were decided in this session
+    // In pending review mode, hide requests decided in this session
     if (selectedStatus === 'pending' && decidedIds.has(b._id)) {
       return false;
     }
-    const matchesSearch = b.title?.toLowerCase().includes(search.toLowerCase()) || 
+    const matchesSearch = !search.trim() || 
+                          b.title?.toLowerCase().includes(search.toLowerCase()) || 
                           b._id?.toLowerCase().includes(search.toLowerCase()) ||
-                          b.requester?.toLowerCase().includes(search.toLowerCase());
+                          b.requester?.toLowerCase().includes(search.toLowerCase()) ||
+                          b.requested_room?.toLowerCase().includes(search.toLowerCase());
     const matchesCat = selectedCategory === 'ALL' || b.requested_category === selectedCategory;
     const matchesStatus = selectedStatus === 'ALL' || b.status === selectedStatus;
     return matchesSearch && matchesCat && matchesStatus;
   });
 
   // Pagination logic
-  const totalPages = Math.max(1, Math.ceil(filteredBookings.length / CARDS_PER_PAGE));
+  const totalPages = Math.max(1, Math.ceil(filteredBookings.length / ROWS_PER_PAGE));
   const safePage = Math.min(currentPage, totalPages);
   const paginatedBookings = filteredBookings.slice(
-    (safePage - 1) * CARDS_PER_PAGE,
-    safePage * CARDS_PER_PAGE
+    (safePage - 1) * ROWS_PER_PAGE,
+    safePage * ROWS_PER_PAGE
   );
 
-  // Reset page when filters change
   useEffect(() => { setCurrentPage(1); }, [search, selectedCategory, selectedStatus]);
 
   return (
     <div className="space-y-2.5">
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
       
-      {/* Page Header */}
+      {/* 1. Page Header (Unboxed, Consistent text-2xl matching ExamsView) */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
             <Building2 className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-            <span>Spectra Fest Venue Management</span>
+            <span>Spectra Fest Venue Review & Authorizations</span>
           </h1>
           <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-            25 Fest Venue Requests • 67.0 Benchmark Score (Ceiling) • Priority Compliant (Admin &gt; Faculty &gt; Coord &gt; Club)
+            25 Fest Requests • 67.0 Benchmark Score (Ceiling) • Priority Compliant (Admin &gt; Faculty &gt; Coord &gt; Club)
           </p>
         </div>
+
         <button
           onClick={() => setShowManualModal(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-xs transition self-start sm:self-auto"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-xs transition cursor-pointer self-start sm:self-auto"
         >
           <Plus className="w-3.5 h-3.5" />
           <span>Submit Request</span>
         </button>
       </div>
 
-      {/* Filter Bar */}
-      <div className="bg-white dark:bg-[#111625] rounded-xl p-2 border border-slate-200/90 dark:border-slate-800/80 shadow-xs">
+      {/* 2. Compact Search & Filter Controls */}
+      <div className="bg-white dark:bg-[#111625] rounded-xl px-3 py-2 border border-slate-200/90 dark:border-slate-800/80 shadow-xs">
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+          
           <div className="relative flex-1">
             <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
-              placeholder="Search title, ID, or requester..."
+              placeholder="Search by title, ID (BR-01), requester, or venue..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full text-xs pl-8 pr-3 py-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              className="w-full text-xs pl-8 pr-3 py-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500"
             />
           </div>
+
           <div className="flex items-center gap-2">
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="text-[11px] font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-slate-700 dark:text-slate-300 focus:outline-none flex-1 sm:flex-none"
+              className="text-[11px] font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1 text-slate-700 dark:text-slate-300 focus:outline-none flex-1 sm:flex-none cursor-pointer"
             >
               <option value="ALL">All Categories</option>
-              <option value="institute_event">Institute (5p)</option>
-              <option value="guest_lecture">Guest Lecture (4p)</option>
-              <option value="department_event">Dept Event (3p)</option>
-              <option value="club_event">Club Event (2p)</option>
+              <option value="institute_event">Institute Events (5p)</option>
+              <option value="guest_lecture">Guest Lectures (4p)</option>
+              <option value="department_event">Dept Events (3p)</option>
+              <option value="club_event">Club Events (2p)</option>
             </select>
+
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="text-[11px] font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-slate-700 dark:text-slate-300 focus:outline-none flex-1 sm:flex-none"
+              className="text-[11px] font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1 text-slate-700 dark:text-slate-300 focus:outline-none flex-1 sm:flex-none cursor-pointer"
             >
               <option value="ALL">All Statuses</option>
+              <option value="pending">Pending Review</option>
               <option value="approved">Approved</option>
-              <option value="pending">Pending</option>
-              <option value="alternative_offered">Alt Offered</option>
+              <option value="alternative_offered">Alternative Offered</option>
               <option value="rejected">Rejected</option>
               <option value="cancelled">Cancelled</option>
             </select>
-            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium tabular-nums whitespace-nowrap hidden sm:inline px-1">
+
+            <span className="text-[11px] text-slate-400 dark:text-slate-500 font-mono font-medium tabular-nums whitespace-nowrap hidden sm:inline px-1">
               {filteredBookings.length} / {bookings.length}
             </span>
           </div>
+
         </div>
       </div>
 
-      {/* Card Grid — 2 rows of 4 cards on desktop, compact & non-scrollable */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-2.5 gap-y-3.5">
-        {paginatedBookings.map((b) => {
-          const catInfo = CATEGORY_WEIGHTS[b.requested_category] || CATEGORY_WEIGHTS.club_event;
-          const statusInfo = STATUS_BADGES[b.status] || STATUS_BADGES.pending;
-          const StatusIcon = statusInfo.icon;
-          const canManage = activeUser.role === 'admin' || activeUser.role === 'department_coordinator';
+      {/* 3. Modern Tabular Matrix View (Elongated, Single-Screen Non-Scrollable) */}
+      <div className="bg-white dark:bg-[#0b0f19] rounded-xl border border-slate-200/90 dark:border-slate-800/80 p-3 shadow-xs overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead className="bg-slate-100/90 dark:bg-slate-900/90 text-slate-900 dark:text-white text-xs font-bold uppercase tracking-wider border-b border-slate-200 dark:border-slate-700">
+              <tr>
+                <th className="py-2.5 px-3 font-bold text-slate-900 dark:text-white w-20">Req ID</th>
+                <th className="py-2.5 px-3 font-bold text-slate-900 dark:text-white">Event Title</th>
+                <th className="py-2.5 px-3 font-bold text-slate-900 dark:text-white">Requester</th>
+                <th className="py-2.5 px-3 font-bold text-slate-900 dark:text-white">Category</th>
+                <th className="py-2.5 px-3 font-bold text-slate-900 dark:text-white">Pax</th>
+                <th className="py-2.5 px-3 font-bold text-slate-900 dark:text-white">Time Window</th>
+                <th className="py-2.5 px-3 font-bold text-slate-900 dark:text-white">Venue</th>
+                <th className="py-2.5 px-3 font-bold text-slate-900 dark:text-white">Status</th>
+                <th className="py-2.5 px-3 font-bold text-slate-900 dark:text-white text-center w-36">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/70 text-xs">
+              {paginatedBookings.length === 0 ? (
+                <tr>
+                  <td colSpan={9} className="py-10 text-center text-slate-400 dark:text-slate-500 text-xs font-medium">
+                    No booking requests match the selected filters.
+                  </td>
+                </tr>
+              ) : (
+                paginatedBookings.map((b) => {
+                  const catInfo = CATEGORY_WEIGHTS[b.requested_category] || CATEGORY_WEIGHTS.club_event;
+                  const statusInfo = STATUS_BADGES[b.status] || STATUS_BADGES.pending;
+                  const StatusIcon = statusInfo.icon;
+                  const isPending = b.status === 'pending';
+                  const isApproved = b.status === 'approved';
+                  const isAlt = b.status === 'alternative_offered';
+                  const isRejected = b.status === 'rejected';
+                  const isCancelled = b.status === 'cancelled';
 
-          return (
-            <div
-              key={b._id}
-              className="group bg-white dark:bg-[#111625] rounded-xl border border-slate-200/90 dark:border-slate-800/80 shadow-xs hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-200 flex flex-col justify-between overflow-hidden h-[154px]"
-            >
-              <div className="p-2.5 flex flex-col justify-between flex-1 gap-1.5">
-                {/* Header: ID + Status badge */}
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold font-mono text-slate-500 dark:text-slate-400">
-                    {b._id}
-                  </span>
-                  <span className={`text-[8.5px] font-bold px-1.5 py-0.5 rounded-full border flex items-center gap-0.5 leading-none ${statusInfo.color}`}>
-                    <StatusIcon className="w-2.5 h-2.5" />
-                    <span>{statusInfo.label}</span>
-                  </span>
-                </div>
+                  const day = b.assigned_day || b.windows?.[0]?.day || 'MON';
+                  const startP = b.assigned_start_period || b.windows?.[0]?.from_period || 10;
+                  const endP = b.assigned_end_period || (startP + (b.duration_periods || 2) - 1);
+                  const venue = b.assigned_room || b.requested_room || 'Any';
 
-                {/* Title & Requester */}
-                <div>
-                  <h3 className="text-[12px] font-bold text-slate-900 dark:text-white leading-tight truncate" title={b.title}>
-                    {b.title}
-                  </h3>
-                  <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
-                    <span className="flex items-center gap-1 truncate max-w-[130px]">
-                      <User className="w-2.5 h-2.5 text-slate-400 shrink-0" />
-                      <span className="truncate">{b.requester}</span>
-                    </span>
-                    <span className={`text-[8px] font-bold px-1 py-0.5 rounded-full border shrink-0 ${catInfo.color}`}>
-                      +{catInfo.weight}p
-                    </span>
+                  return (
+                    <tr key={b._id} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors">
+                      {/* 1. Request ID */}
+                      <td className="py-2 px-3 font-bold font-mono text-slate-900 dark:text-white">
+                        {b._id}
+                      </td>
+
+                      {/* 2. Event Title */}
+                      <td className="py-2 px-3 font-semibold text-slate-900 dark:text-white max-w-[200px] truncate" title={b.title}>
+                        {b.title}
+                      </td>
+
+                      {/* 3. Requester */}
+                      <td className="py-2 px-3 text-slate-600 dark:text-slate-400 max-w-[140px] truncate" title={b.requester}>
+                        <div className="flex items-center gap-1.5 truncate">
+                          <User className="w-3 h-3 text-slate-400 shrink-0" />
+                          <span className="truncate">{b.requester}</span>
+                        </div>
+                      </td>
+
+                      {/* 4. Category with weight badge */}
+                      <td className="py-2 px-3">
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${catInfo.color}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${catInfo.dot}`} />
+                          <span>{catInfo.label}</span>
+                          <strong className="ml-0.5 font-mono">+{catInfo.weight}p</strong>
+                        </span>
+                      </td>
+
+                      {/* 5. Pax */}
+                      <td className="py-2 px-3 font-medium text-slate-800 dark:text-slate-200">
+                        <span>{b.attendance}</span>
+                        <span className="text-[10px] text-slate-400 ml-1">pax</span>
+                      </td>
+
+                      {/* 6. Time Window */}
+                      <td className="py-2 px-3 text-slate-600 dark:text-slate-400 whitespace-nowrap font-mono text-[11px]">
+                        <span>{day} P{startP}–P{endP}</span>
+                        <span className="text-[10px] text-slate-400 ml-1">({b.duration_periods}h)</span>
+                      </td>
+
+                      {/* 7. Venue */}
+                      <td className="py-2 px-3">
+                        <span className="font-bold text-indigo-600 dark:text-indigo-400 font-mono text-xs">
+                          {venue}
+                        </span>
+                      </td>
+
+                      {/* 8. Status */}
+                      <td className="py-2 px-3">
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${statusInfo.color}`}>
+                          <StatusIcon className="w-2.5 h-2.5" />
+                          <span>{statusInfo.label}</span>
+                        </span>
+                      </td>
+
+                      {/* 9. Modern Actions: Tick, Alternative, Cross */}
+                      <td className="py-2 px-3 text-center">
+                        {isPending ? (
+                          <div className="flex items-center justify-center gap-1.5">
+                            {/* Modern Tick (Approve) */}
+                            <button
+                              onClick={() => openDecisionModal(b, 'approve')}
+                              className="p-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 border border-emerald-200/80 dark:border-emerald-800 transition cursor-pointer shadow-2xs"
+                              title="Approve booking with administrative justification"
+                            >
+                              <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+                            </button>
+
+                            {/* Modern Alternative (Swap) */}
+                            <button
+                              onClick={() => openDecisionModal(b, 'alternative')}
+                              className="p-1.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/60 border border-amber-200/80 dark:border-amber-800 transition cursor-pointer shadow-2xs"
+                              title="Offer alternative venue or time slot with reason"
+                            >
+                              <ArrowRightLeft className="w-3.5 h-3.5 stroke-[2]" />
+                            </button>
+
+                            {/* Modern Cross (Reject) */}
+                            <button
+                              onClick={() => openDecisionModal(b, 'reject')}
+                              className="p-1.5 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/60 border border-rose-200/80 dark:border-rose-800 transition cursor-pointer shadow-2xs"
+                              title="Reject request with official administrative comment"
+                            >
+                              <X className="w-3.5 h-3.5 stroke-[2.5]" />
+                            </button>
+                          </div>
+                        ) : isApproved ? (
+                          <div className="flex items-center justify-center gap-1">
+                            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold truncate max-w-[80px]">
+                              {b.assigned_room || 'AUD'}
+                            </span>
+                            <button
+                              onClick={() => openDecisionModal(b, 'alternative')}
+                              className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition"
+                            >
+                              Modify
+                            </button>
+                          </div>
+                        ) : isAlt ? (
+                          <div className="flex items-center justify-center gap-1">
+                            <button
+                              onClick={() => openDecisionModal(b, 'approve')}
+                              className="text-[10px] px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-200 font-semibold hover:bg-emerald-100 transition"
+                            >
+                              Confirm
+                            </button>
+                          </div>
+                        ) : isRejected ? (
+                          <span className="text-[10px] text-rose-500 font-medium italic">
+                            Rejected
+                          </span>
+                        ) : (
+                          <span className="text-[10px] text-slate-400 italic">
+                            Withdrawn
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* 4. Table Pagination Footer (Shifted lower with comfortable buttons) */}
+        <div className="pt-2.5 mt-1 border-t border-slate-200/80 dark:border-slate-800/80 flex items-center justify-between text-xs">
+          <span className="text-xs text-slate-500 dark:text-slate-400 font-medium tabular-nums">
+            Showing {filteredBookings.length === 0 ? 0 : (safePage - 1) * ROWS_PER_PAGE + 1}–{Math.min(safePage * ROWS_PER_PAGE, filteredBookings.length)} of {filteredBookings.length} requests
+          </span>
+
+          {totalPages > 1 && (
+            <div className="flex items-center space-x-1.5">
+              <button
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={safePage === 1}
+                className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:pointer-events-none transition cursor-pointer"
+                title="Previous page"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(num => (
+                <button
+                  key={num}
+                  onClick={() => setCurrentPage(num)}
+                  className={`min-w-[30px] h-7 px-2 rounded-lg text-xs font-semibold transition cursor-pointer ${
+                    safePage === num
+                      ? 'bg-indigo-600 text-white shadow-2xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700'
+                  }`}
+                >
+                  {num}
+                </button>
+              ))}
+
+              <button
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={safePage === totalPages}
+                className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:pointer-events-none transition cursor-pointer"
+                title="Next page"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── Decision Modal with Comment / Justification ──────────────── */}
+      {actionModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
+          <div className="bg-white dark:bg-[#111625] rounded-2xl max-w-lg w-full p-5 border border-slate-200 dark:border-slate-800 shadow-2xl space-y-3.5">
+            
+            {/* Modal Header */}
+            <div className="flex items-start justify-between border-b border-slate-100 dark:border-slate-800/80 pb-2.5">
+              <div className="flex items-center gap-2">
+                {actionModal.type === 'approve' ? (
+                  <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400">
+                    <Check className="w-4 h-4 stroke-[2.5]" />
                   </div>
-                </div>
-
-                {/* Inline Stats Capsule */}
-                <div className="flex items-center justify-between text-[10px] text-slate-600 dark:text-slate-300 bg-slate-50/80 dark:bg-slate-900/60 px-2 py-1 rounded-md border border-slate-100 dark:border-slate-800/60">
-                  <span className="flex items-center gap-1 font-medium">
-                    <Users className="w-2.5 h-2.5 text-slate-400" />
-                    <span className="font-semibold text-slate-800 dark:text-slate-200">{b.attendance}</span>
-                  </span>
-                  <span className="text-slate-300 dark:text-slate-700">•</span>
-                  <span className="flex items-center gap-1 font-medium">
-                    <Timer className="w-2.5 h-2.5 text-slate-400" />
-                    <span className="font-semibold text-slate-800 dark:text-slate-200">{b.duration_periods}h</span>
-                  </span>
-                  <span className="text-slate-300 dark:text-slate-700">•</span>
-                  <span className="flex items-center gap-1 font-medium truncate max-w-[90px]">
-                    <MapPin className="w-2.5 h-2.5 text-indigo-500 shrink-0" />
-                    <span className="truncate text-indigo-600 dark:text-indigo-400 font-semibold">
-                      {b.assigned_room ? `${b.assigned_room} (${b.assigned_day})` : (b.requested_room || 'Any')}
-                    </span>
-                  </span>
-                </div>
-
-                {/* Decision reason if present */}
-                {b.decision_reason && (
-                  <div className="text-[9px] text-slate-400 dark:text-slate-500 italic truncate border-l-2 border-indigo-400 pl-1.5 -mt-0.5">
-                    "{b.decision_reason}"
+                ) : actionModal.type === 'alternative' ? (
+                  <div className="p-1.5 rounded-lg bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400">
+                    <ArrowRightLeft className="w-4 h-4 stroke-[2]" />
+                  </div>
+                ) : (
+                  <div className="p-1.5 rounded-lg bg-rose-50 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400">
+                    <X className="w-4 h-4 stroke-[2.5]" />
                   </div>
                 )}
-
-                {/* Actions */}
-                <div className="pt-1.5 border-t border-slate-100 dark:border-slate-800/60">
-                  {canManage ? (
-                    b.status === 'approved' ? (
-                      <div className="flex items-center justify-between gap-1 w-full">
-                        <span className="flex-1 flex items-center justify-center gap-1 py-1 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-[10px] font-semibold border border-emerald-200/80 dark:border-emerald-800">
-                          <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-                          <span>Approved: {b.assigned_room} ({b.assigned_day} P{b.assigned_start_period})</span>
-                        </span>
-                        <button
-                          onClick={() => setActionModal({ booking: b, type: 'alternative' })}
-                          className="py-1 px-2 rounded-md bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 text-slate-600 dark:text-slate-300 text-[10px] font-semibold border border-slate-200 dark:border-slate-700 transition"
-                          title="Reallocate venue or time slot"
-                        >
-                          Modify
-                        </button>
-                      </div>
-                    ) : b.status === 'rejected' ? (
-                      <div className="w-full py-1 rounded-md bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 text-[10px] font-semibold border border-rose-200/80 dark:border-rose-800 text-center flex items-center justify-center gap-1">
-                        <XCircle className="w-3 h-3 text-rose-500" />
-                        <span>Rejected</span>
-                      </div>
-                    ) : b.status === 'alternative_offered' ? (
-                      <div className="flex items-center justify-between gap-1 w-full">
-                        <span className="flex-1 flex items-center justify-center gap-1 py-1 rounded-md bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 text-[10px] font-semibold border border-amber-200/80 dark:border-amber-800">
-                          <AlertCircle className="w-3 h-3 text-amber-500" />
-                          <span>Alt: {b.assigned_room} ({b.assigned_day})</span>
-                        </span>
-                        <button
-                          onClick={() => setActionModal({ booking: b, type: 'approve' })}
-                          className="py-1 px-2 rounded-md bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 text-[10px] font-semibold border border-emerald-200 dark:border-emerald-800 transition"
-                        >
-                          Approve
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={() => setActionModal({ booking: b, type: 'approve' })}
-                          className="flex-1 py-1 rounded-md bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-[10px] font-semibold border border-emerald-200/80 dark:border-emerald-800 transition text-center"
-                        >
-                          Approve
-                        </button>
-                        <button
-                          onClick={() => setActionModal({ booking: b, type: 'alternative' })}
-                          className="flex-1 py-1 rounded-md bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/50 text-amber-700 dark:text-amber-300 text-[10px] font-semibold border border-amber-200/80 dark:border-amber-800 transition text-center"
-                        >
-                          Alternative
-                        </button>
-                        <button
-                          onClick={() => setActionModal({ booking: b, type: 'reject' })}
-                          className="flex-1 py-1 rounded-md bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-300 text-[10px] font-semibold border border-rose-200/80 dark:border-rose-800 transition text-center"
-                        >
-                          Reject
-                        </button>
-                      </div>
-                    )
-                  ) : (
-                    b.status !== 'cancelled' && (
-                      <button
-                        onClick={() => handleCancelBooking(b._id)}
-                        className="w-full py-1 rounded-md bg-slate-50 dark:bg-slate-800/40 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-slate-600 dark:text-slate-300 hover:text-rose-600 border border-slate-200 dark:border-slate-700 text-[10px] font-semibold transition flex items-center justify-center gap-1"
-                      >
-                        <Ban className="w-3 h-3" />
-                        Cancel Booking
-                      </button>
-                    )
-                  )}
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white capitalize">
+                    {actionModal.type === 'approve' ? 'Approve Venue Request' : actionModal.type === 'alternative' ? 'Offer Alternative Venue/Slot' : 'Reject Venue Request'}
+                  </h3>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    {actionModal.booking._id} • {actionModal.booking.title}
+                  </p>
                 </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
 
-      {/* Pagination — shifted lower with larger comfortable buttons */}
-      {totalPages > 1 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-3.5 pb-1">
-          <span className="text-xs text-slate-500 dark:text-slate-400 font-medium tabular-nums">
-            Showing {(safePage - 1) * CARDS_PER_PAGE + 1}–{Math.min(safePage * CARDS_PER_PAGE, filteredBookings.length)} of {filteredBookings.length} requests
-          </span>
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-              disabled={safePage <= 1}
-              className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition"
-              title="Previous Page"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
               <button
-                key={page}
-                onClick={() => setCurrentPage(page)}
-                className={`min-w-[32px] h-8 rounded-lg text-xs font-semibold transition ${
-                  page === safePage
-                    ? 'bg-indigo-600 text-white shadow-xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700'
-                }`}
+                onClick={() => setActionModal(null)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition"
               >
-                {page}
+                <X className="w-4 h-4" />
               </button>
-            ))}
-            <button
-              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-              disabled={safePage >= totalPages}
-              className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition"
-              title="Next Page"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      )}
-      {/* Decision Modal */}
-      {actionModal && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-4 backdrop-blur-xs animate-in fade-in">
-          <div className="bg-white dark:bg-slate-900 rounded-t-2xl sm:rounded-2xl max-w-md w-full p-5 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white capitalize">
-              {actionModal.type} Request: {actionModal.booking._id} ({actionModal.booking.title})
-            </h3>
+            </div>
 
+            {/* Request Summary Pills */}
+            <div className="grid grid-cols-3 gap-2 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800 text-xs">
+              <div>
+                <span className="text-[10px] text-slate-400 block">Requester</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-200 truncate block">
+                  {actionModal.booking.requester}
+                </span>
+              </div>
+              <div>
+                <span className="text-[10px] text-slate-400 block">Attendance</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-200 block">
+                  {actionModal.booking.attendance} pax
+                </span>
+              </div>
+              <div>
+                <span className="text-[10px] text-slate-400 block">Priority Weight</span>
+                <span className="font-semibold text-indigo-600 dark:text-indigo-400 block font-mono">
+                  +{CATEGORY_WEIGHTS[actionModal.booking.requested_category]?.weight || 2}p
+                </span>
+              </div>
+            </div>
+
+            {/* Alternative Venue & Window Controls (if alternative) */}
             {actionModal.type === 'alternative' && (
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
-                <div>
-                  <label className="block text-slate-500 mb-1">Room</label>
-                  <select
-                    value={altRoom}
-                    onChange={(e) => setAltRoom(e.target.value)}
-                    className="w-full p-2 bg-slate-50 border rounded-lg font-medium"
-                  >
-                    <option value="AUD">Main AUD (500)</option>
-                    <option value="SH-1">Seminar Hall 1 (150)</option>
-                    <option value="SH-2">Seminar Hall 2 (100)</option>
-                    <option value="OAT">Open Air Theatre (800)</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-slate-500 mb-1">Day</label>
-                  <select
-                    value={altDay}
-                    onChange={(e) => setAltDay(e.target.value)}
-                    className="w-full p-2 bg-slate-50 border rounded-lg font-medium"
-                  >
-                    <option value="MON">Monday</option>
-                    <option value="TUE">Tuesday</option>
-                    <option value="WED">Wednesday</option>
-                    <option value="THU">Thursday</option>
-                    <option value="FRI">Friday</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-slate-500 mb-1">Start Period</label>
-                  <select
-                    value={altStart}
-                    onChange={(e) => setAltStart(e.target.value)}
-                    className="w-full p-2 bg-slate-50 border rounded-lg font-medium"
-                  >
-                    <option value={10}>P10 (18:00)</option>
-                    <option value={11}>P11 (19:00)</option>
-                    <option value={12}>P12 (20:00)</option>
-                  </select>
+              <div className="space-y-2 pt-1">
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">
+                  Select Alternative Venue & Time Window:
+                </label>
+                <div className="grid grid-cols-3 gap-2 text-xs">
+                  <div>
+                    <label className="block text-[10px] text-slate-400 mb-1">Venue</label>
+                    <select
+                      value={altRoom}
+                      onChange={(e) => setAltRoom(e.target.value)}
+                      className="w-full py-1.5 px-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg font-semibold text-xs text-slate-800 dark:text-slate-200"
+                    >
+                      <option value="AUD">Main AUD (500 seats)</option>
+                      <option value="OAT">Open Air Theatre (800 seats)</option>
+                      <option value="SH-1">Seminar Hall 1 (150 seats)</option>
+                      <option value="SH-2">Seminar Hall 2 (100 seats)</option>
+                      <option value="LH-1">Lecture Hall 1 (200 seats)</option>
+                      <option value="LH-2">Lecture Hall 2 (200 seats)</option>
+                      <option value="CR-101">Classroom A-101 (90 seats)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-slate-400 mb-1">Day</label>
+                    <select
+                      value={altDay}
+                      onChange={(e) => setAltDay(e.target.value)}
+                      className="w-full py-1.5 px-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg font-semibold text-xs text-slate-800 dark:text-slate-200"
+                    >
+                      <option value="MON">Monday</option>
+                      <option value="TUE">Tuesday</option>
+                      <option value="WED">Wednesday</option>
+                      <option value="THU">Thursday</option>
+                      <option value="FRI">Friday</option>
+                      <option value="SAT">Saturday</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-slate-400 mb-1">Start Period</label>
+                    <select
+                      value={altStart}
+                      onChange={(e) => setAltStart(e.target.value)}
+                      className="w-full py-1.5 px-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg font-semibold text-xs text-slate-800 dark:text-slate-200"
+                    >
+                      <option value={9}>P9 (17:00)</option>
+                      <option value={10}>P10 (18:00)</option>
+                      <option value={11}>P11 (19:00)</option>
+                      <option value={12}>P12 (20:00)</option>
+                    </select>
+                  </div>
                 </div>
               </div>
             )}
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">
-                Official Administrative Justification / Reason:
+            {/* Administrative Comment / Justification Box (Approve, Reject, and Alternative) */}
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <MessageSquare className="w-3.5 h-3.5 text-indigo-500" />
+                <span>
+                  {actionModal.type === 'approve'
+                    ? 'Administrative Approval Comment / Justification:'
+                    : actionModal.type === 'alternative'
+                    ? 'Alternative Offer Justification:'
+                    : 'Rejection Reason / Mandatory Justification:'}
+                </span>
               </label>
               <textarea
                 rows={3}
-                placeholder="Enter justification explaining why this decision was made..."
+                placeholder="Enter justification for the audit trail..."
                 value={decisionReason}
                 onChange={(e) => setDecisionReason(e.target.value)}
-                className="w-full text-xs p-3 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full text-xs p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500"
               />
             </div>
 
-            <div className="flex justify-end space-x-2 pt-2">
+            {/* Rejection Quick Template Suggestions */}
+            {actionModal.type === 'reject' && (
+              <div className="flex flex-wrap items-center gap-1.5 text-[10px]">
+                <span className="text-slate-400">Quick Reasons:</span>
+                <button
+                  type="button"
+                  onClick={() => setDecisionReason('Venue capacity insufficient for expected attendance size.')}
+                  className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition"
+                >
+                  Capacity insufficient
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDecisionReason('Auditorium reserved for higher priority Institute Inaugural Event.')}
+                  className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition"
+                >
+                  Priority inversion protection
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDecisionReason('Requested venue is undergoing scheduled maintenance (Rule H8).')}
+                  className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition"
+                >
+                  Maintenance conflict
+                </button>
+              </div>
+            )}
+
+            {/* Modal Actions */}
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
               <button
+                type="button"
                 onClick={() => setActionModal(null)}
-                className="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-xs font-semibold"
+                className="px-3.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 text-slate-700 dark:text-slate-300 text-xs font-semibold transition cursor-pointer"
               >
                 Cancel
               </button>
               <button
+                type="button"
                 onClick={handleDecisionSubmit}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-semibold hover:bg-indigo-700"
+                className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-white text-xs font-semibold transition cursor-pointer shadow-xs ${
+                  actionModal.type === 'approve'
+                    ? 'bg-emerald-600 hover:bg-emerald-500'
+                    : actionModal.type === 'alternative'
+                    ? 'bg-amber-600 hover:bg-amber-500'
+                    : 'bg-rose-600 hover:bg-rose-500'
+                }`}
               >
-                Confirm Decision
+                {actionModal.type === 'approve' ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+                    <span>Confirm Approval</span>
+                  </>
+                ) : actionModal.type === 'alternative' ? (
+                  <>
+                    <ArrowRightLeft className="w-3.5 h-3.5 stroke-[2]" />
+                    <span>Dispatch Alternative</span>
+                  </>
+                ) : (
+                  <>
+                    <X className="w-3.5 h-3.5 stroke-[2.5]" />
+                    <span>Confirm Rejection</span>
+                  </>
+                )}
               </button>
             </div>
+
           </div>
         </div>
       )}
 
-      {/* Manual Request Modal (Requirement 10) */}
+      {/* ── Manual Request Modal ─────────────────────────────────────── */}
       {showManualModal && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-4 backdrop-blur-xs animate-in fade-in">
-          <form onSubmit={handleManualSubmit} className="bg-white dark:bg-slate-900 rounded-t-2xl sm:rounded-2xl max-w-lg w-full p-5 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <Plus className="w-5 h-5 text-indigo-600" />
-              Manual Venue Booking Request (Hard Constraint Checked)
-            </h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
+          <form onSubmit={handleManualSubmit} className="bg-white dark:bg-[#111625] rounded-2xl max-w-md w-full p-5 border border-slate-200 dark:border-slate-800 shadow-2xl space-y-3.5">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <Plus className="w-4 h-4 text-indigo-600" />
+                <span>Manual Venue Booking Request</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowManualModal(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
 
-            <div className="space-y-3 text-xs">
+            <div className="space-y-2.5 text-xs">
               <div>
-                <label className="block font-semibold mb-1">Event Title</label>
+                <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Event Title</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g., Annual Coding Hackathon Closing Ceremony"
                   value={manualForm.title}
                   onChange={(e) => setManualForm({ ...manualForm, title: e.target.value })}
-                  className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border rounded-xl"
+                  className="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block font-semibold mb-1">Event Category</label>
+                  <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Event Category</label>
                   <select
                     value={manualForm.requested_category}
                     onChange={(e) => setManualForm({ ...manualForm, requested_category: e.target.value })}
-                    className="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-xl"
+                    className="w-full p-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs"
                   >
-                    <option value="club_event">Club Event</option>
-                    <option value="department_event">Department Event</option>
-                    <option value="guest_lecture">Guest Lecture</option>
-                    <option value="institute_event">Institute Event</option>
+                    <option value="club_event">Club Event (2p)</option>
+                    <option value="department_event">Dept Event (3p)</option>
+                    <option value="guest_lecture">Guest Lecture (4p)</option>
+                    <option value="institute_event">Institute Event (5p)</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block font-semibold mb-1">Expected Attendance</label>
+                  <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Expected Attendance</label>
                   <input
                     type="number"
                     required
@@ -700,18 +875,18 @@ export default function BookingsView({ currentUser }) {
                     max={800}
                     value={manualForm.attendance}
                     onChange={(e) => setManualForm({ ...manualForm, attendance: e.target.value })}
-                    className="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-xl"
+                    className="w-full p-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-2">
                 <div>
-                  <label className="block font-semibold mb-1">Day</label>
+                  <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Day</label>
                   <select
                     value={manualForm.day}
                     onChange={(e) => setManualForm({ ...manualForm, day: e.target.value })}
-                    className="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-xl"
+                    className="w-full p-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs"
                   >
                     <option value="MON">Monday</option>
                     <option value="TUE">Tuesday</option>
@@ -721,44 +896,44 @@ export default function BookingsView({ currentUser }) {
                   </select>
                 </div>
                 <div>
-                  <label className="block font-semibold mb-1">Start Period</label>
+                  <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Start Period</label>
                   <select
                     value={manualForm.from_period}
                     onChange={(e) => setManualForm({ ...manualForm, from_period: e.target.value })}
-                    className="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-xl"
+                    className="w-full p-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs"
                   >
-                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((p) => (
-                      <option key={p} value={p}>P{p}</option>
+                    {[9, 10, 11, 12].map((p) => (
+                      <option key={p} value={p}>P{p} ({8 + p}:00)</option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className="block font-semibold mb-1">Duration (Hours)</label>
+                  <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Duration (Hours)</label>
                   <input
                     type="number"
                     min={1}
                     max={4}
                     value={manualForm.duration_periods}
                     onChange={(e) => setManualForm({ ...manualForm, duration_periods: e.target.value })}
-                    className="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-xl"
+                    className="w-full p-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs"
                   />
                 </div>
               </div>
             </div>
 
-            <div className="flex justify-end space-x-2 pt-2 border-t">
+            <div className="flex justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
               <button
                 type="button"
                 onClick={() => setShowManualModal(false)}
-                className="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-xs font-semibold"
+                className="px-3.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 text-slate-700 dark:text-slate-300 text-xs font-semibold"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-semibold hover:bg-indigo-700"
+                className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold"
               >
-                Validate & Submit
+                Submit Booking
               </button>
             </div>
           </form>

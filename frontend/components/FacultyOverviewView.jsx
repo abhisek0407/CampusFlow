@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { apiFetch } from '@/lib/api';
 import {
   Calendar,
   Clock,
@@ -8,570 +9,361 @@ import {
   Users,
   ShieldCheck,
   CheckCircle2,
-  AlertCircle,
   Sparkles,
-  ArrowRight,
-  BookOpen,
-  CalendarDays,
-  FileText,
-  UserCheck,
-  ExternalLink,
+  ChevronLeft,
   ChevronRight,
-  Filter
+  RefreshCw,
+  BookOpen
 } from 'lucide-react';
+import FacultyUnavailabilityView from './FacultyUnavailabilityView';
+import AIAssistantView from './AIAssistantView';
 
-// Ground truth scheduled sessions for F01 (Dr. Ananya Mishra)
+const DAYS = ['MON', 'TUE', 'WED', 'THU', 'FRI'];
+const DAY_LABELS = {
+  MON: 'Monday',
+  TUE: 'Tuesday',
+  WED: 'Wednesday',
+  THU: 'Thursday',
+  FRI: 'Friday',
+};
+
+const PERIODS = [
+  { id: 1, time: '08:00 - 09:00', label: 'P1' },
+  { id: 2, time: '09:00 - 10:00', label: 'P2' },
+  { id: 3, time: '10:00 - 11:00', label: 'P3' },
+  { id: 4, time: '11:00 - 12:00', label: 'P4' },
+  { id: 5, time: '12:00 - 13:00', label: 'P5' },
+  { id: 6, time: '14:00 - 15:00', label: 'P6' },
+  { id: 7, time: '15:00 - 16:00', label: 'P7' },
+  { id: 8, time: '16:00 - 17:00', label: 'P8' },
+  { id: 9, time: '17:00 - 18:00', label: 'P9' },
+];
+
+// Ground truth verified sessions for F01 (Dr. Ananya Mishra)
 const DEFAULT_SESSIONS = [
-  {
-    id: 'CS101-B-L2',
-    course_id: 'CS101',
-    course: 'Introduction to Computer Programming',
-    type: 'Lecture',
-    day: 'MON',
-    dayFull: 'Monday',
-    start_period: 5,
-    end_period: 5,
-    periodLabel: 'P5 (12:00 – 13:00)',
-    time: '12:00 PM – 1:00 PM',
-    room_id: 'CR-102',
-    building: 'Academic Block A • Ground Floor',
-    groups: ['Y1-B'],
-    cohortLabel: 'Year 1 • Section B',
-    students: 90,
-    accessible: true,
-  },
-  {
-    id: 'CS301-L2',
-    course_id: 'CS301',
-    course: 'Operating Systems & System Architecture',
-    type: 'Lecture',
-    day: 'TUE',
-    dayFull: 'Tuesday',
-    start_period: 4,
-    end_period: 4,
-    periodLabel: 'P4 (11:00 – 12:00)',
-    time: '11:00 AM – 12:00 PM',
-    room_id: 'CR-202',
-    building: 'Academic Block B • 2nd Floor (Lift)',
-    groups: ['CSE-3'],
-    cohortLabel: 'B.Tech CSE • Year 3',
-    students: 75,
-    accessible: true,
-  },
-  {
-    id: 'CS101-B-L1',
-    course_id: 'CS101',
-    course: 'Introduction to Computer Programming',
-    type: 'Lecture',
-    day: 'TUE',
-    dayFull: 'Tuesday',
-    start_period: 6,
-    end_period: 6,
-    periodLabel: 'P6 (14:00 – 15:00)',
-    time: '2:00 PM – 3:00 PM',
-    room_id: 'LH-3',
-    building: 'Lecture Hall Complex • Ground Floor',
-    groups: ['Y1-B'],
-    cohortLabel: 'Year 1 • Section B',
-    students: 90,
-    accessible: true,
-  },
-  {
-    id: 'CS301-L1',
-    course_id: 'CS301',
-    course: 'Operating Systems & System Architecture',
-    type: 'Lecture',
-    day: 'WED',
-    dayFull: 'Wednesday',
-    start_period: 2,
-    end_period: 2,
-    periodLabel: 'P2 (09:00 – 10:00)',
-    time: '9:00 AM – 10:00 AM',
-    room_id: 'CR-203',
-    building: 'Academic Block B • 2nd Floor (Lift)',
-    groups: ['CSE-3'],
-    cohortLabel: 'B.Tech CSE • Year 3',
-    students: 75,
-    accessible: true,
-  },
-  {
-    id: 'CS101-A-L2',
-    course_id: 'CS101',
-    course: 'Introduction to Computer Programming',
-    type: 'Lecture',
-    day: 'THU',
-    dayFull: 'Thursday',
-    start_period: 1,
-    end_period: 1,
-    periodLabel: 'P1 (08:00 – 09:00)',
-    time: '8:00 AM – 9:00 AM',
-    room_id: 'CR-102',
-    building: 'Academic Block A • Ground Floor',
-    groups: ['Y1-A'],
-    cohortLabel: 'Year 1 • Section A',
-    students: 90,
-    accessible: true,
-  },
-  {
-    id: 'CS101-A-L1',
-    course_id: 'CS101',
-    course: 'Introduction to Computer Programming',
-    type: 'Lecture',
-    day: 'FRI',
-    dayFull: 'Friday',
-    start_period: 5,
-    end_period: 5,
-    periodLabel: 'P5 (12:00 – 13:00)',
-    time: '12:00 PM – 1:00 PM',
-    room_id: 'CR-201',
-    building: 'Academic Block A • 2nd Floor (Lift)',
-    groups: ['Y1-A'],
-    cohortLabel: 'Year 1 • Section A',
-    students: 90,
-    accessible: true,
-  },
-  {
-    id: 'CS301-L3',
-    course_id: 'CS301',
-    course: 'Operating Systems & System Architecture',
-    type: 'Lecture',
-    day: 'FRI',
-    dayFull: 'Friday',
-    start_period: 7,
-    end_period: 7,
-    periodLabel: 'P7 (15:00 – 16:00)',
-    time: '3:00 PM – 4:00 PM',
-    room_id: 'CR-203',
-    building: 'Academic Block B • 2nd Floor (Lift)',
-    groups: ['CSE-3'],
-    cohortLabel: 'B.Tech CSE • Year 3',
-    students: 75,
-    accessible: true,
-  },
+  { session_id: 'CS101-B-L2', course_id: 'CS101', course_title: 'Programming in C', kind: 'Lecture', day: 'MON', start_period: 5, end_period: 5, room_id: 'CR-102', groups: ['Y1-B'] },
+  { session_id: 'CS301-L2', course_id: 'CS301', course_title: 'Operating Systems', kind: 'Lecture', day: 'TUE', start_period: 4, end_period: 4, room_id: 'CR-202', groups: ['CSE-3'] },
+  { session_id: 'CS101-B-L1', course_id: 'CS101', course_title: 'Programming in C', kind: 'Lecture', day: 'TUE', start_period: 6, end_period: 6, room_id: 'LH-3', groups: ['Y1-B'] },
+  { session_id: 'CS301-L1', course_id: 'CS301', course_title: 'Operating Systems', kind: 'Lecture', day: 'WED', start_period: 2, end_period: 2, room_id: 'CR-203', groups: ['CSE-3'] },
+  { session_id: 'CS101-A-L2', course_id: 'CS101', course_title: 'Programming in C', kind: 'Lecture', day: 'THU', start_period: 1, end_period: 1, room_id: 'CR-102', groups: ['Y1-A'] },
+  { session_id: 'CS101-A-L1', course_id: 'CS101', course_title: 'Programming in C', kind: 'Lecture', day: 'FRI', start_period: 5, end_period: 5, room_id: 'CR-201', groups: ['Y1-A'] },
+  { session_id: 'CS301-L3', course_id: 'CS301', course_title: 'Operating Systems', kind: 'Lecture', day: 'FRI', start_period: 7, end_period: 7, room_id: 'CR-203', groups: ['CSE-3'] },
 ];
 
-const DAYS = [
-  { id: 'ALL', label: 'All Week' },
-  { id: 'MON', label: 'Mon' },
-  { id: 'TUE', label: 'Tue' },
-  { id: 'WED', label: 'Wed' },
-  { id: 'THU', label: 'Thu' },
-  { id: 'FRI', label: 'Fri' },
-];
-
-export default function FacultyOverviewView({ currentUser, setActiveTab }) {
+export default function FacultyOverviewView({ currentUser, setActiveTab, initialTab = 'timetable' }) {
   const facultyName = currentUser?.name || 'Dr. Ananya Mishra';
   const facultyId = currentUser?.linked_faculty_id || 'F01';
   const department = currentUser?.department === 'CSE' ? 'Computer Science & Engineering' : (currentUser?.department || 'Computer Science & Engineering');
 
-  const [sessions, setSessions] = useState(DEFAULT_SESSIONS);
-  const [selectedDay, setSelectedDay] = useState('ALL');
+  const [activeSubTab, setActiveSubTab] = useState(initialTab);
+  const [classes, setClasses] = useState(DEFAULT_SESSIONS);
+  const [leaves, setLeaves] = useState([
+    { day: 'FRI', periods: [6, 7, 8], title: 'Research Grant Review Meeting', status: 'approved' }
+  ]);
   const [loading, setLoading] = useState(false);
+  const [selectedCell, setSelectedCell] = useState(null);
 
   useEffect(() => {
-    // Attempt dynamic fetch from API with fallback
-    fetch(`/api/schedule/views?faculty=${facultyId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success && Array.isArray(data.sessions) && data.sessions.length > 0) {
-          const mapped = data.sessions.map((s) => ({
-            id: s.session_id,
-            course_id: s.course_id,
-            course: s.course_title || s.course_id,
-            type: s.kind === 'lecture' ? 'Lecture' : (s.kind === 'tutorial' ? 'Tutorial' : 'Lab Session'),
-            day: s.day,
-            dayFull: s.day === 'MON' ? 'Monday' : (s.day === 'TUE' ? 'Tuesday' : (s.day === 'WED' ? 'Wednesday' : (s.day === 'THU' ? 'Thursday' : 'Friday'))),
-            start_period: s.start_period,
-            end_period: s.end_period,
-            periodLabel: `P${s.start_period} (${s.start_period === 1 ? '08:00' : s.start_period === 2 ? '09:00' : s.start_period === 3 ? '10:00' : s.start_period === 4 ? '11:00' : s.start_period === 5 ? '12:00' : s.start_period === 6 ? '14:00' : s.start_period === 7 ? '15:00' : s.start_period === 8 ? '16:00' : '17:00'})`,
-            time: formatPeriodTime(s.start_period),
-            room_id: s.room_id,
-            building: s.room_id.startsWith('LH') ? 'Lecture Hall Complex' : 'Academic Block',
-            groups: s.groups || [],
-            cohortLabel: (s.groups || []).join(', '),
-            students: s.size || 80,
-            accessible: true,
-          }));
-          setSessions(mapped);
+    async function loadTimetable() {
+      setLoading(true);
+      try {
+        const res = await apiFetch('/api/faculty/my-timetable');
+        const data = await res.json();
+        if (data.success && Array.isArray(data.classes) && data.classes.length > 0) {
+          setClasses(data.classes);
         }
-      })
-      .catch(() => {
-        // Safe fallback is already pre-set to DEFAULT_SESSIONS
-      })
-      .finally(() => setLoading(false));
+        if (data.success && Array.isArray(data.leaves)) {
+          setLeaves(data.leaves);
+        }
+      } catch (err) {
+        // Fallback to default sessions
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadTimetable();
   }, [facultyId]);
 
-  function formatPeriodTime(p) {
-    const times = {
-      1: '8:00 AM – 9:00 AM',
-      2: '9:00 AM – 10:00 AM',
-      3: '10:00 AM – 11:00 AM',
-      4: '11:00 AM – 12:00 PM',
-      5: '12:00 PM – 1:00 PM',
-      6: '2:00 PM – 3:00 PM',
-      7: '3:00 PM – 4:00 PM',
-      8: '4:00 PM – 5:00 PM',
-      9: '5:00 PM – 6:00 PM',
-    };
-    return times[p] || `Period ${p}`;
-  }
-
-  const filteredSessions = selectedDay === 'ALL'
-    ? sessions
-    : sessions.filter((s) => s.day === selectedDay);
-
-  // Next upcoming class (defaults to first session or Monday)
-  const nextClass = sessions[0] || DEFAULT_SESSIONS[0];
+  const classAt = (day, p) => classes.find((c) => c.day === day && p >= c.start_period && p <= c.end_period);
+  const leaveAt = (day, p) => leaves.find((l) => l.day === day && (l.periods || []).includes(p));
 
   return (
-    <div className="space-y-5 sm:space-y-6 max-w-7xl mx-auto font-sans pb-8">
-      
-      {/* ========================================================================= */}
-      {/* 1. PROFESSIONAL ACADEMIC HEADER                                           */}
-      {/* ========================================================================= */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-4 sm:p-6 shadow-xs">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          
-          {/* Identity & Status */}
-          <div className="flex items-start space-x-3.5 sm:space-x-4">
-            {/* Custom Monogram Avatar */}
-            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-slate-900 dark:bg-blue-600 text-white flex items-center justify-center font-bold text-base sm:text-lg tracking-wider shrink-0 shadow-xs border border-slate-800 dark:border-blue-500">
-              AM
-            </div>
+    <div className="font-sans pb-4 space-y-2.5">
 
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-900">
-                  {facultyId} • Faculty Member
-                </span>
-                <span className="text-slate-300 dark:text-slate-700 hidden sm:inline">•</span>
-                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium truncate">
-                  Dept of {department}
-                </span>
-              </div>
-
-              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mt-1 tracking-tight">
-                {facultyName}
-              </h1>
-
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-slate-500 dark:text-slate-400">
-                <span className="flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                  <span className="font-medium text-slate-700 dark:text-slate-300">Spring 2026</span>
-                </span>
-                <span>•</span>
-                <span>Week 7 (Regular Lectures &amp; Midsem Prep)</span>
-                <span>•</span>
-                <span className="text-emerald-600 dark:text-emerald-400 font-medium">0 Clashes (H2 Passed)</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Action Navigation Buttons */}
-          <div className="flex flex-wrap items-center gap-2 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-100 dark:border-slate-800">
-            <button
-              onClick={() => setActiveTab('my-timetable')}
-              className="flex-1 sm:flex-initial inline-flex items-center justify-center space-x-2 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 text-xs font-semibold shadow-xs transition cursor-pointer"
-            >
-              <Calendar className="w-3.5 h-3.5" />
-              <span>Full Timetable</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('ai-faculty-assistant')}
-              className="flex-1 sm:flex-initial inline-flex items-center justify-center space-x-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 text-slate-800 dark:text-slate-200 text-xs font-semibold border border-slate-200 dark:border-slate-700 transition cursor-pointer"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-              <span>AI Assistant</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('mark-unavailability')}
-              className="flex-1 sm:flex-initial inline-flex items-center justify-center space-x-1.5 px-3 py-2 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-medium border border-slate-200/80 dark:border-slate-700/80 transition cursor-pointer"
-            >
-              <span>Mark Leave</span>
-            </button>
-          </div>
-
-        </div>
-      </div>
-
-      {/* ========================================================================= */}
-      {/* 2. REFINED ACADEMIC METRICS (CLEAN INSTITUTIONAL DESIGN, NO GENERIC CARDS)  */}
-      {/* ========================================================================= */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+      {/* ── FIXED TOP SECTION (Welcome Header + Small Single Info Box + 3 Tabs Bar) ── */}
+      <div className="sticky top-0 z-20 bg-slate-50 dark:bg-slate-950 pt-1 pb-2 space-y-2 border-b border-slate-200/80 dark:border-slate-800/80">
         
-        {/* Metric 1 */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-3.5 sm:p-4 shadow-2xs">
-          <div className="flex items-center justify-between text-slate-400 text-xs">
-            <span className="font-semibold text-slate-500 dark:text-slate-400 uppercase text-[10px] tracking-wider">Weekly Commitment</span>
-            <BookOpen className="w-3.5 h-3.5 text-slate-400" />
-          </div>
-          <div className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mt-1 tracking-tight">
-            7.0 <span className="text-xs sm:text-sm font-normal text-slate-500">hours/week</span>
-          </div>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-            2 courses • 7 active sessions
-          </p>
-        </div>
-
-        {/* Metric 2 */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-3.5 sm:p-4 shadow-2xs">
-          <div className="flex items-center justify-between text-slate-400 text-xs">
-            <span className="font-semibold text-slate-500 dark:text-slate-400 uppercase text-[10px] tracking-wider">Daily Teaching Load</span>
-            <Clock className="w-3.5 h-3.5 text-slate-400" />
-          </div>
-          <div className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mt-1 tracking-tight">
-            Max 2h <span className="text-xs sm:text-sm font-normal text-slate-500">/ day</span>
-          </div>
-          <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium mt-1">
-            Compliant with 4h cap (H12)
-          </p>
-        </div>
-
-        {/* Metric 3 */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-3.5 sm:p-4 shadow-2xs">
-          <div className="flex items-center justify-between text-slate-400 text-xs">
-            <span className="font-semibold text-slate-500 dark:text-slate-400 uppercase text-[10px] tracking-wider">Assigned Venues</span>
-            <MapPin className="w-3.5 h-3.5 text-slate-400" />
-          </div>
-          <div className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mt-1 tracking-tight">
-            100% <span className="text-xs sm:text-sm font-normal text-slate-500">Accessible</span>
-          </div>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-            CR-102, CR-201, CR-202, LH-3
-          </p>
-        </div>
-
-        {/* Metric 4 */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-3.5 sm:p-4 shadow-2xs">
-          <div className="flex items-center justify-between text-slate-400 text-xs">
-            <span className="font-semibold text-slate-500 dark:text-slate-400 uppercase text-[10px] tracking-wider">Student Cohorts</span>
-            <Users className="w-3.5 h-3.5 text-slate-400" />
-          </div>
-          <div className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mt-1 tracking-tight">
-            180+ <span className="text-xs sm:text-sm font-normal text-slate-500">students</span>
-          </div>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-            Y1 Sections A &amp; B, CSE Year 3
-          </p>
-        </div>
-
-      </div>
-
-      {/* ========================================================================= */}
-      {/* 3. NEXT SCHEDULED ENGAGEMENT (SPOTLIGHT CARD FOR BUSY FACULTY)            */}
-      {/* ========================================================================= */}
-      <div className="bg-slate-900 dark:bg-slate-950 text-white rounded-2xl p-4 sm:p-5 border border-slate-800 shadow-md">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800/80">
-          <div className="flex items-center space-x-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
-              Upcoming Teaching Session
-            </span>
-          </div>
-          <span className="text-xs font-mono font-medium text-slate-400">
-            {nextClass.dayFull} • {nextClass.periodLabel}
-          </span>
-        </div>
-
-        <div className="mt-3.5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 font-mono font-bold text-xs border border-blue-400/30">
-                {nextClass.course_id}
-              </span>
-              <span className="text-xs text-slate-400">• {nextClass.type}</span>
-            </div>
-            <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
-              {nextClass.course}
-            </h3>
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-300 pt-1">
-              <span className="flex items-center gap-1.5 font-medium">
-                <MapPin className="w-3.5 h-3.5 text-blue-400 shrink-0" />
-                <span>Room {nextClass.room_id} ({nextClass.building})</span>
-              </span>
-              <span className="flex items-center gap-1.5 text-slate-300">
-                <Users className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                <span>{nextClass.cohortLabel} (~{nextClass.students} students)</span>
-              </span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 shrink-0 pt-2 md:pt-0">
-            <button
-              onClick={() => setActiveTab('my-timetable')}
-              className="w-full sm:w-auto px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition flex items-center justify-center space-x-1.5 cursor-pointer shadow-xs"
-            >
-              <span>View in Grid</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={() => setActiveTab('ai-faculty-assistant')}
-              title="Request reschedule for this slot"
-              className="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 transition flex items-center justify-center space-x-1.5 cursor-pointer"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-blue-400" />
-              <span>Reschedule</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* ========================================================================= */}
-      {/* 4. WEEKLY SESSIONS LIST WITH DAY TABS (RESPONSIVE FOR MOBILE & TABLET)    */}
-      {/* ========================================================================= */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-4 sm:p-6 shadow-xs space-y-4">
-        
-        {/* Section Header & Day Filters */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+        {/* 1. Welcome Name Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
           <div>
-            <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
-              Weekly Teaching Engagements
-            </h2>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+              Welcome, {facultyName}
+            </h1>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Scheduled teaching sessions and assigned lecture halls for the week
+              {facultyId} • Dept of {department} • Spring 2026 • 0 Clashes (H2 Passed)
             </p>
           </div>
 
-          {/* Interactive Day Filter Pills */}
-          <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
-            {DAYS.map((d) => {
-              const count = d.id === 'ALL'
-                ? sessions.length
-                : sessions.filter((s) => s.day === d.id).length;
-              const isActive = selectedDay === d.id;
-
-              return (
-                <button
-                  key={d.id}
-                  onClick={() => setSelectedDay(d.id)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer flex items-center space-x-1 ${
-                    isActive
-                      ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
-                      : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
-                  }`}
-                >
-                  <span>{d.label}</span>
-                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
-                    isActive
-                      ? 'bg-white/20 dark:bg-slate-900/20 text-white dark:text-slate-900'
-                      : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
-                  }`}>
-                    {count}
-                  </span>
-                </button>
-              );
-            })}
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs font-semibold">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span>0 Clashes (H2 Passed)</span>
+            </span>
           </div>
         </div>
 
-        {/* Sessions Feed */}
-        <div className="space-y-2.5 sm:space-y-3">
-          {filteredSessions.length === 0 ? (
-            <div className="py-8 text-center text-xs text-slate-400 italic bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
-              No classes scheduled for {selectedDay}. Enjoy your research / office hours!
-            </div>
-          ) : (
-            filteredSessions.map((s) => (
-              <div
-                key={s.id}
-                className="group p-3.5 sm:p-4 rounded-xl bg-slate-50/80 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-800 border border-slate-200/70 dark:border-slate-700/70 hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-xs transition flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
-              >
-                {/* Left: Day Badge + Course Details */}
-                <div className="flex items-start space-x-3 min-w-0">
-                  <div className="w-11 h-11 rounded-xl bg-slate-200 dark:bg-slate-700/80 text-slate-800 dark:text-slate-200 font-bold font-mono text-xs flex flex-col items-center justify-center shrink-0 border border-slate-300/60 dark:border-slate-600">
-                    <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 leading-none">
-                      DAY
-                    </span>
-                    <span className="leading-tight text-xs font-black">{s.day}</span>
-                  </div>
-
-                  <div className="min-w-0 space-y-0.5">
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <span className="font-bold text-slate-900 dark:text-white truncate">
-                        {s.course}
-                      </span>
-                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold">
-                        {s.course_id}
-                      </span>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-500 dark:text-slate-400">
-                      <span>Cohort: <strong className="text-slate-700 dark:text-slate-300">{s.cohortLabel}</strong></span>
-                      <span>•</span>
-                      <span>Enrolled: <strong>~{s.students}</strong></span>
-                      <span>•</span>
-                      <span className="text-blue-600 dark:text-blue-400 font-medium">{s.id}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Right: Timing + Room + Accessible Pill */}
-                <div className="flex flex-wrap items-center justify-between sm:justify-end gap-2 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-200/50 dark:border-slate-700/50">
-                  <div className="flex items-center space-x-1.5 text-slate-700 dark:text-slate-300 font-medium">
-                    <Clock className="w-3.5 h-3.5 text-slate-400" />
-                    <span>{s.time}</span>
-                  </div>
-
-                  <div className="flex items-center space-x-1.5">
-                    <span className="font-mono font-bold px-2 py-0.5 rounded-lg bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 text-[11px]">
-                      {s.room_id}
-                    </span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-medium">
-                      Accessible
-                    </span>
-                  </div>
-                </div>
+        {/* 2. Small Single Box for Details at Top in Row-Col Format */}
+        <div className="bg-white dark:bg-[#111625] rounded-xl border border-slate-200/90 dark:border-slate-800/80 p-2.5 shadow-xs">
+          <div className="grid grid-cols-2 md:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-100 dark:divide-slate-800/80 text-xs">
+            {/* Weekly Commitment */}
+            <div className="px-3 py-1 first:pl-1">
+              <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Weekly Commitment</span>
+              <div className="text-base font-bold text-slate-900 dark:text-white mt-0.5">
+                7.0 <span className="text-xs font-normal text-slate-500">hrs/week</span>
               </div>
-            ))
-          )}
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 truncate block">2 courses • 7 active sessions</span>
+            </div>
+
+            {/* Daily Teaching Load */}
+            <div className="px-3 py-1">
+              <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Daily Teaching Load</span>
+              <div className="text-base font-bold text-slate-900 dark:text-white mt-0.5">
+                Max 2h <span className="text-xs font-normal text-slate-500">/ day</span>
+              </div>
+              <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold truncate block">Compliant with 4h cap (H12)</span>
+            </div>
+
+            {/* Assigned Venues */}
+            <div className="px-3 py-1">
+              <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Assigned Venues</span>
+              <div className="text-base font-bold text-slate-900 dark:text-white mt-0.5">
+                100% <span className="text-xs font-normal text-slate-500">Accessible</span>
+              </div>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 truncate block">CR-102, CR-201, CR-202, LH-3</span>
+            </div>
+
+            {/* Student Cohorts */}
+            <div className="px-3 py-1 last:pr-1">
+              <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Student Cohorts</span>
+              <div className="text-base font-bold text-slate-900 dark:text-white mt-0.5">
+                180+ <span className="text-xs font-normal text-slate-500">students</span>
+              </div>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 truncate block">Y1 Sec A &amp; B, CSE Year 3</span>
+            </div>
+          </div>
+        </div>
+
+        {/* 3. Three Tabs Bar Fixed at Top */}
+        <div className="flex items-center gap-6 text-xs font-semibold pt-0.5">
+          <button
+            type="button"
+            onClick={() => setActiveSubTab('timetable')}
+            className={`pb-2 transition flex items-center gap-1.5 cursor-pointer ${
+              activeSubTab === 'timetable'
+                ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400 font-bold'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+            }`}
+          >
+            <Calendar className="w-4 h-4" />
+            <span>Full Timetable</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveSubTab('ai-assistant')}
+            className={`pb-2 transition flex items-center gap-1.5 cursor-pointer ${
+              activeSubTab === 'ai-assistant'
+                ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400 font-bold'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+            }`}
+          >
+            <Sparkles className="w-4 h-4 text-indigo-500" />
+            <span>AI Assistant</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveSubTab('mark-leave')}
+            className={`pb-2 transition flex items-center gap-1.5 cursor-pointer ${
+              activeSubTab === 'mark-leave'
+                ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400 font-bold'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+            }`}
+          >
+            <Clock className="w-4 h-4 text-amber-500" />
+            <span>Mark Leave</span>
+          </button>
         </div>
 
       </div>
 
-      {/* ========================================================================= */}
-      {/* 5. ACADEMIC COMPLIANCE & SCHEDULE ADVISORY FOOTER                          */}
-      {/* ========================================================================= */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        
-        {/* Unavailability & Office Hours */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-4 text-xs space-y-2">
-          <div className="flex items-center space-x-2 text-slate-900 dark:text-white font-bold">
-            <UserCheck className="w-4 h-4 text-slate-500" />
-            <span>Faculty Unavailability Windows (Rule H7)</span>
-          </div>
-          <p className="text-slate-500 dark:text-slate-400 text-[11px] leading-relaxed">
-            Wednesdays 10:00 AM – 1:00 PM (P3–P5) is registered as reserved for <strong>Department HOD Meetings</strong>. The scheduler guarantees no teaching sessions are placed in this window.
-          </p>
-          <button
-            onClick={() => setActiveTab('mark-unavailability')}
-            className="text-blue-600 dark:text-blue-400 hover:underline font-semibold text-[11px] inline-flex items-center space-x-1 cursor-pointer pt-1"
-          >
-            <span>Update Leave or Unavailable Slots</span>
-            <ArrowRight className="w-3 h-3" />
-          </button>
-        </div>
+      {/* ── DYNAMIC CONTENT (Switches seamlessly while top section remains fixed) ── */}
+      <div className="pt-1">
+        {/* TAB 1: FULL TIMETABLE */}
+        {activeSubTab === 'timetable' && (
+          <div className="bg-white dark:bg-[#0b0f19] rounded-xl border border-slate-200/90 dark:border-slate-800/80 p-3 shadow-xs overflow-hidden">
+            {/* Table Title Bar */}
+            <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+                  Weekly Teaching Timetable (P1–P9)
+                </h3>
+              </div>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                7 Assigned Sessions • 1 Active Unavailability Block
+              </span>
+            </div>
 
-        {/* AI Schedule Assistant Reminder */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-4 text-xs space-y-2">
-          <div className="flex items-center space-x-2 text-slate-900 dark:text-white font-bold">
-            <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-            <span>Need to shift a session?</span>
-          </div>
-          <p className="text-slate-500 dark:text-slate-400 text-[11px] leading-relaxed">
-            Use the natural language AI Faculty Assistant to propose conflict-free alternative slots. All recommendations are mathematically verified by CP-SAT before being submitted for Dean approval.
-          </p>
-          <button
-            onClick={() => setActiveTab('ai-faculty-assistant')}
-            className="text-blue-600 dark:text-blue-400 hover:underline font-semibold text-[11px] inline-flex items-center space-x-1 cursor-pointer pt-1"
-          >
-            <span>Launch AI Faculty Assistant</span>
-            <ArrowRight className="w-3 h-3" />
-          </button>
-        </div>
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse text-xs">
+                {/* Bold, Dark Table Header */}
+                <thead className="bg-slate-100/90 dark:bg-slate-900/90 text-slate-900 dark:text-white uppercase tracking-wider font-bold border-b border-slate-200 dark:border-slate-700">
+                  <tr>
+                    <th className="py-2 px-3 text-left w-28 font-bold text-slate-900 dark:text-white text-xs">
+                      Period
+                    </th>
+                    {DAYS.map((day) => (
+                      <th
+                        key={day}
+                        className="py-2 px-3 text-center border-l border-slate-200 dark:border-slate-700 font-bold text-slate-900 dark:text-white text-xs min-w-[130px]"
+                      >
+                        <span>{DAY_LABELS[day]}</span>
+                        <span className="text-[10px] text-slate-400 font-mono font-medium block">({day})</span>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
 
+                {/* Table Body with Medium Font */}
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
+                  {PERIODS.map((period) => (
+                    <tr key={period.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+                      {/* Period Slot Column */}
+                      <td className="py-1.5 px-3 bg-slate-50/50 dark:bg-slate-900/50 border-r border-slate-100 dark:border-slate-800">
+                        <span className="font-bold text-xs font-mono text-slate-900 dark:text-white block">
+                          {period.label}
+                        </span>
+                        <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono block">
+                          {period.time}
+                        </span>
+                      </td>
+
+                      {/* Day Cells */}
+                      {DAYS.map((day) => {
+                        const cls = classAt(day, period.id);
+                        const leave = leaveAt(day, period.id);
+
+                        return (
+                          <td key={day} className="p-1.5 border-l border-slate-100 dark:border-slate-800/60 align-top min-h-[44px]">
+                            {cls ? (
+                              <div
+                                onClick={() => setSelectedCell({ type: 'class', ...cls })}
+                                className="p-1.5 rounded-lg bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-200/90 dark:border-indigo-800/80 hover:border-indigo-400 dark:hover:border-indigo-600 transition cursor-pointer shadow-2xs space-y-0.5"
+                              >
+                                <div className="flex items-center justify-between">
+                                  <span className="font-bold text-xs text-indigo-900 dark:text-indigo-200">
+                                    {cls.course_id}
+                                  </span>
+                                  <span className="text-[10px] font-bold font-mono text-indigo-700 dark:text-indigo-300 bg-white dark:bg-indigo-900/60 px-1.5 py-0.2 rounded border border-indigo-200 dark:border-indigo-700">
+                                    {cls.room_id}
+                                  </span>
+                                </div>
+                                <div className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 truncate" title={cls.course_title}>
+                                  {cls.course_title}
+                                </div>
+                                <div className="text-[10px] text-slate-500 dark:text-slate-400 flex items-center justify-between pt-0.5">
+                                  <span>{cls.groups?.join(', ') || 'CSE'}</span>
+                                  <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-semibold">Accessible</span>
+                                </div>
+                              </div>
+                            ) : leave ? (
+                              <div
+                                onClick={() => setSelectedCell({ type: 'leave', ...leave })}
+                                className="p-1.5 rounded-lg bg-rose-50/80 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-300 cursor-pointer shadow-2xs"
+                              >
+                                <span className="font-bold text-[11px] block truncate" title={leave.title || 'Faculty Unavailability'}>
+                                  {leave.title || 'Faculty Unavailability'}
+                                </span>
+                                <span className="text-[9px] text-rose-600 dark:text-rose-400 font-medium uppercase tracking-wider block">
+                                  Constraint H7 Bound
+                                </span>
+                              </div>
+                            ) : (
+                              <div className="h-9 flex items-center justify-center text-slate-300 dark:text-slate-700 text-xs">
+                                —
+                              </div>
+                            )}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 2: AI ASSISTANT (Embedded below fixed header) */}
+        {activeSubTab === 'ai-assistant' && (
+          <div className="bg-white dark:bg-[#0b0f19] rounded-xl border border-slate-200/90 dark:border-slate-800/80 p-3 shadow-xs">
+            <AIAssistantView currentUser={currentUser} />
+          </div>
+        )}
+
+        {/* TAB 3: MARK LEAVE (Embedded below fixed header) */}
+        {activeSubTab === 'mark-leave' && (
+          <div>
+            <FacultyUnavailabilityView currentUser={currentUser} />
+          </div>
+        )}
       </div>
+
+      {/* ── Class / Leave Details Modal ────────────────────────────────── */}
+      {selectedCell && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
+          <div className="bg-white dark:bg-[#111625] rounded-2xl max-w-sm w-full p-4 border border-slate-200 dark:border-slate-800 shadow-2xl space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
+              <span className="font-bold text-sm text-slate-900 dark:text-white">
+                {selectedCell.type === 'class' ? `${selectedCell.course_id} Session Details` : 'Unavailability Block'}
+              </span>
+              <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                selectedCell.type === 'class' ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300' : 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'
+              }`}>
+                {selectedCell.type === 'class' ? selectedCell.kind || 'Lecture' : 'H7 Leave'}
+              </span>
+            </div>
+
+            <div className="space-y-1.5 text-xs text-slate-700 dark:text-slate-300">
+              {selectedCell.type === 'class' ? (
+                <>
+                  <p><strong className="text-slate-900 dark:text-white">Course:</strong> {selectedCell.course_id} — {selectedCell.course_title}</p>
+                  <p><strong className="text-slate-900 dark:text-white">Venue:</strong> {selectedCell.room_id} (100% Accessible)</p>
+                  <p><strong className="text-slate-900 dark:text-white">Slot:</strong> {selectedCell.day} Period {selectedCell.start_period}</p>
+                  <p><strong className="text-slate-900 dark:text-white">Cohorts:</strong> {selectedCell.groups?.join(', ') || 'Undergraduate'}</p>
+                </>
+              ) : (
+                <>
+                  <p><strong className="text-slate-900 dark:text-white">Day:</strong> {selectedCell.day}</p>
+                  <p><strong className="text-slate-900 dark:text-white">Reason:</strong> {selectedCell.title || 'Official Meeting / Leave'}</p>
+                  <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">Protected by CP-SAT Constraint H7 (0 Clashes)</p>
+                </>
+              )}
+            </div>
+
+            <div className="flex justify-end pt-2 border-t border-slate-100 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={() => setSelectedCell(null)}
+                className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold hover:bg-slate-200 transition cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
