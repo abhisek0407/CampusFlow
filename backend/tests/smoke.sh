@@ -134,7 +134,14 @@ DISRUPT_ID=$(echo "$RES_PROPOSE" | grep -o '"disruption_id":"[^"]*' | cut -d'"' 
 
 echo ""
 if [ "$SMOKE_ALLOW_APPROVE" = "1" ]; then
-  echo "7. Testing Concurrency & Stale Proposal (Approve Twice -> 409)..."
+  echo "7. Submitting faculty disruption, then testing repeat approval (Approve Twice -> 409)..."
+  RES_SUBMIT=$(curl -s -X POST "$BASE/api/disruptions/submit" \
+    -H "Authorization: Bearer $FAC_TOKEN" \
+    -H "Content-Type: application/json" \
+    -d "{\"disruption_id\":\"$DISRUPT_ID\"}")
+  echo "$RES_SUBMIT" | grep -q '"success":true' && echo "✓ Faculty disruption submitted: PASS" || { echo "FAIL on submit: $RES_SUBMIT"; exit 1; }
+  echo "$RES_SUBMIT" | grep -q '"status":"analyzed"' && echo "✓ Submitted disruption status is analyzed: PASS" || { echo "FAIL: submit did not return analyzed status: $RES_SUBMIT"; exit 1; }
+
   RES_APPROVE_1=$(curl -s -X POST "$BASE/api/disruptions/approve" \
     -H "Authorization: Bearer $ADMIN_TOKEN" \
     -H "Content-Type: application/json" \
@@ -145,7 +152,7 @@ if [ "$SMOKE_ALLOW_APPROVE" = "1" ]; then
     -H "Authorization: Bearer $ADMIN_TOKEN" \
     -H "Content-Type: application/json" \
     -d "{\"disruption_id\":\"$DISRUPT_ID\"}")
-  if [ "$CODE_APPROVE_2" -eq 409 ] || [ "$CODE_APPROVE_2" -eq 400 ]; then
+  if [ "$CODE_APPROVE_2" -eq 409 ]; then
     echo "✓ Second approve returned 409 stale_proposal: PASS"
   else
     echo "FAIL: Expected 409 on second approve, got $CODE_APPROVE_2"

@@ -153,13 +153,23 @@ def run_smoke_tests():
         # 7. Approve twice (only when SMOKE_ALLOW_APPROVE == '1')
         print("\n7. Concurrency & Stale Proposal Check...")
         if os.getenv("SMOKE_ALLOW_APPROVE") == "1":
+            r_submit = client.post(
+                f"{BASE}/api/disruptions/submit",
+                json={"disruption_id": disrupt_id},
+                headers=headers_fac,
+            )
+            print(f"  [Faculty Submit] Status: {r_submit.status_code}, status: {r_submit.json().get('status')}")
+            assert r_submit.status_code == 200
+            assert r_submit.json().get("success") is True
+            assert r_submit.json().get("status") == "analyzed"
+
             r_app1 = client.post(f"{BASE}/api/disruptions/approve", json={"disruption_id": disrupt_id}, headers=headers_admin)
             print(f"  [First Approve] Status: {r_app1.status_code}, success: {r_app1.json().get('success')}, new_version: {r_app1.json().get('new_version')}")
             assert r_app1.status_code == 200
 
             r_app2 = client.post(f"{BASE}/api/disruptions/approve", json={"disruption_id": disrupt_id}, headers=headers_admin)
             print(f"  [Second Approve Same Proposal] Status: {r_app2.status_code}, error: {r_app2.json().get('error')}")
-            assert r_app2.status_code in (409, 400)
+            assert r_app2.status_code == 409
         else:
             print("  Skipping approve/stale section (SMOKE_ALLOW_APPROVE!=1); schedule untouched: PASS")
 
