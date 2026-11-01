@@ -149,7 +149,7 @@ export default function ClubOverviewView({ setActiveTab }) {
   const [toasts, setToasts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState('');
-  const ROWS_PER_PAGE = 4;
+  const ROWS_PER_PAGE = 6; // Extended to fill vertical viewport with zero wasted bottom space
   const clubName = 'Dramatics Society';
 
   const addToast = useCallback((type, title, message) => {

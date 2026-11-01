@@ -115,9 +115,9 @@ export default function FacultyRequestSessionView({ currentUser }) {
   const [toasts, setToasts] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Pagination for table (3 per page balances height for single non-scrollable page)
+  // Pagination for table (Extended to 5 to eliminate wasted bottom vertical space)
   const [currentPage, setCurrentPage] = useState(1);
-  const ROWS_PER_PAGE = 3;
+  const ROWS_PER_PAGE = 5;
 
   const addToast = useCallback((type, title, message) => {
     const id = Date.now() + Math.random();

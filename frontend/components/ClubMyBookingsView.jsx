@@ -147,7 +147,7 @@ export default function ClubMyBookingsView({ setActiveTab }) {
   const [toasts, setToasts] = useState([]);
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const ROWS_PER_PAGE = 4;
+  const ROWS_PER_PAGE = 6; // Extended to fill vertical viewport with zero wasted bottom space
 
   const addToast = useCallback((type, title, message) => {
     const id = Date.now() + Math.random();

@@ -120,7 +120,7 @@ export default function BookingsView({ currentUser }) {
   const [altStart, setAltStart] = useState(10);
   const [showManualModal, setShowManualModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const ROWS_PER_PAGE = 7; // Perfectly balances table rows to fit single screen without scroll
+  const ROWS_PER_PAGE = 9; // Extended to fill vertical viewport with zero wasted bottom space
   const [toasts, setToasts] = useState([]);
   const [decidedIds, setDecidedIds] = useState(new Set());
   const [manualForm, setManualForm] = useState({

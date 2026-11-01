@@ -25,7 +25,7 @@ export default function RoomManagementView() {
   const [filterType, setFilterType] = useState('ALL');
   const [filterBuilding, setFilterBuilding] = useState('ALL');
   const [currentPage, setCurrentPage] = useState(1);
-  const ROWS_PER_PAGE = 7;
+  const ROWS_PER_PAGE = 9; // Extended to fill vertical viewport with zero wasted bottom space
 
   useEffect(() => {
     fetchRooms();

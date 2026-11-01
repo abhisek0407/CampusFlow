@@ -20,7 +20,7 @@ export default function AnalyticsView() {
   const [roomStats, setRoomStats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const ROWS_PER_PAGE = 7;
+  const ROWS_PER_PAGE = 9; // Extended to fill vertical viewport with zero wasted bottom space
 
   useEffect(() => {
     fetchStats();

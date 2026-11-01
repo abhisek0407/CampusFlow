@@ -26,7 +26,7 @@ export default function DepartmentBookingsView() {
   const [submitting, setSubmitting] = useState(false);
   const [successMsg, setSuccessMsg] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const ROWS_PER_PAGE = 7;
+  const ROWS_PER_PAGE = 9; // Extended to fill vertical viewport with zero wasted bottom space
 
   useEffect(() => {
     fetchBookings();

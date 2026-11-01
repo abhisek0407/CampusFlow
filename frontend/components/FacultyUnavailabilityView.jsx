@@ -146,9 +146,9 @@ export default function FacultyUnavailabilityView({ currentUser }) {
   const [formReason, setFormReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Pagination State for Table
+  // Pagination State for Table (Extended to 6 to eliminate wasted bottom vertical space)
   const [currentPage, setCurrentPage] = useState(1);
-  const ROWS_PER_PAGE = 4; // Keeps view single-page non-scrollable
+  const ROWS_PER_PAGE = 6;
 
   const addToast = useCallback((type, title, message) => {
     const id = Date.now() + Math.random();
