@@ -12,13 +12,17 @@ import {
   History, 
   Clock, 
   ExternalLink,
-  Award
+  Award,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 
 export default function ValidatorView() {
   const [validatorReport, setValidatorReport] = useState(null);
   const [loading, setLoading] = useState(false);
   const [auditLogs, setAuditLogs] = useState([]);
+  const [logPage, setLogPage] = useState(1);
+  const LOGS_PER_PAGE = 4;
 
   useEffect(() => {
     runValidator();
@@ -55,13 +59,13 @@ export default function ValidatorView() {
   return (
     <div className="space-y-6">
       
-      {/* Header Bar */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+      {/* Header Bar (Unboxed, Consistent text-2xl) */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <ShieldCheck className="w-5 h-5 text-indigo-600" />
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
+            <ShieldCheck className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
             Official Benchmark Evaluation & Audit Trail
-          </h2>
+          </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Real-time verification against official <code>CrunchWeek_StarterPack/validator.py</code> and immutable administrative logs.
           </p>
@@ -181,41 +185,92 @@ Exam soft penalty: 0`}
       )}
 
       {/* Audit Trail Log View (Section 2 Requirement 8) */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-        <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-          <History className="w-4 h-4 text-indigo-600" />
-          <span>Administrative Audit Trail Log</span>
-        </h3>
+      {(() => {
+        const logsList = auditLogs.length > 0 ? auditLogs : [
+          {
+            _id: 'LOG-INIT',
+            action: 'DATABASE_SEEDED',
+            user_id: 'USER_ADMIN',
+            description: 'All 15 collections seeded and initialized from cit_public.json',
+            timestamp: new Date().toISOString()
+          }
+        ];
+        const logTotalPages = Math.max(1, Math.ceil(logsList.length / LOGS_PER_PAGE));
+        const safeLogPage = Math.min(logPage, logTotalPages);
+        const paginatedLogs = logsList.slice((safeLogPage - 1) * LOGS_PER_PAGE, safeLogPage * LOGS_PER_PAGE);
 
-        <div className="divide-y divide-slate-100 dark:divide-slate-800">
-          {(auditLogs.length > 0 ? auditLogs : [
-            {
-              _id: 'LOG-INIT',
-              action: 'DATABASE_SEEDED',
-              user_id: 'USER_ADMIN',
-              description: 'All 15 collections seeded and initialized from cit_public.json',
-              timestamp: new Date().toISOString()
-            }
-          ]).map((log, idx) => (
-            <div key={idx} className="py-3 flex items-start justify-between text-xs gap-4">
-              <div className="space-y-0.5">
-                <div className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                  <span className="font-mono text-[11px] px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded">
-                    {log.action}
-                  </span>
-                  <span>{log.description}</span>
-                </div>
-                <div className="text-[11px] text-slate-400">
-                  Triggered by: <strong>{log.user_id}</strong>
-                </div>
-              </div>
-              <span className="text-[10px] text-slate-400 font-mono whitespace-nowrap">
-                {new Date(log.timestamp).toLocaleString()}
+        return (
+          <div className="bg-white dark:bg-slate-900 rounded-xl p-3 border border-slate-200 dark:border-slate-800 shadow-xs space-y-2">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                <History className="w-3.5 h-3.5 text-indigo-600" />
+                <span>Administrative Audit Trail Log</span>
+              </h3>
+              <span className="text-[10px] text-slate-400 font-mono">
+                Page {safeLogPage} of {logTotalPages}
               </span>
             </div>
-          ))}
-        </div>
-      </div>
+
+            <div className="divide-y divide-slate-100 dark:divide-slate-800">
+              {paginatedLogs.map((log, idx) => (
+                <div key={log._id || idx} className="py-1.5 flex items-start justify-between text-xs gap-3">
+                  <div className="space-y-0.5">
+                    <div className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                      <span className="font-mono text-[10px] px-1 py-0.2 bg-slate-100 dark:bg-slate-800 rounded">
+                        {log.action}
+                      </span>
+                      <span className="text-[11px]">{log.description}</span>
+                    </div>
+                    <div className="text-[10px] text-slate-400">
+                      Triggered by: <strong>{log.user_id}</strong>
+                    </div>
+                  </div>
+                  <span className="text-[9.5px] text-slate-400 font-mono whitespace-nowrap">
+                    {new Date(log.timestamp).toLocaleTimeString()}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {logTotalPages > 1 && (
+              <div className="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-slate-800 text-xs">
+                <span className="text-[10px] text-slate-400">
+                  Showing {(safeLogPage - 1) * LOGS_PER_PAGE + 1}–{Math.min(safeLogPage * LOGS_PER_PAGE, logsList.length)} of {logsList.length} logs
+                </span>
+                <div className="flex items-center space-x-1">
+                  <button
+                    onClick={() => setLogPage(p => Math.max(1, p - 1))}
+                    disabled={safeLogPage === 1}
+                    className="p-1 rounded-md border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:pointer-events-none transition"
+                  >
+                    <ChevronLeft className="w-3.5 h-3.5" />
+                  </button>
+                  {Array.from({ length: logTotalPages }, (_, i) => i + 1).map(num => (
+                    <button
+                      key={num}
+                      onClick={() => setLogPage(num)}
+                      className={`min-w-[24px] h-6 px-1.5 rounded-md text-[10px] font-semibold transition ${
+                        safeLogPage === num
+                          ? 'bg-indigo-600 text-white shadow-xs'
+                          : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700'
+                      }`}
+                    >
+                      {num}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => setLogPage(p => Math.min(logTotalPages, p + 1))}
+                    disabled={safeLogPage === logTotalPages}
+                    className="p-1 rounded-md border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:pointer-events-none transition"
+                  >
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
     </div>
   );

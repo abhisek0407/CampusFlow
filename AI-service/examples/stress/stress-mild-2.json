@@ -1,0 +1,63 @@
+{
+ "id": "stress-mild-2",
+ "dataset": "cit-public-v1",
+ "description": "generated: level=mild seed=2",
+ "changes": [
+  {
+   "type": "faculty_unavailable",
+   "faculty_id": "F27",
+   "days": [
+    "TUE",
+    "THU"
+   ],
+   "periods": [
+    6,
+    7,
+    8,
+    9
+   ],
+   "reason": "stress: F27 out (afternoon)"
+  },
+  {
+   "type": "room_unavailable",
+   "room_id": "LH-2",
+   "days": [
+    "MON",
+    "TUE",
+    "FRI"
+   ],
+   "periods": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "reason": "stress: LH-2 closed (full day)"
+  },
+  {
+   "type": "add_session",
+   "session": {
+    "id": "WS101-A-P1-N20",
+    "course_id": "WS101",
+    "kind": "lab",
+    "groups": [
+     "Y1-A"
+    ],
+    "faculty_id": "F29",
+    "size": 90,
+    "duration": 3,
+    "room_types": [
+     "workshop"
+    ],
+    "needs_accessible": false,
+    "basket_slot": null,
+    "fixed_slot": null
+   }
+  }
+ ]
+}

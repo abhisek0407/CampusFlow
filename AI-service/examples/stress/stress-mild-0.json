@@ -1,0 +1,66 @@
+{
+ "id": "stress-mild-0",
+ "dataset": "cit-public-v1",
+ "description": "generated: level=mild seed=0",
+ "changes": [
+  {
+   "type": "add_session",
+   "session": {
+    "id": "ME301-L1-N00",
+    "course_id": "ME301",
+    "kind": "lecture",
+    "groups": [
+     "ME-3"
+    ],
+    "faculty_id": "F17",
+    "size": 55,
+    "duration": 1,
+    "room_types": [
+     "classroom",
+     "lecture_hall",
+     "auditorium"
+    ],
+    "needs_accessible": false,
+    "basket_slot": null,
+    "fixed_slot": null
+   }
+  },
+  {
+   "type": "room_unavailable",
+   "room_id": "LH-4",
+   "days": [
+    "TUE",
+    "THU"
+   ],
+   "periods": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "reason": "stress: LH-4 closed (morning)"
+  },
+  {
+   "type": "faculty_unavailable",
+   "faculty_id": "F08",
+   "days": [
+    "WED",
+    "THU",
+    "FRI"
+   ],
+   "periods": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "reason": "stress: F08 out (full day)"
+  }
+ ]
+}

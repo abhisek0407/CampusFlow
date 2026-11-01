@@ -146,8 +146,21 @@ export default function AIAssistantView({ currentUser }) {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       
+      {/* Page Header (Unboxed, Consistent text-2xl) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
+            <Sparkles className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+            <span>AI Assistant & Intelligent Dispatcher</span>
+          </h1>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Natural Language & Hinglish Parsing • Schedule Explanations & Constraint Audits
+          </p>
+        </div>
+      </div>
+
       {/* Module 1: Natural Language & Hinglish Booking Extraction (Requirement 3) */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
         <div className="flex items-start justify-between">
