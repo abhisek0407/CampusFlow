@@ -2,7 +2,7 @@
 
 **Constraint-based campus scheduling, examination allocation and venue management for the Chilika Institute of Technology (CIT).**
 
-Team **OrchestrAI** · Crunch Week hackathon submission
+Team **Innovation Tycoon** · Crunch Week hackathon submission
 
 CampusFlow generates a clash-free weekly timetable, schedules mid-semester exams, decides festival-week venue requests by priority, and repairs the timetable with the fewest possible changes when something breaks. A natural-language assistant (English and Hinglish, text and voice) helps users file requests, but it never decides whether anything is valid. Every decision comes from a deterministic solver and an independent validator.
 
